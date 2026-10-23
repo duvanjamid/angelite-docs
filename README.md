@@ -36,7 +36,7 @@ en este repositorio.
 npx http-server site -c-1
 ```
 
-(abrir `site/*.html` con doble clic también funciona: no hay módulos ES ni peticiones a otros orígenes).
+(la vista previa local es `dist/`; sírvela con cualquier servidor estático, por ejemplo `npx serve dist`).
 
 ## Qué contiene cada medición
 
