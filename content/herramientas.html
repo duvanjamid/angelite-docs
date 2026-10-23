@@ -3,8 +3,8 @@
 <p>El paquete trae sus <code>.d.ts</code> (comprobados con <code>tsc</code> en el CI): <code>signal&lt;T&gt;</code>, <code>input&lt;T&gt;</code>, <code>output&lt;T&gt;</code>, <code>viewChild&lt;T&gt;</code>, <code>Route</code>, <code>RouteGuard</code>, <code>OnInit</code>, <code>OnDestroy</code>, <code>OnError</code>… Funciona igual con JS y con TS. La <a href="componentes.html">referencia de la API</a> se genera a partir de esos mismos tipos.</p>
 
 <h2 id="tests">Tests</h2>
-<p><code>@duvanjamid/angelite/lite/testing</code> monta un componente en el documento y da lo básico para interactuar con él:</p>
-<pre><code>import { render, cleanup } from '@duvanjamid/angelite/lite/testing';
+<p><code>@duvanjamid/angelite/testing</code> monta un componente en el documento y da lo básico para interactuar con él:</p>
+<pre><code>import { render, cleanup } from '@duvanjamid/angelite/testing';
 
 afterEach(cleanup);
 
@@ -32,7 +32,7 @@ test('suma', async () =&gt; {
 // counter.ng.html: &lt;p&gt;&#123;&#123; cuenta() &#125;&#125;&lt;/p&gt;   →  error: "cuenta" is not a member of the component</code></pre>
 
 <h2 id="devtools">DevTools</h2>
-<p><code>enableDevtools({ panel: true })</code> (<code>lite/devtools</code>) añade <code>window.__ANGELITE__</code> con <code>tree()</code>, <code>inspect(el)</code>, <code>state(instancia)</code> y <code>set(instancia, 'campo', valor)</code>, y un panel flotante con el árbol de componentes y el valor de sus señales.</p>
+<p><code>enableDevtools({ panel: true })</code> (<code>@duvanjamid/angelite/devtools</code>) añade <code>window.__ANGELITE__</code> con <code>tree()</code>, <code>inspect(el)</code>, <code>state(instancia)</code> y <code>set(instancia, 'campo', valor)</code>, y un panel flotante con el árbol de componentes y el valor de sus señales.</p>
 <div class="callout"><span class="t">Alcance</span><p>Es un inspector básico: no hay línea de tiempo ni edición desde el panel.</p></div>
 
 <h2 id="build">Vite y editor</h2>

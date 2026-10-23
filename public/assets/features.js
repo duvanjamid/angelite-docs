@@ -11,7 +11,7 @@
   el('wnote').textContent = F.evidenceWhere;
   const fw = F.frameworks;
   const totals = Object.fromEntries(fw.map(([k]) => [k, { score: 0, n: 0, bundled: 0 }]));
-  let html = '<div class="feat"><table><thead><tr><th>Característica</th>' + fw.map(([k, n]) => `<th style="color:var(--c-${k === 'lite' ? 'lite' : k})">${n}</th>`).join('') + '<th>Fuente</th></tr></thead><tbody>';
+  let html = '<div class="feat"><table><thead><tr><th>Característica</th>' + fw.map(([k, n]) => `<th style="color:var(--c-${k === 'angelite' ? 'angelite' : k})">${n}</th>`).join('') + '<th>Fuente</th></tr></thead><tbody>';
   for (const g of F.groups) {
     html += `<tr class="grp"><td colspan="${fw.length + 2}">${esc(g.title)}</td></tr>`;
     for (const r of g.rows) {

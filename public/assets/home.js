@@ -9,9 +9,9 @@
   const rows = F.groups.reduce((n, g) => n + g.rows.length, 0);
   const best = Math.max(...['preact', 'vue', 'react', 'angular'].map(score));
   const stats = [
-    [`${kb(fw['lite-aot'].size.gzip)} KB`, `app precompilada, min+gzip (Preact ${kb(fw.preact.size.gzip)} KB)`],
-    [`${num(fw['lite-aot'].memory.rows10k)} MB`, `memoria con 10.000 filas (Angular ${num(fw.angular.memory.rows10k)} MB)`],
-    [`${num(score('lite'))} de ${rows}`, `características cubiertas (la mejor de las demás: ${num(best)})`],
+    [`${kb(fw['angelite-aot'].size.gzip)} KB`, `app precompilada, min+gzip (Preact ${kb(fw.preact.size.gzip)} KB)`],
+    [`${num(fw['angelite-aot'].memory.rows10k)} MB`, `memoria con 10.000 filas (Angular ${num(fw.angular.memory.rows10k)} MB)`],
+    [`${num(score('angelite'))} de ${rows}`, `características cubiertas (la mejor de las demás: ${num(best)})`],
     ['0', 'dependencias de runtime; sin eval ni new Function']
   ];
   el.innerHTML = stats.map(([a, b]) => `<div class="stat"><b>${a}</b><span>${b}</span></div>`).join('');

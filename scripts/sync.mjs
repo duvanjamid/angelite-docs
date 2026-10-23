@@ -19,7 +19,7 @@ if (!existsSync(join(src, 'package.json'))) { console.error(`not a framework che
 if (!process.env.SKIP_BUILD) execFileSync('npm', ['run', 'build'], { cwd: src, stdio: 'inherit' });
 
 const copy = (from, to) => { mkdirSync(join(to, '..'), { recursive: true }); copyFileSync(from, to); console.log('copied', to.replace(here + '/', '')); };
-for (const f of ['angelite-lite.min.js', 'angelite-ui.min.js', 'angelite-addons.min.js']) copy(join(src, 'dist', f), join(here, 'public', f));
+for (const f of ['angelite.min.js', 'angelite-ui.min.js', 'angelite-addons.min.js']) copy(join(src, 'dist', f), join(here, 'public', f));
 for (const f of readdirSync(join(src, 'types'))) if (/\.d\.m?ts$/.test(f)) copy(join(src, 'types', f), join(here, 'data', 'types', f));
 for (const f of ['SECURITY.md', 'CHANGELOG.md']) copy(join(src, f), join(here, 'analysis', f));
 copy(join(src, 'benchmarks', 'results.json'), join(here, 'analysis', 'benchmark-results.json'));

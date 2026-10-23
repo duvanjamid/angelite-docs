@@ -1,7 +1,7 @@
 <!--{"title":"HTTP, i18n y animaciones","description":"Cliente HTTP con interceptores y resource(), internacionalización con plurales y animaciones de entrada y salida.","examples":true}-->
 <h2 id="http">Cliente HTTP y datos</h2>
-<p><code>createHttp()</code> (<code>@duvanjamid/angelite/lite/http</code>) es un cliente sobre <code>fetch</code>: URL base, parámetros de consulta, JSON automático, <code>timeout</code>, cancelación con <code>AbortSignal</code> e <b>interceptores</b>. Las respuestas que no son 2xx lanzan un <code>HttpError</code> con <code>status</code> y <code>data</code>.</p>
-<pre><code>import { createHttp, retry } from '@duvanjamid/angelite/lite/http';
+<p><code>createHttp()</code> (<code>@duvanjamid/angelite/http</code>) es un cliente sobre <code>fetch</code>: URL base, parámetros de consulta, JSON automático, <code>timeout</code>, cancelación con <code>AbortSignal</code> e <b>interceptores</b>. Las respuestas que no son 2xx lanzan un <code>HttpError</code> con <code>status</code> y <code>data</code>.</p>
+<pre><code>import { createHttp, retry } from '@duvanjamid/angelite/http';
 
 const http = createHttp({
   baseUrl: '/api',
@@ -49,7 +49,7 @@ mount(Lista, root);
   </script>
 
 <h2 id="i18n">Internacionalización</h2>
-<p><code>createI18n()</code> (<code>@duvanjamid/angelite/lite/i18n</code>) tiene un idioma activo en una señal: cualquier plantilla que llame a <code>t()</code> se repinta al cambiarlo.</p>
+<p><code>createI18n()</code> (<code>@duvanjamid/angelite/i18n</code>) tiene un idioma activo en una señal: cualquier plantilla que llame a <code>t()</code> se repinta al cambiarlo.</p>
 <ul>
   <li><b>Parámetros:</b> <code>t('hola', &#123; nombre: 'Ada' &#125;)</code> con <code>&#123;nombre&#125;</code> en el mensaje. Un parámetro que falta se queda visible.</li>
   <li><b>Plurales:</b> un mensaje puede ser un objeto con <code>zero</code>, <code>one</code>, <code>few</code>, <code>many</code>, <code>other</code>…; se elige con <code>Intl.PluralRules</code> según <code>count</code>.</li>

@@ -1,17 +1,17 @@
 (() => {
   const D = window.BENCH;
-  const FW = ['lite-aot', 'lite', 'preact', 'vue', 'react', 'angular'];
-  const NAME = { 'lite-aot': 'AngeLite precompilado', lite: 'AngeLite en navegador', preact: 'Preact', vue: 'Vue', react: 'React', angular: 'Angular' };
+  const FW = ['angelite-aot', 'angelite', 'preact', 'vue', 'react', 'angular'];
+  const NAME = { 'angelite-aot': 'AngeLite precompilado', angelite: 'AngeLite en navegador', preact: 'Preact', vue: 'Vue', react: 'React', angular: 'Angular' };
   const $ = id => document.getElementById(id);
   const f = D.frameworks;
-  const LA = f['lite-aot'], LJ = f.lite;
+  const LA = f['angelite-aot'], LJ = f.angelite;
   const fmt = (n, d = 1) => n.toLocaleString('es-ES', { maximumFractionDigits: d, minimumFractionDigits: d });
   const kb = n => fmt(n / 1024) + ' KB';
 
   $('legend').innerHTML = FW.map(k => `<span><i style="background:var(--c-${k})"></i>${NAME[k]}</span>`).join('');
   $('env').textContent = `${D.env.chromium} headless, ${D.env.cpus} CPU (${D.env.cpu}), Node ${D.env.node}, ${D.env.rounds} rondas × ${D.env.iterations} iteraciones`;
   $('when').textContent = new Date(D.generatedAt).toLocaleString('es-ES');
-  $('versions').textContent = Object.entries(D.versions).map(([k, v]) => `${k === 'lite' ? 'AngeLite' : k} ${v}`).join(' · ');
+  $('versions').textContent = Object.entries(D.versions).map(([k, v]) => `${k === 'angelite' ? 'AngeLite' : k} ${v}`).join(' · ');
 
   const TIE = 0.10; // within 10% of the best counts as a tie: below that the measurement cannot separate them
   function chart(title, values, unit, d = 1, note = '') {
@@ -67,27 +67,27 @@
   const strict = [], tied = [], behind = [];
   for (const [name, v] of Object.entries(all)) {
     const best = Math.min(...FW.map(k => v[k]));
-    if (v['lite-aot'] === best) strict.push(name);
-    else if (v['lite-aot'] <= best * (1 + TIE)) tied.push(`${name} (${NAME[bestOf(v)]})`);
-    else behind.push(`${name} (${NAME[bestOf(v)]}, +${Math.round((v['lite-aot'] / best - 1) * 100)} %)`);
+    if (v['angelite-aot'] === best) strict.push(name);
+    else if (v['angelite-aot'] <= best * (1 + TIE)) tied.push(`${name} (${NAME[bestOf(v)]})`);
+    else behind.push(`${name} (${NAME[bestOf(v)]}, +${Math.round((v['angelite-aot'] / best - 1) * 100)} %)`);
   }
   const wins = strict, losses = behind;
   const slow = k => D.benches.filter(b => f[k].ops[b.id].median / Math.min(...FW.map(x => f[x].ops[b.id].median)) > 1.25).map(b => b.label.toLowerCase());
-  const slowLA = slow('lite-aot');
+  const slowLA = slow('angelite-aot');
 
   const bullets = [
-    `<b>Peso</b>: AngeLite precompilado ${fmt(gz['lite-aot'])} KB gzip (${ord(rank(gz, 'lite-aot'))}); con las plantillas compiladas en el navegador ${fmt(gz.lite)} KB (${ord(rank(gz, 'lite'))}). Preact: ${fmt(gz.preact)} KB, Vue ${fmt(gz.vue)}, Angular ${fmt(gz.angular)}, React ${fmt(gz.react)}.`,
-    `<b>Arranque</b>: ${fmt(st['lite-aot'], 1)} ms precompilado (${ord(rank(st, 'lite-aot'))}) y ${fmt(st.lite, 1)} ms con compilador en el navegador (${ord(rank(st, 'lite'))}); Preact ${fmt(st.preact, 1)} ms, React ${fmt(st.react, 1)} ms.${(f['lite-aot'].startup.p25 <= f.preact.startup.p75 && f.preact.startup.p25 <= f['lite-aot'].startup.p75) ? ' Los rangos de medición (p25–p75) de AngeLite precompilado y Preact se solapan: es un empate técnico, no una victoria clara.' : ''}`,
-    `<b>Velocidad</b>: puntuación global ${fmt(score['lite-aot'], 2)}× precompilado y ${fmt(score.lite, 2)}× en navegador (${NAME[bestOf(score)]} es la mejor con ${fmt(score[bestOf(score)], 2)}×; ${NAME[bestOf(score, false)]}, la peor con ${fmt(score[bestOf(score, false)], 2)}×). ${slowLA.length ? `El precompilado tarda más de un 25 % más que el mejor en: ${slowLA.join(', ')}.` : 'El precompilado no queda a más de un 25 % del mejor en ninguna operación.'} Diferencias de pocos ms o por debajo del ~10 % están dentro del ruido.`,
-    `<b>Memoria</b> con 10.000 filas: ${fmt(mem['lite-aot'], 1)} MB (${ord(rank(mem, 'lite-aot'))}), frente a ${fmt(mem.angular, 1)} MB de Angular, ${fmt(mem.preact, 1)} MB de Preact y ${fmt(mem.react, 1)} MB de React.`,
+    `<b>Peso</b>: AngeLite precompilado ${fmt(gz['angelite-aot'])} KB gzip (${ord(rank(gz, 'angelite-aot'))}); con las plantillas compiladas en el navegador ${fmt(gz.angelite)} KB (${ord(rank(gz, 'angelite'))}). Preact: ${fmt(gz.preact)} KB, Vue ${fmt(gz.vue)}, Angular ${fmt(gz.angular)}, React ${fmt(gz.react)}.`,
+    `<b>Arranque</b>: ${fmt(st['angelite-aot'], 1)} ms precompilado (${ord(rank(st, 'angelite-aot'))}) y ${fmt(st.angelite, 1)} ms con compilador en el navegador (${ord(rank(st, 'angelite'))}); Preact ${fmt(st.preact, 1)} ms, React ${fmt(st.react, 1)} ms.${(f['angelite-aot'].startup.p25 <= f.preact.startup.p75 && f.preact.startup.p25 <= f['angelite-aot'].startup.p75) ? ' Los rangos de medición (p25–p75) de AngeLite precompilado y Preact se solapan: es un empate técnico, no una victoria clara.' : ''}`,
+    `<b>Velocidad</b>: puntuación global ${fmt(score['angelite-aot'], 2)}× precompilado y ${fmt(score.angelite, 2)}× en navegador (${NAME[bestOf(score)]} es la mejor con ${fmt(score[bestOf(score)], 2)}×; ${NAME[bestOf(score, false)]}, la peor con ${fmt(score[bestOf(score, false)], 2)}×). ${slowLA.length ? `El precompilado tarda más de un 25 % más que el mejor en: ${slowLA.join(', ')}.` : 'El precompilado no queda a más de un 25 % del mejor en ninguna operación.'} Diferencias de pocos ms o por debajo del ~10 % están dentro del ruido.`,
+    `<b>Memoria</b> con 10.000 filas: ${fmt(mem['angelite-aot'], 1)} MB (${ord(rank(mem, 'angelite-aot'))}), frente a ${fmt(mem.angular, 1)} MB de Angular, ${fmt(mem.preact, 1)} MB de Preact y ${fmt(mem.react, 1)} MB de React.`,
     `<b>En resumen</b> (${Object.keys(all).length} mediciones): AngeLite precompilado tiene la mediana más baja en ${strict.length} (${strict.join(', ')})${tied.length ? `; empata dentro del 10 % en ${tied.length}: ${tied.join(', ')}` : ''}${behind.length ? `; queda por detrás en ${behind.join(', ')}` : '; no queda por detrás en ninguna'}. El precio del modo precompilado es un paso de build (como el JSX de React/Preact o las plantillas de Vue/Angular); sin él, el modo en navegador mantiene la ergonomía de «un solo script».`
   ];
   $('reading').innerHTML = bullets.map(b => `<li>${b}</li>`).join('');
 
   $('summary').innerHTML = `<div class="cards">
-    <div class="card"><b>${fmt(gz['lite-aot'])} KB</b><span>AngeLite precompilado, min+gzip (Preact: ${fmt(gz.preact)} KB)</span></div>
-    <div class="card"><b>${fmt(gz.react / gz['lite-aot'], 1)}×</b><span>React pesa más que AngeLite precompilado</span></div>
-    <div class="card"><b>${fmt(gz.angular / gz['lite-aot'], 1)}×</b><span>Angular pesa más que AngeLite precompilado</span></div>
-    <div class="card"><b>${fmt(score['lite-aot'], 2)}×</b><span>velocidad global vs el mejor (${NAME[bestOf(score)]}: ${fmt(score[bestOf(score)], 2)}×)</span></div>
+    <div class="card"><b>${fmt(gz['angelite-aot'])} KB</b><span>AngeLite precompilado, min+gzip (Preact: ${fmt(gz.preact)} KB)</span></div>
+    <div class="card"><b>${fmt(gz.react / gz['angelite-aot'], 1)}×</b><span>React pesa más que AngeLite precompilado</span></div>
+    <div class="card"><b>${fmt(gz.angular / gz['angelite-aot'], 1)}×</b><span>Angular pesa más que AngeLite precompilado</span></div>
+    <div class="card"><b>${fmt(score['angelite-aot'], 2)}×</b><span>velocidad global vs el mejor (${NAME[bestOf(score)]}: ${fmt(score[bestOf(score)], 2)}×)</span></div>
   </div>`;
 })();

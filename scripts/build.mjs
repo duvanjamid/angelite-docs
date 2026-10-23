@@ -168,7 +168,7 @@ function addSearch({ id, title, toc, text }) {
   searchDocs.push({ url: `${id}.html`, title, group: p ? p.group : '', headings: toc.map(t => ({ id: t.id, text: t.text })), text: text.slice(0, 6000) });
 }
 
-const LIB = ['angelite-lite.min.js', 'angelite-addons.min.js'];
+const LIB = ['angelite.min.js', 'angelite-addons.min.js'];
 
 function readMeta(file) {
   const raw = readFileSync(file, 'utf8');
@@ -212,13 +212,13 @@ function mdPage(id, source) {
 /* ---------- API reference, generated from the type definitions ---------- */
 
 const MODULES = [
-  { file: 'lite.d.ts', id: 'lite', name: '@duvanjamid/angelite', desc: 'El núcleo: señales, componentes, inyección de dependencias, router, seguridad, pipes y referencias.' },
-  { file: 'forms.d.ts', id: 'forms', name: '@duvanjamid/angelite/lite/forms', desc: 'Formularios reactivos sobre señales.' },
-  { file: 'http.d.ts', id: 'http', name: '@duvanjamid/angelite/lite/http', desc: 'Cliente HTTP con interceptores y resource().' },
-  { file: 'i18n.d.ts', id: 'i18n', name: '@duvanjamid/angelite/lite/i18n', desc: 'Internacionalización con plurales y formatos.' },
-  { file: 'hydrate.d.ts', id: 'hydrate', name: '@duvanjamid/angelite/lite/hydrate', desc: 'El lado del cliente del renderizado en servidor.' },
-  { file: 'devtools.d.ts', id: 'devtools', name: '@duvanjamid/angelite/lite/devtools', desc: 'Inspector de componentes y señales.' },
-  { file: 'testing.d.ts', id: 'testing', name: '@duvanjamid/angelite/lite/testing', desc: 'Utilidades para probar componentes.' },
+  { file: 'angelite.d.ts', id: 'angelite', name: '@duvanjamid/angelite', desc: 'El núcleo: señales, componentes, inyección de dependencias, router, seguridad, pipes y referencias.' },
+  { file: 'forms.d.ts', id: 'forms', name: '@duvanjamid/angelite/forms', desc: 'Formularios reactivos sobre señales.' },
+  { file: 'http.d.ts', id: 'http', name: '@duvanjamid/angelite/http', desc: 'Cliente HTTP con interceptores y resource().' },
+  { file: 'i18n.d.ts', id: 'i18n', name: '@duvanjamid/angelite/i18n', desc: 'Internacionalización con plurales y formatos.' },
+  { file: 'hydrate.d.ts', id: 'hydrate', name: '@duvanjamid/angelite/hydrate', desc: 'El lado del cliente del renderizado en servidor.' },
+  { file: 'devtools.d.ts', id: 'devtools', name: '@duvanjamid/angelite/devtools', desc: 'Inspector de componentes y señales.' },
+  { file: 'testing.d.ts', id: 'testing', name: '@duvanjamid/angelite/testing', desc: 'Utilidades para probar componentes.' },
   { file: 'ssr.d.mts', id: 'ssr', name: '@duvanjamid/angelite/tools/ssr.mjs', desc: 'Renderizado en servidor (Node).' },
   { file: 'aot.d.mts', id: 'aot', name: '@duvanjamid/angelite/tools/aot.mjs', desc: 'Compilador de plantillas para el build y chequeo de plantillas.' },
   { file: 'vite.d.mts', id: 'vite', name: '@duvanjamid/angelite/tools/vite.mjs', desc: 'Plugin de Vite para plantillas precompiladas.' },

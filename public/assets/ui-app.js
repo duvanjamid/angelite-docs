@@ -1,5 +1,5 @@
 /**
- * The component library page, built with AngeLite itself (Lite core + AngeLite UI).
+ * The component library page, built with AngeLite itself (core + AngeLite UI).
  * The API tables, accessibility notes and inputs come from the library (window.UI_META); how each component is shown
  * comes from ui-examples.js. Every component gets a playground: controls generated from its inputs, a live preview and
  * the template that produces it.

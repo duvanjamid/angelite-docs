@@ -110,7 +110,7 @@ mount(Todos, root);
 <p>No hay <code>@switch</code>: encadena <code>@if (…) &#123;…&#125; @else if (…) &#123;…&#125; @else &#123;…&#125;</code>.</p>
 
 <h2 id="pipes">Pipes</h2>
-<p>Un pipe transforma un valor dentro de la plantilla: <code>&#123;&#123; precio | currency:'EUR' &#125;&#125;</code>. Incluidos: <code>uppercase</code>, <code>lowercase</code>, <code>titlecase</code>, <code>json</code>, <code>number</code>, <code>percent</code>, <code>currency</code>, <code>slice</code> y <code>date</code>. El bundle completo los trae; con el runtime solo (plantillas precompiladas) importa <code>@duvanjamid/angelite/lite/pipes</code> o registra los tuyos.</p>
+<p>Un pipe transforma un valor dentro de la plantilla: <code>&#123;&#123; precio | currency:'EUR' &#125;&#125;</code>. Incluidos: <code>uppercase</code>, <code>lowercase</code>, <code>titlecase</code>, <code>json</code>, <code>number</code>, <code>percent</code>, <code>currency</code>, <code>slice</code> y <code>date</code>. El bundle completo los trae; con el runtime solo (plantillas precompiladas) importa <code>@duvanjamid/angelite/pipes</code> o registra los tuyos.</p>
 <script type="text/plain" class="example" data-title="Pipe propio">
 const { signal, component, mount, registerPipe } = AngeLite;
 
@@ -163,4 +163,4 @@ component(App, {
 
 mount(App, root);
   </script>
-<div class="callout"><span class="t">Código aparte, no solo render aparte</span><p><code>@defer</code> retrasa el <em>render</em>. Para dividir el <em>código</em> de una pantalla entera en otro archivo, usa <code>load: () =&gt; import('./pantalla.js')</code> en una <a href="router.html#carga-diferida">ruta</a>. En una app precompilada, <code>@defer</code> necesita el módulo <code>lite/defer</code> (el bundle completo ya lo incluye; <code>enableDevWarnings()</code> avisa si falta).</p></div>
+<div class="callout"><span class="t">Código aparte, no solo render aparte</span><p><code>@defer</code> retrasa el <em>render</em>. Para dividir el <em>código</em> de una pantalla entera en otro archivo, usa <code>load: () =&gt; import('./pantalla.js')</code> en una <a href="router.html#carga-diferida">ruta</a>. En una app precompilada, <code>@defer</code> necesita el bundle <code>runtime-plus</code> (el paquete principal ya lo incluye; <code>enableDevWarnings()</code> avisa si falta).</p></div>

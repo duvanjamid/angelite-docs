@@ -12,7 +12,7 @@ window.FEATURES = {
  },
  "frameworks": [
   [
-   "lite",
+   "angelite",
    "AngeLite"
   ],
   [
@@ -42,7 +42,7 @@ window.FEATURES = {
      "why": "Interpolar datos del usuario como texto nunca debe ejecutar HTML.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        ""
       ],
@@ -69,7 +69,7 @@ window.FEATURES = {
      "why": "Un `href` con datos del usuario es el XSS más común en frameworks.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "lista de esquemas permitidos; `trustUrl()` para esquemas propios"
       ],
@@ -96,7 +96,7 @@ window.FEATURES = {
      "why": "Un `onclick` con una cadena es ejecución de código arbitrario.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "error de compilación (también en el AOT)"
       ],
@@ -123,7 +123,7 @@ window.FEATURES = {
      "why": "`[onclick]`, `[srcdoc]`, o enlazar datos a `<script>`: mejor un error al construir que un agujero en producción.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "on*, srcdoc, outerHTML y bindings en script/style/base/link/meta: error de compilación (comprobado)"
       ],
@@ -150,7 +150,7 @@ window.FEATURES = {
      "why": "Insertar HTML del usuario sin vigilar es XSS: lo seguro es que no se renderice salvo que lo marques.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "`trustHtml()` obligatorio; sin él se inserta como texto"
       ],
@@ -177,7 +177,7 @@ window.FEATURES = {
      "why": "Si alguien controla una plantilla, no debería llegar al navegador entero.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "bloqueo por valor: window y document no llegan a la plantilla por ningún camino"
       ],
@@ -204,7 +204,7 @@ window.FEATURES = {
      "why": "Las políticas estrictas prohíben `eval` y `new Function`.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "sin eval ni new Function en ningún bundle"
       ],
@@ -231,7 +231,7 @@ window.FEATURES = {
      "why": "Exigido por algunas políticas de seguridad empresariales.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "política `angelite` para plantillas y `trustHtml()`"
       ],
@@ -258,7 +258,7 @@ window.FEATURES = {
      "why": "Si el framework inyecta `<style>`, una CSP estricta lo bloquea.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "hojas de estilo construibles; si no, <style> con nonce"
       ],
@@ -285,7 +285,7 @@ window.FEATURES = {
      "why": "Menos dependencias = menos superficie de cadena de suministro.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "0"
       ],
@@ -312,7 +312,7 @@ window.FEATURES = {
      "why": "Saber cómo reportar y cómo se corrigen las vulnerabilidades.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "SECURITY.md con el modelo de confianza"
       ],
@@ -344,7 +344,7 @@ window.FEATURES = {
      "why": "Solo se toca lo que depende del dato que cambió.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        ""
       ],
@@ -371,7 +371,7 @@ window.FEATURES = {
      "why": "Mover solo los nodos necesarios al reordenar.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "subsecuencia creciente más larga"
       ],
@@ -398,7 +398,7 @@ window.FEATURES = {
      "why": "Un solo listener en lugar de uno por elemento: menos memoria.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "en document"
       ],
@@ -425,7 +425,7 @@ window.FEATURES = {
      "why": "El compilador hace trabajo que el runtime no tiene que repetir.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "p",
        "AOT precompila, sin hoisting ni flags"
       ],
@@ -447,7 +447,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "mod",
+      "angelite": "mod",
       "vue": "off",
       "react": "off",
       "angular": "off"
@@ -458,7 +458,7 @@ window.FEATURES = {
      "why": "Mantener la interfaz fluida con actualizaciones pesadas.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "n",
        "no previsto: las señales ya actualizan solo lo que cambia"
       ],
@@ -488,7 +488,7 @@ window.FEATURES = {
      "why": "Dividir el código y cargar partes bajo demanda.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "`@defer` (idle, viewport, interaction, hover, timer, when) y rutas con `load()`"
       ],
@@ -510,7 +510,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "mod",
+      "angelite": "mod",
       "preact": "mod",
       "vue": "core",
       "react": "core",
@@ -522,7 +522,7 @@ window.FEATURES = {
      "why": "SEO y primer pintado rápido.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "p",
        "`tools/ssr.mjs`: renderiza en Node con jsdom; sin streaming"
       ],
@@ -548,7 +548,7 @@ window.FEATURES = {
       "vue": "mod",
       "react": "mod",
       "angular": "off",
-      "lite": "mod"
+      "angelite": "mod"
      }
     },
     {
@@ -556,7 +556,7 @@ window.FEATURES = {
      "why": "Reusar el HTML del servidor en vez de re-crearlo.",
      "ev": "D",
      "cells": {
-      "lite": [
+      "angelite": [
        "p",
        "`hydrate()` sustituye el HTML del servidor sin parpadeo; no adopta los nodos (el cliente renderiza otra vez)"
       ],
@@ -582,7 +582,7 @@ window.FEATURES = {
       "vue": "core",
       "react": "mod",
       "angular": "core",
-      "lite": "mod"
+      "angelite": "mod"
      }
     },
     {
@@ -590,7 +590,7 @@ window.FEATURES = {
      "why": "Usarlo con un solo <script>.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "9,1 KB gzip con el compilador incluido"
       ],
@@ -622,7 +622,7 @@ window.FEATURES = {
      "why": "Servicios distintos por árbol de componentes y fáciles de sustituir en tests.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "`providers` por componente (ámbito: ese componente y sus descendientes); sin árbol de módulos"
       ],
@@ -644,7 +644,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "core",
+      "angelite": "core",
       "preact": "core",
       "vue": "core",
       "react": "core",
@@ -656,7 +656,7 @@ window.FEATURES = {
      "why": "Aplicaciones de varias pantallas.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "anidadas, `canActivate`, `resolve`, `load()`, `redirectTo`, query; modos hash e history"
       ],
@@ -678,7 +678,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "mod",
+      "angelite": "mod",
       "preact": "off",
       "vue": "off",
       "react": "ext",
@@ -690,7 +690,7 @@ window.FEATURES = {
      "why": "Validación y estado de formularios complejos.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "`FormControl`/`FormGroup`/`FormArray` sobre señales y validadores; sin validadores asíncronos"
       ],
@@ -715,7 +715,7 @@ window.FEATURES = {
       "vue": "ext",
       "react": "ext",
       "angular": "off",
-      "lite": "mod"
+      "angelite": "mod"
      }
     },
     {
@@ -723,7 +723,7 @@ window.FEATURES = {
      "why": "Peticiones con reintentos, cabeceras y errores centralizados.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "sobre `fetch`: interceptores, `retry`, `timeout`, cancelación y `resource()` con señales"
       ],
@@ -746,7 +746,7 @@ window.FEATURES = {
      },
      "where": {
       "angular": "off",
-      "lite": "mod"
+      "angelite": "mod"
      }
     },
     {
@@ -754,7 +754,7 @@ window.FEATURES = {
      "why": "Autocompletado y errores en el editor.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "`.d.ts` incluidos, comprobados con `tsc` en CI"
       ],
@@ -776,7 +776,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "core",
+      "angelite": "core",
       "preact": "core",
       "vue": "core",
       "react": "ext",
@@ -788,7 +788,7 @@ window.FEATURES = {
      "why": "Detectar errores de plantilla antes de ejecutar.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "p",
        "elementos, pipes y nombres que el componente no tiene; no comprueba tipos"
       ],
@@ -810,7 +810,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "mod",
+      "angelite": "mod",
       "preact": "ext",
       "vue": "off",
       "react": "ext",
@@ -822,7 +822,7 @@ window.FEATURES = {
      "why": "Que un fallo no tumbe toda la aplicación.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "p",
        "`ngOnError` captura bindings, handlers y contenido proyectado; no el constructor ni `ngOnInit`"
       ],
@@ -844,7 +844,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "core",
+      "angelite": "core",
       "preact": "core",
       "vue": "core",
       "react": "core",
@@ -856,7 +856,7 @@ window.FEATURES = {
      "why": "Modales y menús fuera de su contenedor.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "`<ng-portal to=\"#id\">`"
       ],
@@ -878,7 +878,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "mod",
+      "angelite": "mod",
       "preact": "mod",
       "vue": "core",
       "react": "mod",
@@ -890,7 +890,7 @@ window.FEATURES = {
      "why": "Entrada y salida de elementos.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "p",
        "`animate.enter` / `animate.leave` con clases CSS; sin estados ni orquestación"
       ],
@@ -914,7 +914,7 @@ window.FEATURES = {
      "where": {
       "vue": "core",
       "angular": "off",
-      "lite": "mod"
+      "angelite": "mod"
      }
     },
     {
@@ -922,7 +922,7 @@ window.FEATURES = {
      "why": "Componentes con varias zonas de contenido.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "`<ng-content select=\"x\">` + `slot=\"x\"`"
       ],
@@ -944,7 +944,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "core",
+      "angelite": "core",
       "preact": "core",
       "vue": "core",
       "react": "core",
@@ -956,7 +956,7 @@ window.FEATURES = {
      "why": "Acceder a un elemento o componente hijo.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "`#ref` + `viewChild()` (elemento o instancia), `$el`"
       ],
@@ -978,7 +978,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "mod",
+      "angelite": "mod",
       "preact": "core",
       "vue": "core",
       "react": "core",
@@ -990,7 +990,7 @@ window.FEATURES = {
      "why": "Traducciones y formatos por idioma.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "p",
        "mensajes, plurales (`Intl`), idiomas con respaldo, carga perezosa y formatos; sin extracción de textos"
       ],
@@ -1013,7 +1013,7 @@ window.FEATURES = {
      },
      "where": {
       "angular": "off",
-      "lite": "mod"
+      "angelite": "mod"
      }
     }
    ]
@@ -1026,7 +1026,7 @@ window.FEATURES = {
      "why": "Inspeccionar componentes y estado.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "p",
        "`enableDevtools()`: árbol de componentes y señales (API y panel); sin extensión de navegador"
       ],
@@ -1052,7 +1052,7 @@ window.FEATURES = {
       "vue": "off",
       "react": "off",
       "angular": "off",
-      "lite": "mod"
+      "angelite": "mod"
      }
     },
     {
@@ -1060,7 +1060,7 @@ window.FEATURES = {
      "why": "Probar componentes sin montar el navegador.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "y",
        "`render`, `click`, `type`, `flush`, `provide`, `cleanup`"
       ],
@@ -1082,7 +1082,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "mod",
+      "angelite": "mod",
       "preact": "mod",
       "vue": "off",
       "react": "mod",
@@ -1094,7 +1094,7 @@ window.FEATURES = {
      "why": "Avisos útiles cuando se usa mal.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "p",
        "`enableDevWarnings()`: inputs inexistentes, claves repetidas, módulos y elementos desconocidos"
       ],
@@ -1116,7 +1116,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "mod",
+      "angelite": "mod",
       "preact": "mod",
       "vue": "core",
       "react": "core"
@@ -1127,7 +1127,7 @@ window.FEATURES = {
      "why": "Arrancar y desarrollar sin configurar.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "p",
        "plugins de esbuild y Vite (recarga al editar) y `angelite-check`; sin generador de proyectos"
       ],
@@ -1149,7 +1149,7 @@ window.FEATURES = {
       ]
      },
      "where": {
-      "lite": "mod",
+      "angelite": "mod",
       "preact": "off",
       "vue": "off",
       "react": "ext",
@@ -1161,7 +1161,7 @@ window.FEATURES = {
      "why": "Autocompletado dentro de las plantillas.",
      "ev": "G",
      "cells": {
-      "lite": [
+      "angelite": [
        "p",
        "`angelite-check` da `archivo:línea: mensaje`; sin autocompletado ni servicio de lenguaje"
       ],
@@ -1187,7 +1187,7 @@ window.FEATURES = {
       "vue": "off",
       "react": "ext",
       "angular": "off",
-      "lite": "mod"
+      "angelite": "mod"
      }
     },
     {
@@ -1195,7 +1195,7 @@ window.FEATURES = {
      "why": "Quién lo usa, qué garantías hay entre versiones.",
      "ev": "V",
      "cells": {
-      "lite": [
+      "angelite": [
        "n",
        "proyecto nuevo, sin garantía de API"
       ],

@@ -22,7 +22,7 @@ mount(Greeter, root);
 <div class="callout warn"><span class="t">La señal tiene que ser escribible</span><p><code>[(ngModel)]</code> con un <code>computed</code> o con un valor que no sea una señal lanza un error claro («needs a writable signal»).</p></div>
 
 <h2 id="reactivos">Formularios reactivos</h2>
-<p><code>FormControl</code>, <code>FormGroup</code> y <code>FormArray</code> (<code>@duvanjamid/angelite/lite/forms</code>) guardan su estado en señales: <code>value</code>, <code>errors</code>, <code>valid</code>, <code>touched</code> y <code>dirty</code>. Como <code>value</code> es una señal escribible, se enlaza con <code>[(ngModel)]</code>, y como el resto son señales, la plantilla reacciona sola.</p>
+<p><code>FormControl</code>, <code>FormGroup</code> y <code>FormArray</code> (<code>@duvanjamid/angelite/forms</code>) guardan su estado en señales: <code>value</code>, <code>errors</code>, <code>valid</code>, <code>touched</code> y <code>dirty</code>. Como <code>value</code> es una señal escribible, se enlaza con <code>[(ngModel)]</code>, y como el resto son señales, la plantilla reacciona sola.</p>
 <p>Un validador es una función <code>(valor) =&gt; null | &#123; clave: detalle &#125;</code>. Vienen <code>required</code>, <code>minLength</code>, <code>maxLength</code>, <code>min</code>, <code>max</code>, <code>pattern</code>, <code>email</code> y <code>matches</code> (para «repite la contraseña»). Los errores de varios validadores se fusionan en <code>errors()</code>.</p>
 <script type="text/plain" class="example" data-title="FormGroup con validadores">
 const { signal, component, mount, FormControl, FormGroup, Validators: V } = AngeLite;

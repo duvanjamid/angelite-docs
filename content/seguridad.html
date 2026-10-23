@@ -12,7 +12,7 @@
 </table>
 
 <h2 id="confiar">Cuando sí quieres HTML o un esquema propio</h2>
-<pre><code>import { signal, trustHtml, trustUrl } from '@duvanjamid/angelite/lite';
+<pre><code>import { signal, trustHtml, trustUrl } from '@duvanjamid/angelite';
 
 html = signal(trustHtml(DOMPurify.sanitize(comentario)));   // sanea antes: tú te haces responsable
 link = signal(trustUrl('whatsapp://send?text=hola'));       // esquema permitido a propósito</code></pre>

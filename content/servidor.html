@@ -13,7 +13,7 @@ const html = await renderPage(App, {
   state: { usuarios }                                        // llega al cliente como window.__STATE__
 });</code></pre>
 <pre><code>// cliente
-import { hydrate } from '@duvanjamid/angelite/lite/hydrate';
+import { hydrate } from '@duvanjamid/angelite/hydrate';
 hydrate(App, document.getElementById('app'));</code></pre>
 <ul>
   <li><code>renderToString(Comp, opciones)</code> devuelve solo el HTML del componente; <code>renderPage</code> rellena un <em>shell</em> (<code>&lt;!--app--&gt;</code> y <code>&lt;!--state--&gt;</code>); <code>serializeState(obj)</code> da JSON seguro para incrustar en un <code>&lt;script&gt;</code> (escapa <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code> y los separadores de línea).</li>
@@ -27,7 +27,7 @@ hydrate(App, document.getElementById('app'));</code></pre>
 <pre><code>&lt;!-- counter.ng.html --&gt;
 &lt;button (click)="inc()"&gt;Clics: &#123;&#123; count() &#125;&#125;&lt;/button&gt;</code></pre>
 <pre><code>// counter.js
-import { signal, component, mount } from '@duvanjamid/angelite/lite/runtime';
+import { signal, component, mount } from '@duvanjamid/angelite/runtime';
 import aot from './counter.ng.html';              // compilada por el plugin
 
 class Counter { count = signal(0); inc() { this.count.update(n =&gt; n + 1); } }
@@ -48,5 +48,5 @@ export default { plugins: [angelite({ components: ['ui-button'], members: 'auto'
   <li><code>members: 'auto'</code> lee los campos y métodos de la clase que está junto a la plantilla (<code>x.ng.html</code> + <code>x.js</code>); también puedes dar la lista.</li>
   <li><code>check: 'warn'</code> (por defecto) avisa, <code>'error'</code> detiene el build, <code>false</code> lo desactiva. No comprueba tipos.</li>
 </ul>
-<div class="callout tip"><span class="t">Los módulos opcionales en una app precompilada</span><p>Con el runtime solo, importa los módulos que tus plantillas usen: <code>lite/pipes</code>, <code>lite/portal</code>, <code>lite/defer</code>… (o usa el bundle <code>lite/runtime-plus</code>, que los trae todos sin compilador). <code>enableDevWarnings()</code> te avisa si una plantilla necesita uno que falta.</p></div>
+<div class="callout tip"><span class="t">Los módulos opcionales en una app precompilada</span><p>Con el runtime solo, importa <code>@duvanjamid/angelite/pipes</code> para los pipes, o usa <code>@duvanjamid/angelite/runtime-plus</code>, que trae portales, <code>@defer</code> y referencias sin el compilador. <code>enableDevWarnings()</code> te avisa si una plantilla necesita uno que falta.</p></div>
 <div class="callout warn"><span class="t">Nunca compiles plantillas con datos de usuario</span><p>Con la compilación en el navegador, una plantilla es código. Si una plantilla se construye con texto que no controlas, estás ejecutando ese texto. Precompilar elimina el problema por construcción: el navegador solo recibe el resultado.</p></div>

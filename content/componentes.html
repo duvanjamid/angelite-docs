@@ -77,7 +77,7 @@ mount(App, root);
   </script>
 
 <h2 id="portales">Portales</h2>
-<p><code>&lt;ng-portal to="#destino"&gt;</code> pinta su contenido dentro de otro elemento (por defecto <code>document.body</code>) pero lo mantiene en el ámbito del componente: sirve para modales, menús y tooltips que no deben quedar atrapados por un <code>overflow</code> o un <code>z-index</code>. Se limpia solo al destruir el bloque. Necesita el módulo <code>lite/portal</code> (el bundle completo lo incluye).</p>
+<p><code>&lt;ng-portal to="#destino"&gt;</code> pinta su contenido dentro de otro elemento (por defecto <code>document.body</code>) pero lo mantiene en el ámbito del componente: sirve para modales, menús y tooltips que no deben quedar atrapados por un <code>overflow</code> o un <code>z-index</code>. Se limpia solo al destruir el bloque. Está en el paquete principal y en <code>runtime-plus</code>.</p>
 <script type="text/plain" class="example" data-title="Portal hacia otro contenedor">
 const { signal, component, mount } = AngeLite;
 

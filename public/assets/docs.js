@@ -140,10 +140,10 @@
   /* ---------- live examples ---------- */
   const runners = $$('.example[data-run]');
   if (runners.length && window.AngeLite) {
-    const Lite = Object.assign({}, window.AngeLite, window.AngeLiteAddons || {});
+    const Ng = Object.assign({}, window.AngeLite, window.AngeLiteAddons || {});
     for (const ex of runners) {
       const demo = $('.demo', ex);
-      try { new Function('AngeLite', 'AngeLiteUI', 'root', $('script.src', ex).textContent)(Lite, window.AngeLiteUI, demo); }
+      try { new Function('AngeLite', 'AngeLiteUI', 'root', $('script.src', ex).textContent)(Ng, window.AngeLiteUI, demo); }
       catch (e) { demo.textContent = 'Error: ' + e.message; }
     }
   }
