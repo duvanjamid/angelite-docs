@@ -43,3 +43,7 @@ npx http-server site -c-1
 Las cifras del benchmark salen de `analysis/benchmark-results.json`: 5 rondas × 15 iteraciones por operación, arranque con
 41 cargas intercaladas, mediana, en Chromium sin cabeza. La regla de lectura es «a menos del 10 % es un empate».
 La metodología completa está en la propia página de benchmarks.
+
+## Estado
+
+Sincronizada con `duvanjamid/angelite` en el commit `3451b6e` (PR #3 integrado en `main`: ola 1 y 2, seguridad, rendimiento).
