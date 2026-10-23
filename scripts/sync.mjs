@@ -1,4 +1,4 @@
-// Brings the generated parts from a checkout of the framework:  node scripts/sync.mjs ../angelite-core
+// Brings the generated parts from a checkout of the framework:  node scripts/sync.mjs ../angelite
 //   - rebuilds the bundles (npm run build) so site/ runs exactly the published code
 //   - converts the benchmark results into site/benchmarks-data.js
 //   - copies SECURITY.md, CHANGELOG.md and the raw results into analysis/
@@ -8,7 +8,7 @@ import { copyFileSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const here = resolve(import.meta.dirname, '..');
-const src = resolve(process.argv[2] || '../angelite-core');
+const src = resolve(process.argv[2] || '../angelite');
 if (!existsSync(join(src, 'package.json'))) { console.error(`not a framework checkout: ${src}`); process.exit(1); }
 
 if (!process.env.SKIP_BUILD) execFileSync('npm', ['run', 'build'], { cwd: src, stdio: 'inherit' });

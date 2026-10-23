@@ -1,6 +1,6 @@
 # AngeLite · documentación
 
-Documentación de [AngeLite](https://github.com/duvanjamid/angelite-core): un framework de señales con plantillas al estilo de
+Documentación de [AngeLite](https://github.com/duvanjamid/angelite): un framework de señales con plantillas al estilo de
 Angular, pequeño, rápido y seguro.
 
 **Sitio:** <https://duvanjamid.github.io/angelite-docs/> (se publica con GitHub Pages desde `site/`).
@@ -12,17 +12,17 @@ Angular, pequeño, rápido y seguro.
 | `site/` | El sitio estático: portada, **guía con ejemplos que se ejecutan**, **biblioteca de componentes**, **benchmark** y **comparativa de características** frente a Preact, Vue, React y Angular |
 | `analysis/` | Análisis frente a los demás frameworks, guía de rendimiento, seguridad, registro de cambios y los resultados en bruto del benchmark (`benchmark-results.json`) |
 | `legacy/` | Documentación del framework antiguo (`src/angelite.js`), en desuso |
-| `scripts/` | `sync.mjs`: trae bundles, resultados y registro de cambios desde un checkout de `angelite-core` |
+| `scripts/` | `sync.mjs`: trae bundles, resultados y registro de cambios desde un checkout de `angelite` |
 
 ## Cómo se actualiza
 
-El framework vive en su propio repositorio ([`angelite-core`](https://github.com/duvanjamid/angelite-core)); esta documentación
+El framework vive en su propio repositorio ([`angelite`](https://github.com/duvanjamid/angelite)); esta documentación
 tiene tres partes que se generan a partir de él y el resto se escribe aquí:
 
 ```bash
-# con angelite-core clonado al lado (../angelite-core)
-node scripts/sync.mjs ../angelite-core     # reconstruye los bundles y trae resultados, SECURITY y CHANGELOG
-git add -A && git commit -m "docs: sync with angelite-core <commit>"
+# con angelite clonado al lado (../angelite)
+node scripts/sync.mjs ../angelite     # reconstruye los bundles y trae resultados, SECURITY y CHANGELOG
+git add -A && git commit -m "docs: sync with angelite <commit>"
 ```
 
 `sync.mjs` ejecuta `npm run build` en el framework (para que `site/` use exactamente el código publicado), copia los tres
