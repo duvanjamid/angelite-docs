@@ -1,0 +1,166 @@
+<!--{"title":"Señales y plantillas","description":"Estado reactivo con señales y plantillas al estilo de Angular: interpolación, enlaces, @if, @for, pipes y @defer.","examples":true}-->
+<h2 id="senales">Señales</h2>
+<p>El estado de una app AngeLite vive en <b>señales</b>: contenedores de un valor que avisan a quien los lee cuando cambian. Hay tres piezas:</p>
+<div class="tablewrap"><table>
+  <tr><th>Función</th><th>Qué es</th><th>Cómo se usa</th></tr>
+  <tr><td><code>signal(valor)</code></td><td>Un valor que puedes cambiar</td><td><code>s()</code> lee, <code>s.set(x)</code> escribe, <code>s.update(v =&gt; …)</code> transforma, <code>s.peek()</code> lee sin suscribirse</td></tr>
+  <tr><td><code>computed(fn)</code></td><td>Un valor derivado: se calcula al leerlo y se recalcula solo cuando cambia algo de lo que lee</td><td><code>total()</code> (solo lectura)</td></tr>
+  <tr><td><code>effect(fn)</code></td><td>Código que se ejecuta ahora y cada vez que cambian las señales que lee</td><td>Devuelve una función para detenerlo; <code>fn</code> puede devolver una función de limpieza</td></tr>
+</table></div>
+<p>La clave es lo que pasa en una plantilla: al leer <code>count()</code> en una interpolación, esa parte concreta del DOM —un nodo de texto, un atributo, un bloque— se suscribe a <code>count</code>. Cuando cambia, AngeLite vuelve a evaluar <em>solo</em> esas expresiones y escribe en el DOM <em>solo</em> si el valor es distinto. No hay árbol virtual, ni Zone.js, ni un ciclo de detección de cambios que recorra la app.</p>
+<script type="text/plain" class="example" data-title="Contador con clase condicional">
+const { signal, computed, component, mount } = AngeLite;
+
+class Counter {
+  count = signal(0);
+  double = computed(() => this.count() * 2);
+  inc() { this.count.update(n => n + 1); }
+  reset() { this.count.set(0); }
+}
+
+component(Counter, {
+  template: `
+    <button (click)="inc()">+1</button>
+    <button (click)="reset()">reset</button>
+    <p [class.big]="count() >= 5">
+      count = {{ count() }} · doble = {{ double() }}
+    </p>`
+});
+
+mount(Counter, root);
+  </script>
+<div class="callout"><span class="t">Las actualizaciones se agrupan</span><p>Varios <code>set()</code> seguidos provocan un único repintado: los cambios se aplican en un microtask. Por eso, justo después de un <code>set()</code> el DOM todavía no refleja el cambio; si necesitas esperar, <code>await Promise.resolve()</code> (o <code>flush()</code> en los tests) basta.</p></div>
+<div class="callout warn"><span class="t">Cambiar una propiedad normal no repinta</span><p><code>this.nombre = 'Ada'</code> no avisa a nadie. Lo que quieres que reaccione tiene que ser una señal: <code>nombre = signal('Ada')</code> y <code>this.nombre.set('Ada')</code>. Si cambias un objeto o un array, pon uno nuevo: <code>items.update(l =&gt; [...l, nuevo])</code>.</p></div>
+
+<h2 id="plantillas">Plantillas</h2>
+<p>Una plantilla es HTML con unas pocas extensiones. Se compila una sola vez a una lista de instrucciones («este nodo de texto depende de esta expresión», «este elemento tiene este evento»); después, crear una vista es clonar el HTML y aplicar las instrucciones.</p>
+<div class="tablewrap"><table>
+  <tr><th>Sintaxis</th><th>Qué hace</th></tr>
+  <tr><td><code>&#123;&#123; expr &#125;&#125;</code></td><td>Interpolación. Siempre texto: nunca se interpreta como HTML.</td></tr>
+  <tr><td><code>[prop]="expr"</code></td><td>Enlaza una propiedad del DOM, o un <code>input()</code> si el elemento es un componente.</td></tr>
+  <tr><td><code>[class.x]="cond"</code> · <code>[style.width.px]="n"</code> · <code>[attr.x]="v"</code></td><td>Una clase, un estilo (con unidad opcional) o un atributo. Con <code>null</code> o <code>false</code> el atributo se quita.</td></tr>
+  <tr><td><code>(evento)="sentencia"</code></td><td>Escucha un evento. <code>$event</code> es el evento (o el valor emitido por un output). Varias sentencias con <code>;</code>.</td></tr>
+  <tr><td><code>[(ngModel)]="sig"</code></td><td>Enlace bidireccional con una señal <em>escribible</em>.</td></tr>
+  <tr><td><code>&#123;&#123; x | pipe:arg &#125;&#125;</code></td><td>Pipes, encadenables.</td></tr>
+  <tr><td><code>#nombre</code></td><td>Referencia al elemento, que recibes con <code>viewChild('nombre')</code> (ver <a href="componentes.html#refs">Componentes</a>).</td></tr>
+</table></div>
+
+<h3 id="expresiones">Qué se puede escribir en una expresión</h3>
+<p>Las expresiones las ejecuta un intérprete propio, sin <code>eval</code> ni <code>new Function</code>. Soporta literales, operadores aritméticos, de comparación y lógicos, ternario (<code>a ? b : c</code>), <code>??</code>, acceso con <code>.</code>, <code>?.</code> y <code>[ ]</code>, arrays, y llamadas a métodos del componente. <b>No</b> soporta funciones flecha, literales de objeto, asignaciones, <code>new</code> ni plantillas con comillas invertidas.</p>
+<div class="tablewrap"><table>
+  <tr><th>En lugar de…</th><th>escribe…</th></tr>
+  <tr><td><code>(click)="x = 1"</code></td><td><code>(click)="x.set(1)"</code></td></tr>
+  <tr><td><code>(click)="n++"</code></td><td>un método en la clase: <code>(click)="inc()"</code></td></tr>
+  <tr><td><code>[style]="&#123; color: c &#125;"</code></td><td><code>[style.color]="c"</code></td></tr>
+  <tr><td><code>items.filter(x =&gt; x.ok)</code></td><td>un <code>computed</code> o un método: <code>okItems()</code></td></tr>
+</table></div>
+<div class="callout tip"><span class="t">La regla práctica</span><p>La plantilla decide <em>qué se ve</em>; la lógica va en la clase (métodos y <code>computed</code>). Si una expresión necesita más de un operador, ponle nombre en la clase.</p></div>
+
+<h2 id="flujo">Control de flujo</h2>
+<p>Los bloques <code>@if</code>, <code>@else if</code>, <code>@else</code>, <code>@for</code> y <code>@empty</code> usan la misma sintaxis que Angular 17+. <code>@for</code> reutiliza los nodos del DOM según la clave de <code>track</code>, así que reordenar o actualizar una lista no recrea los elementos que siguen existiendo: solo se mueven.</p>
+<script type="text/plain" class="example" data-title="Lista de tareas: @for, @if, @empty, computed">
+const { signal, computed, component, mount } = AngeLite;
+
+class Todos {
+  draft = signal('');
+  items = signal([{ id: 1, text: 'Probar AngeLite', done: true }]);
+  pending = computed(() => this.items().filter(t => !t.done).length);
+  next = 2;
+
+  add() {
+    const text = this.draft().trim();
+    if (!text) return;
+    this.items.update(l => [...l, { id: this.next++, text, done: false }]);
+    this.draft.set('');
+  }
+  toggle(id) {
+    this.items.update(l => l.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  }
+  remove(id) { this.items.update(l => l.filter(t => t.id !== id)); }
+}
+
+component(Todos, {
+  template: `
+    <input [(ngModel)]="draft" placeholder="Nueva tarea">
+    <button (click)="add()">Añadir</button>
+
+    <ul>
+      @for (t of items(); track t.id) {
+        <li>
+          <input type="checkbox" [checked]="t.done" (change)="toggle(t.id)">
+          <span [style.text-decoration]="t.done ? 'line-through' : ''">{{ $index + 1 }}. {{ t.text }}</span>
+          <button (click)="remove(t.id)">×</button>
+        </li>
+      } @empty {
+        <li>No hay tareas 🎉</li>
+      }
+    </ul>
+
+    @if (pending() > 0) {
+      <p>Te quedan {{ pending() }} por hacer.</p>
+    } @else {
+      <p>¡Todo hecho!</p>
+    }`
+});
+
+mount(Todos, root);
+  </script>
+<p>Variables disponibles dentro de <code>@for</code>: <code>$index</code>, <code>$count</code>, <code>$first</code>, <code>$last</code>, <code>$even</code> y <code>$odd</code>.</p>
+<div class="callout warn"><span class="t">Usa siempre <code>track</code> con una clave estable</span><p><code>track t.id</code> le dice a AngeLite qué fila es cuál. Sin <code>track</code> la clave es el propio elemento (vale para textos y números, no para objetos que se recrean). Con claves repetidas, <code>enableDevWarnings()</code> te avisa.</p></div>
+<p>No hay <code>@switch</code>: encadena <code>@if (…) &#123;…&#125; @else if (…) &#123;…&#125; @else &#123;…&#125;</code>.</p>
+
+<h2 id="pipes">Pipes</h2>
+<p>Un pipe transforma un valor dentro de la plantilla: <code>&#123;&#123; precio | currency:'EUR' &#125;&#125;</code>. Incluidos: <code>uppercase</code>, <code>lowercase</code>, <code>titlecase</code>, <code>json</code>, <code>number</code>, <code>percent</code>, <code>currency</code>, <code>slice</code> y <code>date</code>. El bundle completo los trae; con el runtime solo (plantillas precompiladas) importa <code>@duvanjamid/angelite/lite/pipes</code> o registra los tuyos.</p>
+<script type="text/plain" class="example" data-title="Pipe propio">
+const { signal, component, mount, registerPipe } = AngeLite;
+
+registerPipe('reverse', s => String(s).split('').reverse().join(''));
+registerPipe('repeat', (s, n) => String(s).repeat(n));
+
+class P { word = signal('angelite'); }
+component(P, {
+  template: `<p>{{ word() | reverse }} · {{ word() | slice:0:3 | repeat:3 }}</p>`
+});
+
+mount(P, root);
+  </script>
+<p>Un pipe es solo una función <code>(valor, ...argumentos) =&gt; resultado</code>. Si lee señales dentro de una plantilla, la vista se actualiza cuando cambian (así funcionan los pipes de <a href="datos.html#i18n">i18n</a>).</p>
+
+<h2 id="defer">Carga diferida con @defer</h2>
+<p><code>@defer</code> no renderiza el bloque hasta que se cumple un disparador, y mientras tanto muestra el <code>@placeholder</code>. Sirve para no pagar el coste de lo que el usuario aún no ve.</p>
+<div class="tablewrap"><table>
+  <tr><th>Disparador</th><th>Se carga…</th></tr>
+  <tr><td><code>on idle</code> (por defecto)</td><td>cuando el navegador está libre</td></tr>
+  <tr><td><code>on viewport</code></td><td>cuando el <em>placeholder</em> entra en pantalla</td></tr>
+  <tr><td><code>on interaction</code> · <code>on hover</code></td><td>al hacer clic o pulsar una tecla en el <em>placeholder</em> · al pasar el ratón o enfocarlo</td></tr>
+  <tr><td><code>on timer(2s)</code> · <code>on immediate</code></td><td>tras un tiempo · en cuanto se pinta lo demás</td></tr>
+  <tr><td><code>when expr</code></td><td>la primera vez que la expresión es verdadera (después no se vuelve atrás)</td></tr>
+</table></div>
+<p>Se pueden combinar con <code>;</code>: <code>@defer (on viewport; on timer(5s))</code> carga con lo que ocurra primero. <code>viewport</code>, <code>interaction</code> y <code>hover</code> necesitan un elemento en el <code>@placeholder</code>.</p>
+<script type="text/plain" class="example" data-title="@defer: por interacción y por tiempo">
+const { signal, component, mount } = AngeLite;
+
+class App {
+  listo = signal(false);
+}
+component(App, {
+  template: `
+    @defer (on interaction) {
+      <p>Cargado al hacer clic.</p>
+    } @placeholder {
+      <button>Haz clic para cargar</button>
+    }
+    @defer (on timer(1500ms)) {
+      <p>Apareció tras 1,5 s.</p>
+    } @placeholder {
+      <p><i>Esperando…</i></p>
+    }
+    <label><input type="checkbox" [(ngModel)]="listo"> marcar para cargar</label>
+    @defer (when listo()) {
+      <p>Cargado porque <code>listo()</code> es verdadero.</p>
+    }`
+});
+
+mount(App, root);
+  </script>
+<div class="callout"><span class="t">Código aparte, no solo render aparte</span><p><code>@defer</code> retrasa el <em>render</em>. Para dividir el <em>código</em> de una pantalla entera en otro archivo, usa <code>load: () =&gt; import('./pantalla.js')</code> en una <a href="router.html#carga-diferida">ruta</a>. En una app precompilada, <code>@defer</code> necesita el módulo <code>lite/defer</code> (el bundle completo ya lo incluye; <code>enableDevWarnings()</code> avisa si falta).</p></div>

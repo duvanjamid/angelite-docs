@@ -1,0 +1,109 @@
+<!--{"title":"HTTP, i18n y animaciones","description":"Cliente HTTP con interceptores y resource(), internacionalización con plurales y animaciones de entrada y salida.","examples":true}-->
+<h2 id="http">Cliente HTTP y datos</h2>
+<p><code>createHttp()</code> (<code>@duvanjamid/angelite/lite/http</code>) es un cliente sobre <code>fetch</code>: URL base, parámetros de consulta, JSON automático, <code>timeout</code>, cancelación con <code>AbortSignal</code> e <b>interceptores</b>. Las respuestas que no son 2xx lanzan un <code>HttpError</code> con <code>status</code> y <code>data</code>.</p>
+<pre><code>import { createHttp, retry } from '@duvanjamid/angelite/lite/http';
+
+const http = createHttp({
+  baseUrl: '/api',
+  headers: { 'X-App': 'demo' },
+  interceptors: [
+    (req, next) =&gt; next({ ...req, headers: { ...req.headers, Authorization: `Bearer ${token()}` } }),
+    retry(2)                                   // reintenta errores de red y 5xx
+  ]
+});
+
+const user  = await http.get('/users/1', { params: { fields: 'name' }, timeout: 5000 });
+await http.post('/users', { name: 'Ada' });    // los objetos se envían como JSON</code></pre>
+<p>Un interceptor es <code>(petición, next) =&gt; respuesta</code>: puede cambiar la petición, la respuesta o contestar sin ir a la red (una caché, por ejemplo). Se encadenan: el primero de la lista es el primero en ver la petición y el último en ver la respuesta.</p>
+<h3 id="resource"><code>resource()</code>: datos en señales</h3>
+<p><code>resource(() =&gt; promesa)</code> guarda <code>data</code>, <code>loading</code> y <code>error</code> en señales, vuelve a cargar cuando cambia una señal que lea el cargador, e <b>ignora las respuestas tardías</b> de peticiones antiguas (si pasas de la página 2 a la 3, una respuesta lenta de la 2 no pisa a la 3). <code>reload()</code> fuerza otra carga y <code>destroy()</code> la detiene.</p>
+<script type="text/plain" class="example" data-title="Interceptores y resource() (con un fetch simulado)">
+const { signal, component, mount, createHttp, resource } = AngeLite;
+
+// un "servidor" de mentira para el ejemplo
+const servidor = async (url, init) => {
+  await new Promise(r => setTimeout(r, 300));
+  const pagina = new URL(url, 'http://x').searchParams.get('pagina');
+  return new Response(JSON.stringify({ pagina, auth: init.headers.Authorization, items: ['a' + pagina, 'b' + pagina] }), { status: 200 });
+};
+
+const http = createHttp({
+  baseUrl: '/api',
+  fetch: servidor,
+  interceptors: [(req, next) => next({ ...req, headers: { ...req.headers, Authorization: 'Bearer demo' } })]
+});
+
+class Lista {
+  pagina = signal(1);
+  datos = resource(() => http.get('/items', { params: { pagina: this.pagina() } }));   // se recarga solo al cambiar la página
+}
+component(Lista, {
+  template: `
+    <button (click)="pagina.set(pagina() + 1)">Página {{ pagina() }} → siguiente</button>
+    @if (datos.loading()) {<p>Cargando…</p>}
+    @else if (datos.error()) {<p class="err">Error</p>}
+    @else {<p>{{ datos.data().items.join(', ') }} · {{ datos.data().auth }}</p>}`
+});
+
+mount(Lista, root);
+  </script>
+
+<h2 id="i18n">Internacionalización</h2>
+<p><code>createI18n()</code> (<code>@duvanjamid/angelite/lite/i18n</code>) tiene un idioma activo en una señal: cualquier plantilla que llame a <code>t()</code> se repinta al cambiarlo.</p>
+<ul>
+  <li><b>Parámetros:</b> <code>t('hola', &#123; nombre: 'Ada' &#125;)</code> con <code>&#123;nombre&#125;</code> en el mensaje. Un parámetro que falta se queda visible.</li>
+  <li><b>Plurales:</b> un mensaje puede ser un objeto con <code>zero</code>, <code>one</code>, <code>few</code>, <code>many</code>, <code>other</code>…; se elige con <code>Intl.PluralRules</code> según <code>count</code>.</li>
+  <li><b>Idiomas regionales:</b> <code>es-MX</code> cae a <code>es</code> y luego al idioma por defecto.</li>
+  <li><b>Carga perezosa:</b> <code>await i18n.load('fr', () =&gt; import('./fr.json'))</code>.</li>
+  <li><b>Formatos:</b> <code>number()</code>, <code>date()</code> y <code>relative()</code> siguen al idioma.</li>
+  <li><b>Pipes:</b> <code>i18n.installPipes()</code> registra <code>t</code>, <code>num</code> y <code>date</code>: <code>&#123;&#123; 'items' | t:n() &#125;&#125;</code>.</li>
+</ul>
+<script type="text/plain" class="example" data-title="Idiomas y plurales">
+const { signal, component, mount, createI18n } = AngeLite;
+
+const i18n = createI18n({ locale: 'es', fallback: 'en', messages: {
+  en: { hola: 'Hello', items: { one: '{count} item', other: '{count} items' } },
+  es: { hola: 'Hola', items: { one: '{count} elemento', other: '{count} elementos' } }
+} });
+i18n.installPipes();
+
+class App {
+  i18n = i18n;
+  n = signal(1);
+}
+component(App, {
+  template: `
+    <button (click)="i18n.setLocale(i18n.locale() === 'es' ? 'en' : 'es')">{{ i18n.locale() }}</button>
+    <button (click)="n.set(n() + 1)">+1</button>
+    <p>{{ 'hola' | t }} · {{ 'items' | t:n() }} · {{ 1234.5 | num }}</p>`
+});
+
+mount(App, root);
+  </script>
+<div class="callout"><span class="t">Los mensajes son texto</span><p>Aunque un mensaje o un parámetro contenga HTML, se muestra como texto: no puede inyectar marcado. Si necesitas negritas dentro de una frase, divide el mensaje en partes o usa un componente.</p></div>
+
+<h2 id="animaciones">Animaciones de entrada y salida</h2>
+<p>Con <code>animate.enter="clase"</code> y <code>animate.leave="clase"</code> un elemento recibe esa clase CSS al crearse, y al desaparecer de un <code>@if</code> o un <code>@for</code> <b>se queda en el DOM hasta que termina su animación o transición</b> (con un tope de seguridad para que nunca se quede atascado). Con <code>prefers-reduced-motion</code> no hay animación. Las clases las escribes tú en CSS:</p>
+<pre><code>@keyframes entrar { from { opacity: 0; transform: translateY(-6px); } }
+.fade-in  { animation: entrar .3s ease both; }
+.fade-out { animation: entrar .3s ease reverse both; }</code></pre>
+<script type="text/plain" class="example" data-title="animate.enter / animate.leave">
+const { signal, component, mount } = AngeLite;
+
+class Lista {
+  items = signal([1, 2, 3]);
+  next = 4;
+  add() { this.items.update(l => [...l, this.next++]); }
+  quitar(n) { this.items.update(l => l.filter(x => x !== n)); }
+}
+component(Lista, {
+  template: `
+    <button (click)="add()">Añadir</button>
+    <ul>@for (n of items(); track n) {
+      <li animate.enter="fade-in" animate.leave="fade-out">Fila {{ n }} <button (click)="quitar(n)">×</button></li>
+    }</ul>`
+});
+
+mount(Lista, root);
+  </script>
+<div class="callout"><span class="t">Alcance</span><p>Es lo mínimo útil para entradas y salidas. No hay transiciones entre rutas, animación del reordenado de listas (<code>FLIP</code>) ni orquestación por estados.</p></div>

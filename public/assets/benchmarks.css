@@ -1,0 +1,39 @@
+/* Benchmark and comparison pages. Everything is scoped under .bench so the layout styles are not touched. */
+.bench .legend { display:flex; gap:14px; flex-wrap:wrap; margin:14px 0 0; font-size:.9rem; }
+.bench .legend i, .bench .row i.sw { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; }
+.bench .chart { border:1px solid var(--line); border-radius:10px; background:var(--card); padding:14px 16px; margin:12px 0; }
+.bench .chart h3 { margin:0 0 10px; font-size:1rem; }
+.bench .row { display:grid; grid-template-columns:90px 1fr 92px; gap:10px; align-items:center; margin:5px 0; font-size:.9rem; }
+.bench .bar { height:14px; border-radius:4px; min-width:2px; }
+.bench .row .v { text-align:right; font-variant-numeric:tabular-nums; }
+.bench .row.best .v { font-weight:700; }
+.bench table { border-collapse:collapse; width:100%; font-size:.9rem; font-variant-numeric:tabular-nums; }
+.bench th, .bench td { padding:6px 10px; border-bottom:1px solid var(--line); text-align:right; }
+.bench th:first-child, .bench td:first-child { text-align:left; }
+.bench th { color:var(--muted); font-weight:600; }
+.bench td.best { font-weight:700; color:var(--primary); }
+.bench .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:16px 0; }
+.bench .card { border:1px solid var(--line); border-radius:10px; padding:10px 14px; background:var(--card); }
+.bench .card b { display:block; font-size:1.45rem; }
+.bench .card span { color:var(--muted); font-size:.82rem; }
+.bench .small { font-size:.85rem; color:var(--muted); }
+.bench .feat { overflow-x:auto; border:1px solid var(--line); border-radius:10px; margin:12px 0; background:var(--card); }
+.bench .feat table { min-width:760px; table-layout:fixed; width:100%; }
+.bench .legend b { font-size:1.1rem; }
+.bench .feat th, .bench .feat td { vertical-align:top; padding:8px 10px; }
+.bench .feat thead th { position:sticky; top:0; background:var(--card); }
+.bench .feat td.name { width:25%; font-weight:600; overflow-wrap:anywhere; }
+.bench .feat td.name small { display:block; font-weight:400; color:var(--muted); }
+.bench .feat td.c { text-align:center; width:13%; overflow-wrap:anywhere; }
+.bench .feat td.c b { font-size:1.15rem; display:block; }
+.bench .feat td.c small { display:block; color:var(--muted); font-size:.74rem; line-height:1.25; }
+.bench .feat .y b { color:#2f9e5b; }
+.bench .feat .n b { color:#d63a3a; }
+.bench .half { display:inline-block; width:.85em; height:.85em; border-radius:50%; border:2px solid #d98a00; background:linear-gradient(90deg,#d98a00 50%,transparent 50%); vertical-align:-.1em; }
+.bench .feat td.ev { text-align:center; font-size:.78rem; color:var(--muted); width:6%; }
+.bench .feat td.c i.w { display:inline-block; font-style:normal; font-size:.68rem; border-radius:99px; padding:1px 7px; margin-top:3px; background:var(--code-bg); color:var(--muted); border:1px solid var(--line); }
+.bench .feat td.c i.w-core, .bench .feat td.c i.w-mod { color:#2f9e5b; border-color:#2f9e5b66; }
+.bench .feat tr.grp td { background:var(--code-bg); font-weight:700; text-align:left; }
+.bench .feat tfoot td { font-weight:600; border-bottom:0; }
+.bench .muted { color:var(--muted); }
+.bench .legend { display:flex; gap:14px; flex-wrap:wrap; margin:14px 0 0; font-size:.9rem; }

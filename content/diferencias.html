@@ -1,0 +1,15 @@
+<!--{"title":"Diferencias con Angular","description":"Qué cambia a propósito respecto a Angular y qué módulos opcionales sustituyen a sus paquetes.","examples":false}-->
+<h2 id="limites">Homólogo, no un clon</h2>
+<p>AngeLite toma la forma de Angular (plantillas, señales, rutas, formularios) y renuncia a lo que lo haría grande. Lo que cambia a propósito:</p>
+<table>
+  <tr><th>Angular</th><th>AngeLite Lite</th></tr>
+  <tr><td>Decoradores + TypeScript + compilador</td><td><code>component(Clase, meta)</code> en JS plano (también <code>Component(meta)</code> como decorador si tu toolchain los soporta).</td></tr>
+  <tr><td>Zone.js / detección de cambios</td><td>Señales: solo se actualiza lo que depende de ellas. Mutar una propiedad normal no repinta; usa <code>signal</code>.</td></tr>
+  <tr><td><code>@Input()</code> / <code>@Output()</code></td><td><code>input()</code> / <code>output()</code></td></tr>
+  <tr><td><code>[(ngModel)]="prop"</code></td><td><code>[(ngModel)]="signal"</code> (la señal debe ser escribible).</td></tr>
+  <tr><td>Asignaciones en plantillas (<code>(click)="x = 1"</code>)</td><td>No: <code>(click)="x.set(1)"</code>. Tampoco funciones flecha, literales de objeto ni <code>new</code>.</td></tr>
+  <tr><td><code>@angular/forms</code>, <code>HttpClient</code>, <code>@angular/localize</code>, animaciones, SSR</td><td>Módulos opcionales: <a href="formularios.html"><code>forms</code></a>, <a href="datos.html#http"><code>http</code></a>, <a href="datos.html#i18n"><code>i18n</code></a>, <a href="datos.html#animaciones"><code>animate</code></a> y <a href="servidor.html"><code>tools/ssr.mjs</code></a>. Más pequeños y con menos funciones (sin <code>FormBuilder</code>, validadores asíncronos, <code>ng extract-i18n</code>, animaciones con estados, hidratación incremental).</td></tr>
+  <tr><td><code>@defer</code>, <code>viewChild()</code>, <code>providers</code>, <code>children</code>/<code>canActivate</code>/<code>loadComponent</code></td><td>Sí, con la misma idea: <code>@defer</code>, <code>viewChild()</code>, <code>providers</code>, <code>children</code>/<code>canActivate</code>/<code>load</code>.</td></tr>
+</table>
+<p><a href="comparativa.html">La tabla comparativa</a> dice qué falta, función por función.</p>
+<div class="callout tip"><span class="t">Migrar una idea, no un proyecto</span><p>Si conoces Angular, las plantillas te resultarán familiares. Lo que tendrás que cambiar son los hábitos de estado: en lugar de mutar propiedades, escribe en señales.</p></div>

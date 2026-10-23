@@ -1,7 +1,7 @@
 # AngeLite Lite frente a React, Preact, Vue y Angular
 
 Qué tienen ellos que nosotros no, qué tenemos nosotros que ellos no, y en qué orden conviene cerrar la brecha.
-La tabla completa está en [`benchmarks.html`](benchmarks.html#features) (37 filas, con la fuente de cada dato).
+La tabla completa está en [`benchmarks.html`](comparativa.html) (37 filas, con la fuente de cada dato).
 
 ## Cómo se comprobó
 

@@ -1,0 +1,216 @@
+<!--{"title":"Componentes","description":"Cómo se escribe un componente: inputs, outputs, slots, portales, referencias, límites de error y servicios con ámbito.","examples":true}-->
+<h2 id="basico">Un componente</h2>
+<p>Un componente es una clase de JavaScript más una llamada a <code>component(Clase, meta)</code>. La clase guarda el estado (señales) y los métodos; <code>meta</code> dice cómo se llama la etiqueta (<code>selector</code>), cuál es la plantilla y qué otros componentes usa (<code>imports</code>).</p>
+<ul>
+  <li><b>Inputs:</b> campos creados con <code>input(valorInicial)</code>. Son señales escribibles que el padre rellena con <code>[nombre]="expr"</code> o con un atributo normal (<code>nombre="texto"</code>).</li>
+  <li><b>Outputs:</b> campos creados con <code>output()</code>. El hijo llama a <code>emit(valor)</code> y el padre escucha con <code>(nombre)="..."</code>; el valor llega como <code>$event</code>.</li>
+  <li><b>Ciclo de vida:</b> <code>ngOnInit()</code> (antes de pintar), <code>ngAfterViewInit()</code> (ya en el DOM) y <code>ngOnDestroy()</code> (al quitarlo). <code>this.$el</code> es el elemento anfitrión.</li>
+  <li><b>Métodos:</b> se pueden pasar sueltos a la plantilla (<code>(click)="guardar()"</code>): ya están ligados a la instancia.</li>
+</ul>
+<script type="text/plain" class="example" data-title="Componente hijo con input, output y ng-content">
+const { signal, component, mount, input, output } = AngeLite;
+
+class Card {
+  title = input('');
+  closed = output();
+  close() { this.closed.emit('cerrada'); }
+}
+component(Card, {
+  selector: 'ui-card',
+  template: `
+    <div class="card">
+      <b>{{ title() }}</b> <button (click)="close()">×</button>
+      <div><ng-content></ng-content></div>
+    </div>`
+});
+
+class App {
+  name = signal('Ada');
+  last = signal('—');
+  log(e) { this.last.set(e); }
+}
+component(App, {
+  imports: [Card],
+  template: `
+    <ui-card [title]="'Perfil de ' + name()" (closed)="log($event)">
+      Contenido proyectado: {{ name() }}
+    </ui-card>
+    <p>Último evento: {{ last() }}</p>`
+});
+
+mount(App, root);
+  </script>
+<div class="callout warn"><span class="t">Las etiquetas personalizadas no se auto-cierran</span><p>En HTML escribe siempre <code>&lt;ui-card&gt;&lt;/ui-card&gt;</code>, no <code>&lt;ui-card /&gt;</code>: el navegador ignora la barra y se «come» lo que siga.</p></div>
+<div class="callout"><span class="t">Con TypeScript o decoradores</span><p><code>@Component({ selector, template })</code> hace lo mismo que <code>component()</code> si tu herramienta admite decoradores. Los tipos (<code>Signal&lt;T&gt;</code>, <code>OutputEmitter&lt;T&gt;</code>, <code>OnInit</code>…) vienen en el paquete: mira la <a href="referencia.html">referencia</a>.</p></div>
+
+<h2 id="slots">Slots con nombre</h2>
+<p>El contenido que pones entre las etiquetas de un componente se proyecta donde esté <code>&lt;ng-content&gt;</code>. Si necesitas varias zonas, el componente declara <code>&lt;ng-content select="titulo"&gt;</code> y quien lo usa marca los hijos con <code>slot="titulo"</code>. Lo que no lleva <code>slot</code> va a la zona por defecto. El contenido se evalúa en el ámbito del <em>padre</em> y sigue siendo reactivo.</p>
+<script type="text/plain" class="example" data-title="Slots con nombre">
+const { signal, component, mount } = AngeLite;
+
+class Panel {}
+component(Panel, {
+  selector: 'ui-panel',
+  template: `
+    <div class="card">
+      <header><ng-content select="titulo"></ng-content></header>
+      <section><ng-content></ng-content></section>
+      <footer><small><ng-content select="pie"></ng-content></small></footer>
+    </div>`
+});
+
+class App {
+  n = signal(1);
+}
+component(App, {
+  imports: [Panel],
+  template: `
+    <ui-panel>
+      <b slot="titulo">Pedido #{{ n() }}</b>
+      Cuerpo del panel
+      <span slot="pie">{{ n() }} artículo(s)</span>
+    </ui-panel>
+    <button (click)="n.set(n() + 1)">+1 artículo</button>`
+});
+
+mount(App, root);
+  </script>
+
+<h2 id="portales">Portales</h2>
+<p><code>&lt;ng-portal to="#destino"&gt;</code> pinta su contenido dentro de otro elemento (por defecto <code>document.body</code>) pero lo mantiene en el ámbito del componente: sirve para modales, menús y tooltips que no deben quedar atrapados por un <code>overflow</code> o un <code>z-index</code>. Se limpia solo al destruir el bloque. Necesita el módulo <code>lite/portal</code> (el bundle completo lo incluye).</p>
+<script type="text/plain" class="example" data-title="Portal hacia otro contenedor">
+const { signal, component, mount } = AngeLite;
+
+const target = document.createElement('div');
+target.style.cssText = 'margin-top:10px;padding:10px;border:1px dashed currentColor';
+target.id = 'portal-destino';
+target.textContent = 'Destino del portal: ';
+root.after(target);
+
+class App {
+  open = signal(false);
+}
+component(App, {
+  template: `
+    <button (click)="open.set(!open())">{{ open() ? 'Cerrar' : 'Abrir' }} aviso</button>
+    @if (open()) {
+      <ng-portal to="#portal-destino"><b>¡Hola desde otro sitio del DOM!</b></ng-portal>
+    }`
+});
+
+mount(App, root);
+  </script>
+
+<h2 id="refs">Referencias a elementos</h2>
+<p>Marca un elemento con <code>#nombre</code> y recíbelo con <code>viewChild('nombre')</code>: una señal con el elemento (o la instancia del componente, si lo pones en una etiqueta de componente) que vuelve a <code>null</code> cuando sale del DOM. Es la forma de enfocar un campo, medir un elemento o llamar a un método del hijo.</p>
+<script type="text/plain" class="example" data-title="viewChild">
+const { component, mount, viewChild } = AngeLite;
+
+class App {
+  campo = viewChild('campo');
+  enfocar() { this.campo().focus(); }
+}
+component(App, {
+  template: `
+    <input #campo placeholder="Escribe aquí">
+    <button (click)="enfocar()">Enfocar el campo</button>`
+});
+
+mount(App, root);
+  </script>
+
+<h2 id="errores">Errores controlados</h2>
+<p>Si un componente define <code>ngOnError(error, dónde)</code>, recibe los errores de sus bindings y handlers y los del contenido que le proyectan. Con eso se hace un <b>límite de error</b>: muestra una alternativa en lugar de dejar un hueco. Sin <code>ngOnError</code> el error se registra en la consola y el resto de la vista sigue funcionando.</p>
+<script type="text/plain" class="example" data-title="Un límite de error">
+const { signal, component, mount } = AngeLite;
+
+class Limite {
+  fallo = signal(null);
+  ngOnError(error) { this.fallo.set(error.message); }
+}
+component(Limite, {
+  selector: 'error-limite',
+  template: `
+    @if (fallo()) {
+      <p class="card">Algo salió mal: <b>{{ fallo() }}</b></p>
+    } @else {
+      <ng-content></ng-content>
+    }`
+});
+
+class App {
+  roto() { throw new Error('dato inválido'); }
+}
+component(App, {
+  imports: [Limite],
+  template: `
+    <error-limite><p>{{ roto() }}</p></error-limite>
+    <p>El resto de la página sigue funcionando.</p>`
+});
+
+mount(App, root);
+  </script>
+<div class="callout"><span class="t">Qué captura y qué no</span><p>Captura errores de expresiones, bindings y handlers de eventos. <b>No</b> captura los que se lanzan en el constructor ni en <code>ngOnInit</code> del propio componente: esos se propagan a quien lo montó.</p></div>
+
+<h2 id="di">Servicios e inyección de dependencias</h2>
+<p><code>inject(Clase)</code> devuelve una instancia compartida de la clase (se crea al primer uso): sirve para servicios, estados globales y clientes de API. Con <code>provide(Clase, valor)</code> la sustituyes, por ejemplo en un test.</p>
+<script type="text/plain" class="example" data-title="Servicio compartido entre componentes">
+const { signal, component, mount, inject } = AngeLite;
+
+class CartService {
+  items = signal(0);
+  add() { this.items.update(n => n + 1); }
+}
+
+class AddButton {
+  cart = inject(CartService);
+}
+component(AddButton, {
+  selector: 'add-button',
+  template: `<button (click)="cart.add()">Añadir al carrito</button>`
+});
+
+class Badge {
+  cart = inject(CartService);
+}
+component(Badge, {
+  selector: 'cart-badge',
+  template: `<b>🛒 {{ cart.items() }}</b>`
+});
+
+class Shop {}
+component(Shop, {
+  imports: [AddButton, Badge],
+  template: `<add-button></add-button> <cart-badge></cart-badge>`
+});
+
+mount(Shop, root);
+  </script>
+<h3 id="providers">Servicios con ámbito: <code>providers</code></h3>
+<p>Si un componente declara <code>providers</code>, el servicio es <b>suyo y de sus descendientes</b>, y cada instancia del componente tiene el suyo. Un proveedor es la clase, o <code>&#123; provide: Api, useClass | useValue | useFactory &#125;</code>. <code>inject()</code> busca primero en el componente más cercano que lo declare y, si ninguno lo hace, usa la instancia compartida. Funciona dentro del constructor y de los inicializadores de campo.</p>
+<script type="text/plain" class="example" data-title="providers: un servicio por componente">
+const { signal, component, mount, inject } = AngeLite;
+
+class Contador {
+  n = signal(0);
+  sumar() { this.n.update(v => v + 1); }
+}
+
+class Boton {
+  c = inject(Contador);              // el del componente más cercano que lo declare
+}
+component(Boton, { selector: 'mi-boton', template: `<button (click)="c.sumar()">sumar ({{ c.n() }})</button>` });
+
+class Grupo {}
+component(Grupo, {
+  selector: 'mi-grupo',
+  providers: [Contador],             // cada <mi-grupo> tiene su propio Contador
+  imports: [Boton],
+  template: `<mi-boton></mi-boton> <mi-boton></mi-boton>`
+});
+
+class App {}
+component(App, { imports: [Grupo], template: `<p>Grupo A: <mi-grupo></mi-grupo></p><p>Grupo B: <mi-grupo></mi-grupo></p>` });
+
+mount(App, root);
+  </script>

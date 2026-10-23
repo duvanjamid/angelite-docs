@@ -1,0 +1,72 @@
+<!--{"title": "Inicio rápido", "description": "Instala AngeLite, escribe tu primer componente y elige cómo enviarlo: un solo script, o precompilado para pesar lo mínimo.", "examples": true}-->
+<h2>Qué es AngeLite</h2>
+<p>Es un framework de interfaces de usuario hecho de tres ideas:</p>
+<ul>
+  <li><b>Señales</b> (<code>signal</code>, <code>computed</code>, <code>effect</code>): el estado vive en valores reactivos; cuando uno cambia, solo se actualiza lo que depende de él. No hay detección de cambios global ni Zone.js.</li>
+  <li><b>Plantillas al estilo de Angular</b>: HTML con <code>{{ }}</code>, <code>[prop]</code>, <code>(evento)</code>, <code>@if</code> y <code>@for</code>. Las plantillas se compilan una vez a una lista de instrucciones; no hay DOM virtual.</li>
+  <li><b>Módulos opcionales</b>: el núcleo es pequeño y todo lo demás (router, formularios, HTTP, i18n, animaciones, SSR) se importa solo si lo usas.</li>
+</ul>
+
+<h2>Instalación</h2>
+<p>Hay dos caminos. El más rápido no necesita ninguna herramienta: un <code>&lt;script&gt;</code>.</p>
+<h3>Con un script (sin build)</h3>
+<p>Incluye el bundle y escribe tu app. Las plantillas se compilan en el navegador al arrancar (unos 10&nbsp;KB gzip en total, módulos opcionales incluidos en el bundle completo).</p>
+<pre><code class="language-html">&lt;div id="app"&gt;&lt;/div&gt;
+&lt;script src="https://duvanjamid.github.io/angelite-docs/angelite-lite.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const { signal, component, mount } = AngeLite;
+
+  class Hello {
+    name = signal('mundo');
+  }
+  component(Hello, {
+    template: `&lt;input [(ngModel)]="name"&gt; &lt;p&gt;Hola, {{ name() }}&lt;/p&gt;`
+  });
+  mount(Hello, document.getElementById('app'));
+&lt;/script&gt;</code></pre>
+<div class="callout tip"><span class="t">Para producción</span><p>Descarga el bundle y sírvelo tú, o instala el paquete. Esa URL siempre apunta a la versión de esta documentación.</p></div>
+
+<h3>Con npm y un bundler</h3>
+<pre><code class="language-bash">npm install github:duvanjamid/angelite</code></pre>
+<pre><code class="language-js">import { signal, component, mount } from '@duvanjamid/angelite';</code></pre>
+<p>Con un bundler (esbuild, Vite, Rollup) cada módulo que no importes desaparece del resultado. Para pesar lo mínimo, <a href="servidor.html#precompilar">precompila las plantillas</a>: la app envía solo el runtime (unos 6&nbsp;KB), sin el compilador.</p>
+
+<h2>Tu primer componente</h2>
+<p>Un componente es una clase de JavaScript más <code>component(Clase, { selector, template })</code>. Los campos de la clase están disponibles en la plantilla; las señales se leen llamándolas (<code>count()</code>) y se escriben con <code>set</code> o <code>update</code>.</p>
+<script type="text/plain" class="example" data-title="Contador con estado derivado">
+const { signal, computed, component, mount } = AngeLite;
+
+class Counter {
+  count = signal(1);
+  double = computed(() => this.count() * 2);
+  add(n) { this.count.update(v => v + n); }
+}
+component(Counter, {
+  template: `
+    <button (click)="add(-1)">−</button>
+    <b>{{ count() }}</b>
+    <button (click)="add(1)">+</button>
+    <span> × 2 = {{ double() }}</span>`
+});
+mount(Counter, root);
+</script>
+<div class="callout"><span class="t">Cómo se actualiza</span><p>Cuando pulsas <b>+</b>, <code>count</code> cambia y AngeLite vuelve a evaluar <em>solo</em> las expresiones de la plantilla que la leen, y escribe en el DOM únicamente lo que cambió de valor.</p></div>
+
+<h2>Cómo enviarlo</h2>
+<div class="tablewrap"><table>
+  <tr><th></th><th>Un script</th><th>Precompilado</th></tr>
+  <tr><td>Herramientas</td><td>ninguna</td><td>esbuild, Vite o el CLI de <code>tools/aot.mjs</code></td></tr>
+  <tr><td>Peso (gzip)</td><td>~10&nbsp;KB con compilador</td><td>~6&nbsp;KB, solo el runtime</td></tr>
+  <tr><td>Arranque</td><td>compila las plantillas al cargar</td><td>las plantillas ya son JS</td></tr>
+  <tr><td>CSP estricta</td><td>funciona (no usa <code>eval</code>)</td><td>funciona</td></tr>
+  <tr><td>Plantillas con datos de usuario</td><td><b>nunca</b></td><td>imposible por construcción</td></tr>
+</table></div>
+<p>Lo habitual es empezar con el script y pasar a precompilar cuando la app crece. El código de los componentes no cambia.</p>
+
+<h2>Siguientes pasos</h2>
+<div class="cards">
+  <a class="card" href="plantillas.html"><b>Señales y plantillas</b><span>Todo lo que puedes escribir en una plantilla.</span></a>
+  <a class="card" href="componentes.html"><b>Componentes</b><span>Inputs, outputs, slots, portales y servicios.</span></a>
+  <a class="card" href="ui.html"><b>Componentes listos</b><span>Botones, formularios, diálogos, tablas…</span></a>
+  <a class="card" href="seguridad.html"><b>Seguridad</b><span>Qué protege AngeLite y qué te toca a ti.</span></a>
+</div>

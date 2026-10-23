@@ -1,0 +1,52 @@
+<!--{"title":"SSR y precompilación","description":"Renderizado en servidor con hydrate() y compilación de plantillas en el build para enviar solo el runtime.","examples":false}-->
+<h2 id="ssr">Renderizado en servidor</h2>
+<p><code>@duvanjamid/angelite/tools/ssr.mjs</code> renderiza un componente en Node (con jsdom, que ya es una dependencia de build): no hay una segunda implementación que mantener, la salida es la que construiría el navegador, con la misma sanitización de URL y el mismo escapado. Las peticiones se encolan, así que dos renderizados a la vez no se pisan.</p>
+<pre><code>// servidor (Node)
+import { renderPage } from '@duvanjamid/angelite/tools/ssr.mjs';
+import { provideRouter } from '@duvanjamid/angelite';
+
+const html = await renderPage(App, {
+  shell: '&lt;!doctype html&gt;&lt;body&gt;&lt;!--app--&gt;&lt;!--state--&gt;&lt;script type="module" src="/client.js"&gt;&lt;/script&gt;&lt;/body&gt;',
+  url: req.url,                                              // ruta y query
+  setup: () =&gt; provideRouter(rutas, { mode: 'history' }),     // se ejecuta con el DOM ya disponible
+  ready: async app =&gt; { await app.usuarios.settled; },        // espera a tus datos
+  state: { usuarios }                                        // llega al cliente como window.__STATE__
+});</code></pre>
+<pre><code>// cliente
+import { hydrate } from '@duvanjamid/angelite/lite/hydrate';
+hydrate(App, document.getElementById('app'));</code></pre>
+<ul>
+  <li><code>renderToString(Comp, opciones)</code> devuelve solo el HTML del componente; <code>renderPage</code> rellena un <em>shell</em> (<code>&lt;!--app--&gt;</code> y <code>&lt;!--state--&gt;</code>); <code>serializeState(obj)</code> da JSON seguro para incrustar en un <code>&lt;script&gt;</code> (escapa <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code> y los separadores de línea).</li>
+  <li><code>setup</code> corre antes de montar, con las globales del DOM puestas: ahí se configura el router para que lea <code>url</code>.</li>
+  <li><code>ready</code> recibe la instancia y puede devolver una promesa: es donde esperas a tus datos.</li>
+</ul>
+<div class="callout warn"><span class="t">Hidratación: lo que hace y lo que no</span><p><code>hydrate()</code> sustituye el HTML del servidor por la app viva en la misma tarea, así que no hay parpadeo. <b>No adopta los nodos existentes</b>: el cliente vuelve a renderizar. Ganas contenido visible antes de que llegue el JavaScript y SEO; no ahorras el trabajo de una hidratación completa. Tampoco hay <em>streaming</em>.</p></div>
+
+<h2 id="precompilar">Precompilar plantillas</h2>
+<p>Por defecto AngeLite compila las plantillas en el navegador: un solo script, sin build. Si te importa cada KB, conviértelas en JavaScript durante el build y envía <b>solo el runtime</b> (sin parser de expresiones ni compilador): unos 6&nbsp;KB gzip para una app real, algo menos que Preact (6,2&nbsp;KB).</p>
+<pre><code>&lt;!-- counter.ng.html --&gt;
+&lt;button (click)="inc()"&gt;Clics: &#123;&#123; count() &#125;&#125;&lt;/button&gt;</code></pre>
+<pre><code>// counter.js
+import { signal, component, mount } from '@duvanjamid/angelite/lite/runtime';
+import aot from './counter.ng.html';              // compilada por el plugin
+
+class Counter { count = signal(0); inc() { this.count.update(n =&gt; n + 1); } }
+component(Counter, { aot });                       // en lugar de template
+mount(Counter, document.body);</code></pre>
+<pre><code>// build con esbuild
+import { aotPlugin } from '@duvanjamid/angelite/tools/aot.mjs';
+esbuild.build({ entryPoints: ['counter.js'], bundle: true, minify: true,
+  plugins: [aotPlugin({ components: ['ui-button'], members: 'auto', check: 'error' })] });
+
+// o con Vite (recarga al editar una plantilla)
+import angelite from '@duvanjamid/angelite/tools/vite.mjs';
+export default { plugins: [angelite({ components: ['ui-button'], members: 'auto' })] };</code></pre>
+<p>También hay una CLI: <code>node tools/aot.mjs plantilla.html salida.js --components ui-button,ui-card</code>. Una plantilla precompilada produce <em>exactamente</em> el mismo DOM que la compilada en el navegador (lo comprueban los tests).</p>
+<h3 id="chequeo">El compilador también revisa tus plantillas</h3>
+<ul>
+  <li><b>Elementos desconocidos</b> (<code>&lt;ui-buton&gt;</code>), <b>pipes que no existen</b> y, con <code>members</code>, <b>nombres que el componente no tiene</b> (<code>&#123;&#123; cuenta() &#125;&#125;</code> cuando solo existe <code>count</code>).</li>
+  <li><code>members: 'auto'</code> lee los campos y métodos de la clase que está junto a la plantilla (<code>x.ng.html</code> + <code>x.js</code>); también puedes dar la lista.</li>
+  <li><code>check: 'warn'</code> (por defecto) avisa, <code>'error'</code> detiene el build, <code>false</code> lo desactiva. No comprueba tipos.</li>
+</ul>
+<div class="callout tip"><span class="t">Los módulos opcionales en una app precompilada</span><p>Con el runtime solo, importa los módulos que tus plantillas usen: <code>lite/pipes</code>, <code>lite/portal</code>, <code>lite/defer</code>… (o usa el bundle <code>lite/runtime-plus</code>, que los trae todos sin compilador). <code>enableDevWarnings()</code> te avisa si una plantilla necesita uno que falta.</p></div>
+<div class="callout warn"><span class="t">Nunca compiles plantillas con datos de usuario</span><p>Con la compilación en el navegador, una plantilla es código. Si una plantilla se construye con texto que no controlas, estás ejecutando ese texto. Precompilar elimina el problema por construcción: el navegador solo recibe el resultado.</p></div>

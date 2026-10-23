@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://duvanjamid.github.io/angelite-docs/sitemap.xml

@@ -1,0 +1,62 @@
+<!--{"title":"Formularios","description":"Enlazar campos con ngModel y formularios reactivos con validadores sobre señales.","examples":true}-->
+<h2 id="ngmodel">Enlazar campos con ngModel</h2>
+<p><code>[(ngModel)]="señal"</code> conecta un campo con una señal <em>escribible</em>: lo que escribe el usuario actualiza la señal, y si cambias la señal, el campo se actualiza. Sirve para <code>input</code> (texto, número, casilla) y <code>select</code>. Para formularios con validación, usa los formularios reactivos de abajo.</p>
+<script type="text/plain" class="example" data-title="ngModel + pipes">
+const { signal, computed, component, mount } = AngeLite;
+
+class Greeter {
+  name = signal('mundo');
+  price = signal(1234.5);
+  today = new Date();
+}
+
+component(Greeter, {
+  template: `
+    <input [(ngModel)]="name">
+    <p>Hola, {{ name() | titlecase }}! ({{ name() | uppercase }})</p>
+    <p>Precio: {{ price() | currency:'EUR' }} · Hoy: {{ today | date }}</p>`
+});
+
+mount(Greeter, root);
+  </script>
+<div class="callout warn"><span class="t">La señal tiene que ser escribible</span><p><code>[(ngModel)]</code> con un <code>computed</code> o con un valor que no sea una señal lanza un error claro («needs a writable signal»).</p></div>
+
+<h2 id="reactivos">Formularios reactivos</h2>
+<p><code>FormControl</code>, <code>FormGroup</code> y <code>FormArray</code> (<code>@duvanjamid/angelite/lite/forms</code>) guardan su estado en señales: <code>value</code>, <code>errors</code>, <code>valid</code>, <code>touched</code> y <code>dirty</code>. Como <code>value</code> es una señal escribible, se enlaza con <code>[(ngModel)]</code>, y como el resto son señales, la plantilla reacciona sola.</p>
+<p>Un validador es una función <code>(valor) =&gt; null | &#123; clave: detalle &#125;</code>. Vienen <code>required</code>, <code>minLength</code>, <code>maxLength</code>, <code>min</code>, <code>max</code>, <code>pattern</code>, <code>email</code> y <code>matches</code> (para «repite la contraseña»). Los errores de varios validadores se fusionan en <code>errors()</code>.</p>
+<script type="text/plain" class="example" data-title="FormGroup con validadores">
+const { signal, component, mount, FormControl, FormGroup, Validators: V } = AngeLite;
+
+class Registro {
+  form = new FormGroup({
+    nombre: new FormControl('', [V.required, V.minLength(2)]),
+    email:  new FormControl('', [V.required, V.email])
+  });
+  enviado = signal('');
+  enviar() {
+    this.form.touch();                                   // marca todo como tocado para mostrar errores
+    if (this.form.valid()) this.enviado.set('Enviado: ' + JSON.stringify(this.form.value()));
+  }
+}
+component(Registro, {
+  template: `
+    <p><input [(ngModel)]="form.get('nombre').value" (blur)="form.get('nombre').touch()" placeholder="Nombre">
+       @if (form.get('nombre').touched() && form.get('nombre').errors()) {<span class="err">mínimo 2 letras</span>}</p>
+    <p><input [(ngModel)]="form.get('email').value" (blur)="form.get('email').touch()" placeholder="Email">
+       @if (form.get('email').touched() && form.get('email').errors()) {<span class="err">email no válido</span>}</p>
+    <button (click)="enviar()" [disabled]="!form.valid()">Enviar</button>
+    <p>{{ enviado() }}</p>`
+});
+
+mount(Registro, root);
+  </script>
+<div class="tablewrap"><table>
+  <tr><th>Quieres…</th><th>Usa</th></tr>
+  <tr><td>Mostrar un error solo después de que el usuario toque el campo</td><td><code>(blur)="campo.touch()"</code> y <code>campo.touched() &amp;&amp; campo.errors()</code></td></tr>
+  <tr><td>Mostrar todos los errores al enviar</td><td><code>form.touch()</code> marca todo como tocado</td></tr>
+  <tr><td>Campos anidados</td><td><code>new FormGroup(&#123; direccion: new FormGroup(&#123; calle: … &#125;) &#125;)</code> y <code>form.get('direccion.calle')</code></td></tr>
+  <tr><td>Listas de campos que crecen</td><td><code>FormArray</code> con <code>push()</code> y <code>removeAt()</code>; <code>@for (c of lista.controls(); track $index)</code></td></tr>
+  <tr><td>Volver al estado inicial</td><td><code>form.reset()</code> o <code>form.reset(&#123; nombre: 'x' &#125;)</code></td></tr>
+  <tr><td>Una regla que mira varios campos</td><td>un validador en el grupo: <code>new FormGroup(controles, [v =&gt; …])</code></td></tr>
+</table></div>
+<div class="callout"><span class="t">Qué falta</span><p>Todavía no hay validadores asíncronos. Para «¿ese correo ya existe?», valida al enviar con <a href="datos.html#http">http</a> y pon el error a mano en tu propio estado.</p></div>

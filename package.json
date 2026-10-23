@@ -1,0 +1,18 @@
+{
+  "name": "angelite-docs",
+  "private": true,
+  "type": "module",
+  "description": "Documentation site of AngeLite",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "serve": "npm run build && npx http-server dist -c-1",
+    "check": "node scripts/check.mjs",
+    "sync": "node scripts/sync.mjs ../angelite"
+  },
+  "devDependencies": {
+    "highlight.js": "^11.11.1",
+    "playwright-core": "^1.55.0",
+    "http-server": "^14.1.1",
+    "marked": "^15.0.12"
+  }
+}

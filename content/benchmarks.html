@@ -1,0 +1,39 @@
+<!--{"title": "Benchmark", "description": "AngeLite frente a Preact, Vue, React y Angular con la misma aplicación: peso, arranque, memoria y velocidad medidos en Chromium.", "wide": true, "css": ["assets/benchmarks.css"], "scripts": ["benchmarks-data.js"], "inline": ["assets/benchmarks.js"]}-->
+<div class="bench"><div class="legend" id="legend"></div>
+  <div id="summary"></div>
+
+  <h2 id="peso">Peso</h2>
+  <p>JavaScript de la aplicación completa (framework + la tabla), minificado. Es lo que baja el navegador.</p>
+  <div id="size"></div>
+
+  <h2 id="arranque">Arranque y memoria</h2>
+  <p>Arranque: tiempo desde que empieza la navegación hasta que la app está montada (incluye descargar, parsear y ejecutar el JS, en localhost). Memoria: heap de JavaScript tras forzar GC.</p>
+  <div id="startup"></div>
+  <div id="memory"></div>
+
+  <h2 id="velocidad">Velocidad</h2>
+  <p>Mediana en milisegundos de cada operación (menos es mejor): desde que se dispara hasta que el DOM refleja el cambio y se ha calculado el layout.</p>
+  <div id="ops"></div>
+  <div id="score"></div>
+
+  <h2 id="lectura">Lectura honesta</h2>
+  <ul id="reading"></ul>
+
+<h2 id="metodo">Metodología y límites</h2>
+  <ul>
+    <li><b>Misma app, mismo DOM</b>: <code>table &gt; tbody &gt; tr</code> con 3 celdas, un manejador de clic por fila y la fila seleccionada con clase <code>danger</code>. Los datos salen del mismo generador determinista (<code>benchmarks/apps/shared.js</code>).</li>
+    <li><b>Implementaciones idiomáticas</b>: React 19 con <code>memo</code> + <code>useCallback</code>; Preact (solo núcleo + hooks, <code>shouldComponentUpdate</code> en la fila); Vue 3 con plantilla compilada y <code>shallowRef</code>; Angular 20 con señales, <code>OnPush</code>, <code>@for … track</code> y sin Zone.js (<code>provideZonelessChangeDetection</code>); AngeLite Lite con señales y <code>@for … track</code>.</li>
+    <li><b>Qué se mide</b>: <code>performance.now()</code> hasta que una condición del DOM se cumple (p. ej. «hay 1.000 filas») y se fuerza style + layout. <b>No incluye el pintado</b> (paint/composite). Calentamiento de 2 iteraciones por operación descartadas; las rondas alternan el orden de los frameworks.</li>
+    <li><b>Entorno</b>: <span id="env"></span>. Es un contenedor compartido, sin limitar la CPU: úsalo para comparar <i>entre frameworks en la misma ejecución</i>, no como cifras absolutas. Las diferencias de pocos ms están dentro del ruido; se muestra el p10–p90 al pasar el ratón por cada celda.</li>
+    <li><b>Dos modos de Lite</b>: «en navegador» compila las plantillas al cargar (sin build). «Precompilado» usa <code>tools/aot.mjs</code> para convertir la plantilla en JS en tiempo de build y envía solo el runtime, como hacen JSX (React/Preact), Vue o Angular. Los pipes integrados de Lite son opt-in y no cuentan en estos bundles porque la app no los usa.</li>
+    <li><b>Peso</b>: bundle de producción de cada app con el empaquetador habitual (esbuild para React, Preact y Lite; Vite para Vue; <code>ng build</code> para Angular). Incluye el código de la tabla, idéntico en los cinco. Preact no incluye <code>preact/compat</code>.</li>
+    <li><b>Qué no mide</b>: SSR, hidratación, ecosistema, DevTools, accesibilidad, rendimiento en móvil ni uso real de memoria a largo plazo. Angular y React ofrecen mucho más que Lite; esto compara solo el núcleo de renderizado.</li>
+  </ul>
+
+  <h2 id="repro">Reproducir</h2>
+  <pre><code>cd benchmarks
+npm install
+npm run build     # compila las 5 apps → benchmarks/dist
+npm run bench     # ejecuta la suite → benchmarks/results.json
+ROUNDS=3 ITER=7 npm run bench   # (valores por defecto)</code></pre>
+  <p class="small">Datos generados: <span id="when"></span>. Versiones: <span id="versions"></span>.</p></div>
