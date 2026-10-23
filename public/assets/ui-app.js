@@ -147,19 +147,19 @@ component(Section, {
 /* ---------- theme editor ---------- */
 
 class ThemePanel {
-  primary = signal('#3d6c6f');
+  primary = signal('#d6336c');
   accent = signal('#ef7b4f');
   radius = signal(8);
-  target = input(null);
+  target() { return document.documentElement; }
   css = computed(() => `:root {\n  --ui-primary: ${this.primary()};\n  --ui-accent: ${this.accent()};\n  --ui-radius: ${this.radius()}px;\n}`);
   apply() {
     const el = this.target();
-    if (!el) return;
     el.style.setProperty('--ui-primary', this.primary());
     el.style.setProperty('--ui-accent', this.accent());
     el.style.setProperty('--ui-radius', this.radius() + 'px');
+    el.style.setProperty('--primary', this.primary());
   }
-  reset() { this.primary.set('#3d6c6f'); this.accent.set('#ef7b4f'); this.radius.set(8); ['--ui-primary', '--ui-accent', '--ui-radius'].forEach(k => this.target().style.removeProperty(k)); }
+  reset() { this.primary.set('#d6336c'); this.accent.set('#ef7b4f'); this.radius.set(8); ['--ui-primary', '--ui-accent', '--ui-radius', '--primary'].forEach(k => this.target().style.removeProperty(k)); }
   setPrimary(v) { this.primary.set(v); this.apply(); }
   setAccent(v) { this.accent.set(v); this.apply(); }
   setRadius(v) { this.radius.set(v); this.apply(); }
@@ -183,14 +183,12 @@ class UiPage {
   query = signal('');
   groups = groups.map(g => ({ name: g, id: 'grupo-' + slug(g), items: components.filter(c => c.group === g) }));
   total = components.length;
-  host = null;
   matches(c) {
     const q = this.query().trim().toLowerCase();
     return !q || `${c.name} ${c.tag} ${c.summary}`.toLowerCase().includes(q);
   }
   visible = computed(() => components.filter(c => this.matches(c)).length);
   ngAfterViewInit() {
-    this.host = this.$el.querySelector('.ui-lib');
     if (location.hash) setTimeout(() => { const t = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (t) t.scrollIntoView(); }, 50);
   }
 }
@@ -210,7 +208,7 @@ component(App, {
       </div>
       <h2 id="tema">Tema</h2>
       <p>Todo el aspecto sale de variables CSS (<code>--ui-*</code>). Cambia estas tres, o define las tuyas en <code>:root</code>. El modo oscuro sigue al sistema, o al interruptor de arriba (<code>&lt;html data-theme="dark"&gt;</code>).</p>
-      <docs-theme [target]="host"></docs-theme>
+      <docs-theme></docs-theme>
       <ui-text-field class="filter" label="Filtrar componentes" placeholder="botón, tabla, modal…" [value]="query()" (valueChange)="query.set($event)"></ui-text-field>
       <p class="muted" aria-live="polite">{{ visible() }} de {{ total }} componentes</p>
       @for (g of groups; track g.id) {
@@ -221,4 +219,6 @@ component(App, {
     </div>`
 });
 
-mount(UiPage, document.getElementById('app'));
+const appRoot = document.getElementById('app');
+appRoot.textContent = '';
+mount(UiPage, appRoot);

@@ -1,31 +1,31 @@
 /* AngeLite documentation: layout, sidebar (overlaps the content on small screens), theme and prose.
-   Palette from the logo: teal #3d6c6f, orange #ef7b4f, tan #cb9573, red #bf3f27, light teal #72a2ac. */
+   Palette: pink #d6336c (#ff6b9a in dark) over a slate neutral. */
 :root {
-  --bg:#fff; --fg:#1b2430; --muted:#566074; --line:#e0e5ec; --soft:#f4f7f9; --side:#f8fafb; --code-bg:#f3f6f8; --card:#fbfcfd;
-  --primary:#3d6c6f; --primary-fg:#fff; --link:#2f6568; --accent:#ef7b4f; --accent-soft:#fff1ea; --ok:#277a4c; --warn:#a65d00; --err:#c0392b;
-  --brand-1:#bf3f27; --brand-2:#72a2ac; --shadow:0 12px 32px rgba(15,23,42,.16); --top:56px; --side-w:288px; --radius:10px;
+  --bg:#fff; --fg:#1d2330; --muted:#5d667a; --line:#e3e6ee; --soft:#f5f6fa; --side:#fafbfd; --code-bg:#f4f5f9; --card:#fbfbfd;
+  --primary:#d6336c; --primary-fg:#fff; --link:#c2255c; --accent:#d6336c; --accent-soft:#fdecf2; --ok:#277a4c; --warn:#a65d00; --err:#c0392b;
+  --brand-1:#d6336c; --brand-2:#ff6b9a; --shadow:0 12px 32px rgba(15,23,42,.16); --top:56px; --side-w:288px; --radius:10px;
   --ring:0 0 0 3px color-mix(in srgb, var(--primary) 35%, transparent);
-  --hl-kw:#a8321f; --hl-str:#1f6d4a; --hl-num:#8a5200; --hl-com:#7a8594; --hl-fn:#2d5d9f; --hl-tag:#a8321f; --hl-attr:#7a4a9a; --hl-var:#1b2430;
-  --c-lite:#3d6c6f; --c-lite-aot:#ef7b4f; --c-preact:#7c5cff; --c-vue:#2f9e5b; --c-react:#2f6fd6; --c-angular:#b86e00;
+  --hl-kw:#c2255c; --hl-str:#1f6d4a; --hl-num:#8a5200; --hl-com:#7a8594; --hl-fn:#2d5d9f; --hl-tag:#c2255c; --hl-attr:#7a4a9a; --hl-var:#1d2330;
+  --c-lite:#f08cae; --c-lite-aot:#d6336c; --c-preact:#7c5cff; --c-vue:#2f9e5b; --c-react:#2f6fd6; --c-angular:#b86e00;
   color-scheme: light;
 }
 :root[data-theme=dark] { color-scheme: dark; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme=light]) { color-scheme: dark; } }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme=light]) {
-    --bg:#0f1418; --fg:#e6ebf0; --muted:#9aa8b6; --line:#26303a; --soft:#161d24; --side:#12181d; --code-bg:#151c23; --card:#131a20;
-    --primary:#72a2ac; --primary-fg:#0c1417; --link:#8fbac3; --accent:#f39a76; --accent-soft:#2a1d17; --ok:#5cc08a; --warn:#e0a13a; --err:#f0766a;
-    --brand-1:#e0553a; --shadow:0 12px 32px rgba(0,0,0,.55);
-    --hl-kw:#f08a73; --hl-str:#7fd1a2; --hl-num:#e6b566; --hl-com:#7d8b99; --hl-fn:#8db8f2; --hl-tag:#f08a73; --hl-attr:#c4a2e6; --hl-var:#e6ebf0;
-    --c-lite:#72a2ac; --c-lite-aot:#f39a76; --c-preact:#a08cff; --c-vue:#4cc88a; --c-react:#6aa0ff; --c-angular:#f0b23c;
+    --bg:#14161d; --fg:#e8eaf1; --muted:#98a1b6; --line:#2a2e3b; --soft:#1a1d27; --side:#171a22; --code-bg:#181b24; --card:#181b24;
+    --primary:#ff6b9a; --primary-fg:#1a0610; --link:#ff8fb4; --accent:#ff6b9a; --accent-soft:#2d1822; --ok:#5cc08a; --warn:#e0a13a; --err:#f0766a;
+    --brand-1:#ff6b9a; --brand-2:#ff8fb4; --shadow:0 12px 32px rgba(0,0,0,.55);
+    --hl-kw:#ff8fb4; --hl-str:#7fd1a2; --hl-num:#e6b566; --hl-com:#7d8b99; --hl-fn:#8db8f2; --hl-tag:#ff8fb4; --hl-attr:#c4a2e6; --hl-var:#e8eaf1;
+    --c-lite:#a8456d; --c-lite-aot:#ff6b9a; --c-preact:#a08cff; --c-vue:#4cc88a; --c-react:#6aa0ff; --c-angular:#f0b23c;
   }
 }
 :root[data-theme=dark] {
-  --bg:#0f1418; --fg:#e6ebf0; --muted:#9aa8b6; --line:#26303a; --soft:#161d24; --side:#12181d; --code-bg:#151c23; --card:#131a20;
-  --primary:#72a2ac; --primary-fg:#0c1417; --link:#8fbac3; --accent:#f39a76; --accent-soft:#2a1d17; --ok:#5cc08a; --warn:#e0a13a; --err:#f0766a;
-  --brand-1:#e0553a; --shadow:0 12px 32px rgba(0,0,0,.55);
-  --hl-kw:#f08a73; --hl-str:#7fd1a2; --hl-num:#e6b566; --hl-com:#7d8b99; --hl-fn:#8db8f2; --hl-tag:#f08a73; --hl-attr:#c4a2e6; --hl-var:#e6ebf0;
-  --c-lite:#72a2ac; --c-lite-aot:#f39a76; --c-preact:#a08cff; --c-vue:#4cc88a; --c-react:#6aa0ff; --c-angular:#f0b23c;
+  --bg:#14161d; --fg:#e8eaf1; --muted:#98a1b6; --line:#2a2e3b; --soft:#1a1d27; --side:#171a22; --code-bg:#181b24; --card:#181b24;
+  --primary:#ff6b9a; --primary-fg:#1a0610; --link:#ff8fb4; --accent:#ff6b9a; --accent-soft:#2d1822; --ok:#5cc08a; --warn:#e0a13a; --err:#f0766a;
+  --brand-1:#ff6b9a; --brand-2:#ff8fb4; --shadow:0 12px 32px rgba(0,0,0,.55);
+  --hl-kw:#ff8fb4; --hl-str:#7fd1a2; --hl-num:#e6b566; --hl-com:#7d8b99; --hl-fn:#8db8f2; --hl-tag:#ff8fb4; --hl-attr:#c4a2e6; --hl-var:#e8eaf1;
+  --c-lite:#a8456d; --c-lite-aot:#ff6b9a; --c-preact:#a08cff; --c-vue:#4cc88a; --c-react:#6aa0ff; --c-angular:#f0b23c;
 }
 
 * { box-sizing:border-box; }

@@ -108,7 +108,7 @@ function layout({ id, title, description, body, toc = [], scripts = [], styles =
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)} · AngeLite</title>
 <meta name="description" content="${esc(description)}">
-<meta name="theme-color" content="#3d6c6f">
+<meta name="theme-color" content="#d6336c">
 <link rel="canonical" href="${url}">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="${esc(title)} · AngeLite">
