@@ -13,7 +13,7 @@ window.FEATURES = {
  "frameworks": [
   [
    "lite",
-   "AngeLite Lite"
+   "AngeLite"
   ],
   [
    "preact",

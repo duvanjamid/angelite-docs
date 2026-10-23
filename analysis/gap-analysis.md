@@ -1,4 +1,4 @@
-# AngeLite Lite frente a React, Preact, Vue y Angular
+# AngeLite frente a React, Preact, Vue y Angular
 
 Qué tienen ellos que nosotros no, qué tenemos nosotros que ellos no, y en qué orden conviene cerrar la brecha.
 La tabla completa está en [`benchmarks.html`](comparativa.html) (37 filas, con la fuente de cada dato).
@@ -18,7 +18,7 @@ De las 37 filas de la tabla: 16 son V, 2 son D y 19 son G. Las filas de segurida
 ## Resumen
 
 1. **Estado: los seis huecos de seguridad que encontramos están cerrados** (ver la sección 1), con un test real para cada uno
-   y para su variante precompilada. Lite pasa de peor a mejor del grupo en las pruebas de ataque que ejecutamos.
+   y para su variante precompilada. AngeLite pasa de peor a mejor del grupo en las pruebas de ataque que ejecutamos.
 2. **Donde ganamos es tamaño, memoria y velocidad de listas** (ver el benchmark). Somos además el único con
    un modo «sin build» pequeño: ~10 KB gzip frente a 63,7 KB de Vue con su compilador, y sin `eval`.
 3. **Donde perdemos es todo lo que rodea al núcleo**: tipos, SSR, router, formularios, herramientas, comunidad.
@@ -30,7 +30,7 @@ De las 37 filas de la tabla: 16 son V, 2 son D y 19 son G. Las filas de segurida
 
 Se repite con `cd benchmarks && npm install && npm run probe:security`.
 
-| Prueba | Lite (antes) | **Lite (ahora)** | Preact | Vue | React | Angular |
+| Prueba | AngeLite (antes) | **AngeLite (ahora)** | Preact | Vue | React | Angular |
 |---|---|---|---|---|---|---|
 | Texto escapado por defecto | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `href` con `javascript:` | pasaba | **`unsafe:` + aviso** | pasa | pasa | lo neutraliza | lo sanea |
@@ -41,7 +41,7 @@ Se repite con `cd benchmarks && npm install && npm run probe:security`.
 | Trusted Types | no | **sí (política `angelite`)** | no | una referencia | no | integrado |
 | Estilos bajo CSP estricta | `<style>` sin nonce | **hojas construibles; fallback con nonce** | n/a | n/a | n/a | nonce |
 
-Vue y Preact siguen sin cerrar las URL; solo React y Angular lo hacen. Con estos cambios Lite cierra todo lo que cierran ellos,
+Vue y Preact siguen sin cerrar las URL; solo React y Angular lo hacen. Con estos cambios AngeLite cierra todo lo que cierran ellos,
 más lo que nadie más hace (compilación que rechaza bindings peligrosos, valor-guardia contra `window`).
 
 ### Cómo se cerró cada hueco
@@ -79,14 +79,14 @@ cómo reportar; CodeQL con consultas ampliadas, Dependabot y `npm audit` en el C
 Medido tras la Ola 1 y la Ola 2 (5 rondas × 15 iteraciones por operación, arranque con 41 cargas intercaladas; contenedor compartido, sin pintado; esta máquina fue ~35 % más lenta que la de la medición anterior, así que los milisegundos absolutos no son comparables, sí las posiciones).
 Con la regla «a menos del 10 % es un empate»:
 
-| | Lite precompilado | Mejor de los demás |
+| | AngeLite precompilado | Mejor de los demás |
 |---|---|---|
 | Tamaño de la app (gzip) | **6,1 KB** (el más pequeño; las funciones nuevas costaron 0,2 KB) | Preact 6,2 KB |
 | Arranque | 23,1 ms (rangos intercuartílicos solapados: empate técnico) | Preact 21,3 ms |
 | Memoria con 10.000 filas | **6,6 MB** | Angular 11,8 MB |
 | 12 mediciones en total | **mediana más baja en 7**; empate dentro del 10 % en 4 (arranque, `replace1k`, `swap`, `create10k`); por detrás en `remove` (Preact, +16 % en esta corrida) | — |
 
-`swap` y `remove` varían de una corrida a otra: dos repeticiones dedicadas (5 × 15) dieron 4,70 ms frente a 4,90 de Preact en ambas, y otra sin el gancho de animaciones 4,75 frente a 4,70. Lo honesto es leerlas como empate con Preact y Angular. La puntuación global (media geométrica del tiempo relativo al mejor) es 1,03× para Lite precompilado; React queda en 1,55×.
+`swap` y `remove` varían de una corrida a otra: dos repeticiones dedicadas (5 × 15) dieron 4,70 ms frente a 4,90 de Preact en ambas, y otra sin el gancho de animaciones 4,75 frente a 4,70. Lo honesto es leerlas como empate con Preact y Angular. La puntuación global (media geométrica del tiempo relativo al mejor) es 1,03× para AngeLite precompilado; React queda en 1,55×.
 Mejoras de esta ronda que se midieron: el anfitrión raíz con `display: contents` (−1,5 ms tras el montaje) y una vía rápida en `@for`
 cuando la lista mantiene las mismas claves en el mismo orden (`update10th` pasó de ~9,8 a ~7,9 ms).
 
@@ -123,9 +123,9 @@ Puntos débiles reales del diseño actual:
    *Dirección*: un objeto `app` (`createApp()`) que contenga registros, inyector y router.
 2. **Acoplamiento al DOM global.** El runtime llama a `document` directamente. Eso impide SSR y otros renderizadores.
    *Dirección*: abstraer las pocas operaciones DOM (crear plantilla, insertar, mover, quitar).
-3. **Dos bases de código.** El framework antiguo (~7.000 líneas, `src/angelite.js`) convive con Lite. Duplica conceptos y
+3. **Dos bases de código.** El framework antiguo (~7.000 líneas, `src/angelite.js`) convive con AngeLite. Duplica conceptos y
    mantenimiento, y los tests del antiguo son humo y lógica de formularios. *Dirección*: congelarlo, marcarlo como
-   deprecado y portar a Lite lo que valga (formularios reactivos, guards y resolvers del router).
+   deprecado y portar a AngeLite lo que valga (formularios reactivos, guards y resolvers del router).
 4. **Ámbito por cadena de prototipos y claves de texto.** Cada fila crea un objeto con prototipo del padre y las
    expresiones buscan por nombre. Es rápido y compacto, pero no se puede analizar estáticamente (sin tipos, sin
    comprobación de plantillas) y `$event` / `$index` pueden colisionar con campos del usuario.
