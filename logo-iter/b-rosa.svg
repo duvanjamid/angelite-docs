@@ -1,0 +1,17 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AngeLite">
+  <circle cx="75" cy="70" r="18" fill="#1d2330"/>
+  <circle cx="125" cy="70" r="18" fill="#1d2330"/>
+  <circle cx="75" cy="70" r="8" fill="#d6336c"/>
+  <circle cx="125" cy="70" r="8" fill="#d6336c"/>
+  <circle cx="100" cy="100" r="45" fill="#1d2330"/>
+  <ellipse cx="100" cy="115" rx="20" ry="15" fill="#fbd3e0"/>
+  <circle cx="85" cy="90" r="18" fill="#d6336c"/>
+  <circle cx="115" cy="90" r="18" fill="#d6336c"/>
+  <ellipse cx="100" cy="88" rx="12" ry="8" fill="#d6336c"/>
+  <circle cx="85" cy="90" r="5" fill="#14161d"/>
+  <circle cx="115" cy="90" r="5" fill="#14161d"/>
+  <circle cx="87" cy="88" r="2" fill="#fff"/>
+  <circle cx="117" cy="88" r="2" fill="#fff"/>
+  <ellipse cx="100" cy="110" rx="4" ry="3" fill="#14161d"/>
+  <path d="M100 115 Q95 120 90 118 M100 115 Q105 120 110 118" stroke="#14161d" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>

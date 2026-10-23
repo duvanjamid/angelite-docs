@@ -1,0 +1,15 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AngeLite">
+  <circle cx="62" cy="62" r="24" fill="#d6336c"/>
+  <circle cx="138" cy="62" r="24" fill="#d6336c"/>
+  <circle cx="62" cy="62" r="11" fill="#ff6b9a"/>
+  <circle cx="138" cy="62" r="11" fill="#ff6b9a"/>
+  <circle cx="100" cy="106" r="62" fill="#d6336c"/>
+  <circle cx="74" cy="98" r="22" fill="#fff"/>
+  <circle cx="126" cy="98" r="22" fill="#fff"/>
+  <circle cx="78" cy="100" r="9" fill="#1d2330"/>
+  <circle cx="122" cy="100" r="9" fill="#1d2330"/>
+  <circle cx="81" cy="97" r="3" fill="#fff"/>
+  <circle cx="125" cy="97" r="3" fill="#fff"/>
+  <ellipse cx="100" cy="134" rx="17" ry="12" fill="#fbd3e0"/>
+  <ellipse cx="100" cy="129" rx="6.5" ry="4.5" fill="#1d2330"/>
+</svg>
