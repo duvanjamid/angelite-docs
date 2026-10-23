@@ -1,30 +1,23 @@
-// Brings the generated documentation from an angelite checkout:  node scripts/sync.mjs ../angelite
+// Brings the generated parts from a checkout of the framework:  node scripts/sync.mjs ../angelite-core
+//   - rebuilds the bundles (npm run build) so site/ runs exactly the published code
+//   - converts the benchmark results into site/benchmarks-data.js
+//   - copies SECURITY.md, CHANGELOG.md and the raw results into analysis/
+// The pages, the feature table (site/features-data.js) and the analysis texts are written in this repository.
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, readdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const here = resolve(import.meta.dirname, '..');
-const src = resolve(process.argv[2] || '../angelite');
-if (!existsSync(join(src, 'package.json'))) { console.error(`not an angelite checkout: ${src}`); process.exit(1); }
+const src = resolve(process.argv[2] || '../angelite-core');
+if (!existsSync(join(src, 'package.json'))) { console.error(`not a framework checkout: ${src}`); process.exit(1); }
 
-if (!process.env.SKIP_BUILD) execFileSync('npm', ['run', 'build:docs'], { cwd: src, stdio: 'inherit' });
+if (!process.env.SKIP_BUILD) execFileSync('npm', ['run', 'build'], { cwd: src, stdio: 'inherit' });
 
 const copy = (from, to) => { copyFileSync(from, to); console.log('copied', to.replace(here + '/', '')); };
-// pages owned by this repo are never overwritten
-const OWN = new Set(['index.html', 'guia.html']);
-for (const f of readdirSync(join(src, 'docs'))) {
-  if (f.endsWith('.md')) { if (f !== 'api-reference.md') copy(join(src, 'docs', f), join(here, 'analysis', f)); continue; }
-  if (f === 'index.html') { copy(join(src, 'docs', f), join(here, 'site', 'guia.html')); continue; }
-  if (OWN.has(f)) continue;
-  copy(join(src, 'docs', f), join(here, 'site', f));
-}
+for (const f of ['angelite-lite.min.js', 'angelite-ui.min.js', 'angelite-addons.min.js']) copy(join(src, 'dist', f), join(here, 'site', f));
 for (const f of ['SECURITY.md', 'CHANGELOG.md']) copy(join(src, f), join(here, 'analysis', f));
 copy(join(src, 'benchmarks', 'results.json'), join(here, 'analysis', 'benchmark-results.json'));
 
-// the navigation bar shared by the pages that come from angelite
-const bar = readFileSync(join(here, 'scripts', 'sitebar.html'), 'utf8');
-for (const f of ['guia.html', 'components.html', 'benchmarks.html']) {
-  const file = join(here, 'site', f);
-  const html = readFileSync(file, 'utf8');
-  if (!html.includes('class="sitebar"')) writeFileSync(file, html.replace('<body>', '<body>\n' + bar));
-}
+const results = JSON.parse(readFileSync(join(src, 'benchmarks', 'results.json'), 'utf8'));
+writeFileSync(join(here, 'site', 'benchmarks-data.js'), `// Generated from benchmarks/results.json of the framework repository (node scripts/sync.mjs)\nwindow.BENCH = ${JSON.stringify(results)};\n`);
+console.log('wrote site/benchmarks-data.js');
