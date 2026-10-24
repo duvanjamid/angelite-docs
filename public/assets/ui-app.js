@@ -32,15 +32,34 @@ const NO_GALLERY = new Set(['table', 'code-block', 'tabs', 'pagination', 'breadc
 const FLAG_SKIP = new Set(['open', 'visible', 'checked', 'indeterminate', 'dismissible', 'removable']);
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+
+
+/* Overlays cannot be open all at once on a page (they lock scroll and trap focus), so their open states are shown as
+   static snapshots built with the library's own classes. The playground below each one still opens the real thing. */
+const btn = (text, v) => `<button type="button" class="ui-btn"${v ? ` data-variant="${v}"` : ''}>${text}</button>`;
+const modalSnap = size => `<div class="snap" style="width:min(100%,${{ sm: 340, md: 460, lg: 620 }[size]}px)"><div class="ui-backdrop"><div class="ui-modal" data-size="${size}" role="img" aria-label="Modal abierto"><header><span>Título del diálogo</span><button type="button" tabindex="-1">×</button></header><div class="body"><p>Contenido del diálogo. Tab se queda dentro y Escape lo cierra.</p>${btn('Aceptar', 'primary')}</div></div></div></div>`;
+const drawerSnap = side => `<div class="snap"><div class="ui-drawer-wrap" data-side="${side}"><div class="ui-drawer" role="img" aria-label="Panel abierto"><header><span>Menú</span><button type="button" tabindex="-1">×</button></header><div class="body"><p>Un panel lateral, útil para menús en móvil.</p></div></div></div></div>`;
+const popSnap = (placement, align) => `<div class="snapbox" data-placement="${placement}"><div class="ui-pop" data-placement="${placement}" data-align="${align}">${btn('Más información')}<div class="panel" role="img" aria-label="Panel abierto"><p style="margin:0">Contenido del panel flotante.</p></div></div></div>`;
+const ddSnap = align => `<div class="snapbox"><div class="ui-dd" data-align="${align}">${btn('Acciones')}<div class="menu" role="img" aria-label="Menú abierto"><button type="button" role="menuitem" tabindex="-1">Editar</button><button type="button" role="menuitem" tabindex="-1">Duplicar</button><button type="button" role="menuitem" aria-disabled="true" tabindex="-1">Borrar</button></div></div></div>`;
+const toastSnap = (type, text) => `<div class="ui-toast" data-type="${type}" role="img" aria-label="Aviso"><span class="m">${text}</span><button type="button" tabindex="-1">×</button></div>`;
+const SNAP = {
+  modal: [{ name: 'size', cells: ['sm', 'md', 'lg'].map(v => ({ label: v, html: modalSnap(v) })) }],
+  drawer: [{ name: 'side', cells: ['left', 'right', 'bottom'].map(v => ({ label: v, html: drawerSnap(v), cls: 'wide' })) }],
+  popover: [{ name: 'placement', cells: [{ label: 'bottom', html: popSnap('bottom', 'start') }, { label: 'top', html: popSnap('top', 'start') }] }],
+  dropdown: [{ name: 'align', cells: [{ label: 'start', html: ddSnap('start') }, { label: 'end', html: ddSnap('end') }] }],
+  toasts: [{ name: 'type', cells: [['success', 'Guardado correctamente'], ['error', 'No se pudo guardar'], ['warning', 'Conexión lenta'], ['info', 'Hay una versión nueva']].map(([t, x]) => ({ label: t, html: toastSnap(t, x), cls: 'toast' })) }]
+};
+
 /** Rows of cells: one row per input with a few string options, plus one row with the boolean states. */
 function galleryRows(m, ex) {
-  if (m.group === 'Superposiciones' || NO_GALLERY.has(m.id)) return [];
+  if (SNAP[m.id]) return SNAP[m.id];
+  if ((m.group === 'Superposiciones' && m.id !== 'tooltip') || NO_GALLERY.has(m.id)) return [];
   const data = ex.data || {};
   const rows = [];
   for (const inp of m.inputs) {
     if (inp.name in data) continue;
     const opts = union(inp.type);
-    if (opts && opts.length > 1 && opts.length <= 8) rows.push({ name: inp.name, cells: opts.filter(v => v !== '').map(v => ({ label: v, set: { [inp.name]: v } })) });
+    if (opts && opts.length > 1 && opts.length <= 8) rows.push({ name: inp.name, cells: opts.filter(v => v !== '').map(v => ({ label: v, set: { [inp.name]: v }, cls: m.id === 'tooltip' ? 'room' : '' })) });
   }
   const flags = m.inputs.filter(i => i.type === 'boolean' && !(i.name in data) && !FLAG_SKIP.has(i.name)).slice(0, 6);
   if (ex.extra) rows.push({ name: 'otros', cells: ex.extra });
@@ -56,7 +75,7 @@ function galleryTemplate(m, ex, rows) {
       .map(([k, v]) => (typeof v === 'string' ? `${k}="${esc(v)}"` : `[${k}]="${v}"`)).concat(Object.keys(data).map(k => `[${k}]="${k}"`)).join(' ');
   };
   return rows.map(r => `<div class="vrow"><span class="vname">${esc(r.name)}</span><div class="vcells">` +
-    r.cells.map(c => `<figure class="vcell"><${m.tag} ${attrs(c.set)}>${ex.content || ''}</${m.tag}><figcaption>${esc(c.label)}</figcaption></figure>`).join('') +
+    r.cells.map(c => `<figure class="vcell ${c.cls || ''}">${c.html || `<${m.tag} ${attrs(c.set)}>${ex.content || ''}</${m.tag}>`}<figcaption>${esc(c.label)}</figcaption></figure>`).join('') +
     '</div></div>').join('');
 }
 
@@ -221,6 +240,53 @@ component(ThemePanel, {
     <ui-code-block language="css" [code]="css()"></ui-code-block>`
 });
 
+
+/* ---------- overview: every component at a glance, live and inert ---------- */
+
+let uid = 0;
+function mountHtml(el, html, data) {
+  class Frag { constructor() { Object.assign(this, data || {}); } }
+  component(Frag, { selector: `docs-frag-${++uid}`, imports: ui.all, template: html });
+  return mount(Frag, el);
+}
+
+/** A small, representative rendering of a component: its example as it appears in the playground. */
+function tileHtml(m) {
+  const ex = EX[m.id] || {};
+  if (SNAP[m.id]) return SNAP[m.id][0].cells[Math.min(1, SNAP[m.id][0].cells.length - 1)].html;
+  const data = ex.data || {};
+  const attrs = Object.entries(ex.props || {}).filter(([k, v]) => !(k in data) && !(v !== null && typeof v === 'object'))
+    .map(([k, v]) => (typeof v === 'string' ? `${k}="${esc(v)}"` : `[${k}]="${v}"`)).concat(Object.keys(data).map(k => `[${k}]="${k}"`)).join(' ');
+  return `<${m.tag} ${attrs}>${ex.content || ''}</${m.tag}>`;
+}
+
+class Overview {
+  groups = groups.map(g => ({ name: g, items: components.filter(c => c.group === g) }));
+  handles = [];
+  ngAfterViewInit() {
+    for (const m of components) {
+      const box = this.$el.querySelector(`[data-tile="${m.id}"]`);
+      if (box) this.handles.push(mountHtml(box, tileHtml(m), (EX[m.id] || {}).data));
+    }
+  }
+  ngOnDestroy() { this.handles.forEach(h => h.destroy()); }
+}
+component(Overview, {
+  selector: 'docs-overview',
+  template: `
+    @for (g of groups; track g.name) {
+      <h3 class="ovgroup">{{ g.name }}</h3>
+      <div class="ov">
+        @for (c of g.items; track c.id) {
+          <div class="ovtile">
+            <div class="ovprev" inert aria-hidden="true"><div class="ovin" [attr.data-tile]="c.id"></div></div>
+            <a [href]="'#' + c.id">{{ c.name }}</a>
+          </div>
+        }
+      </div>
+    }`
+});
+
 /* ---------- the page ---------- */
 
 class UiPage {
@@ -238,7 +304,7 @@ class UiPage {
 }
 component(UiPage, {
   selector: 'docs-ui',
-  imports: [Section, ThemePanel, ui.TextField, ui.EmptyState, ui.Button],
+  imports: [Section, ThemePanel, Overview, ui.TextField, ui.EmptyState, ui.Button],
   template: `
     <div class="ui-lib">
       <p>{{ total }} componentes accesibles: <code>{{ '<' }}ui-button{{ '>' }}</code>, <code>{{ '<' }}ui-modal{{ '>' }}</code>, <code>{{ '<' }}ui-table{{ '>' }}</code>… Se usan como cualquier componente de AngeLite: los importas en <code>imports</code> y los pones en la plantilla. Cada uno es una clase marcada como pura, así que un bundler se queda solo con los que importes.</p>
@@ -250,6 +316,9 @@ component(App, {
   template: \`&lt;ui-button variant="primary"&gt;Guardar&lt;/ui-button&gt;\`
 });</code></pre>
       </div>
+      <h2 id="vista-general">Vista general</h2>
+      <p>Los 33 componentes de un vistazo, ya montados. Pulsa el nombre para ver sus variantes, controles y API.</p>
+      <docs-overview></docs-overview>
       <h2 id="tema">Tema</h2>
       <p>Todo el aspecto sale de variables CSS (<code>--ui-*</code>). Cambia estas tres, o define las tuyas en <code>:root</code>. El modo oscuro sigue al sistema, o al interruptor de arriba (<code>&lt;html data-theme="dark"&gt;</code>).</p>
       <docs-theme></docs-theme>

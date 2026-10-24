@@ -84,7 +84,7 @@ nav.groups.forEach(g => g.pages.forEach(p => pagesById.set(p.id, { ...p, group: 
 const order = [...pagesById.values()];
 
 function sidebar(currentId, extra) {
-  const groups = nav.groups.map(g => `<h2>${esc(g.title)}</h2><ul>${g.pages.map(p => {
+  const groups = nav.groups.map(g => `<h2>${esc(g.title)}</h2>${g.hint ? `<p class="hint">${esc(g.hint)}</p>` : ''}<ul${g.steps ? ' class="steps"' : ''}>${g.pages.map(p => {
     const cur = p.id === currentId;
     const sub = cur && extra ? extra : '';
     return `<li><a href="${p.id}.html"${cur ? ' aria-current="page"' : ''}>${esc(p.title)}</a>${sub}</li>`;
@@ -295,7 +295,7 @@ function uiPage() {
   const metaFile = join(root, 'data', 'ui-meta.json');
   if (!existsSync(metaFile)) { warnings.push('ui: data/ui-meta.json not found (run npm run sync)'); return; }
   const meta = JSON.parse(readFileSync(metaFile, 'utf8'));
-  const sub = `<ul>${meta.groups.map(g => `<li><a href="ui.html#grupo-${slug(g)}">${esc(g)}</a><ul>${meta.components.filter(c => c.group === g).map(c => `<li><a href="ui.html#${c.id}">${esc(c.name)}</a></li>`).join('')}</ul></li>`).join('')}</ul>`;
+  const sub = `<div class="uinav">${meta.groups.map(g => `<div class="uigroup"><a class="uig" href="ui.html#grupo-${slug(g)}">${esc(g)}</a><div class="chips">${meta.components.filter(c => c.group === g).map(c => `<a href="ui.html#${c.id}">${esc(c.name)}</a>`).join('')}</div></div>`).join('')}</div>`;
   const body = `<noscript><p>Esta página es una aplicación AngeLite: necesita JavaScript para mostrar los componentes en vivo.</p></noscript><div id="app" aria-live="polite"><p>Cargando componentes…</p></div>`;
   out.set('ui.html', layout({ id: 'ui', title: 'Biblioteca de componentes', description: `${meta.components.length} componentes accesibles hechos con AngeLite: con ejemplos en vivo, controles para probarlos, tablas de API y notas de accesibilidad.`, body, scripts: [...LIB, 'angelite-ui.min.js', 'ui-meta.js', 'ui-examples.js', 'assets/ui-app.js'], wide: true, noToc: true, sideExtra: sub, source: 'public/assets/ui-app.js' }));
   addSearch({ id: 'ui', title: 'Biblioteca de componentes', toc: meta.components.map(c => ({ id: c.id, text: c.name })), text: meta.components.map(c => `${c.name} ${c.summary} ${c.a11y} ${c.inputs.map(i => i.name + ' ' + i.desc).join(' ')}`).join(' ') });

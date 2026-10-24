@@ -6,30 +6,125 @@
     "docsRepo": "https://github.com/duvanjamid/angelite-docs"
   },
   "groups": [
-    { "title": "Empezar", "pages": [
-      { "id": "empezar", "title": "Inicio rápido" },
-      { "id": "diferencias", "title": "Diferencias con Angular" } ] },
-    { "title": "Fundamentos", "pages": [
-      { "id": "plantillas", "title": "Señales y plantillas" },
-      { "id": "componentes", "title": "Componentes" },
-      { "id": "formularios", "title": "Formularios" },
-      { "id": "router", "title": "Router" } ] },
-    { "title": "Datos y servidor", "pages": [
-      { "id": "datos", "title": "HTTP, i18n y animaciones" },
-      { "id": "servidor", "title": "SSR y precompilación" } ] },
-    { "title": "Calidad", "pages": [
-      { "id": "seguridad", "title": "Seguridad" },
-      { "id": "rendimiento", "title": "Rendimiento", "source": "analysis/performance.md" },
-      { "id": "herramientas", "title": "Herramientas y tests" } ] },
-    { "title": "Referencia", "pages": [
-      { "id": "referencia", "title": "API" },
-      { "id": "ui", "title": "Biblioteca de componentes", "special": "ui" } ] },
-    { "title": "Medición", "pages": [
-      { "id": "benchmarks", "title": "Benchmark" },
-      { "id": "comparativa", "title": "Comparativa" },
-      { "id": "analisis", "title": "Análisis frente a los demás", "source": "analysis/gap-analysis.md" } ] },
-    { "title": "Proyecto", "pages": [
-      { "id": "politica-seguridad", "title": "Política de seguridad", "source": "analysis/SECURITY.md" },
-      { "id": "cambios", "title": "Registro de cambios", "source": "analysis/CHANGELOG.md" } ] }
+    {
+      "title": "Empezar",
+      "hint": "Instala y crea tu primera app",
+      "pages": [
+        {
+          "id": "empezar",
+          "title": "Inicio rápido"
+        },
+        {
+          "id": "diferencias",
+          "title": "Si vienes de Angular"
+        }
+      ]
+    },
+    {
+      "title": "Aprender",
+      "hint": "En este orden se entiende mejor",
+      "steps": true,
+      "pages": [
+        {
+          "id": "plantillas",
+          "title": "Señales y plantillas"
+        },
+        {
+          "id": "componentes",
+          "title": "Componentes"
+        },
+        {
+          "id": "formularios",
+          "title": "Formularios"
+        },
+        {
+          "id": "router",
+          "title": "Router"
+        },
+        {
+          "id": "datos",
+          "title": "HTTP, i18n y animaciones"
+        }
+      ]
+    },
+    {
+      "title": "Llevarlo a producción",
+      "hint": "Servidor, seguridad y calidad",
+      "pages": [
+        {
+          "id": "servidor",
+          "title": "SSR y precompilación"
+        },
+        {
+          "id": "seguridad",
+          "title": "Seguridad"
+        },
+        {
+          "id": "rendimiento",
+          "title": "Rendimiento",
+          "source": "analysis/performance.md"
+        },
+        {
+          "id": "herramientas",
+          "title": "Herramientas y tests"
+        }
+      ]
+    },
+    {
+      "title": "Componentes UI",
+      "hint": "33 componentes accesibles, en vivo",
+      "pages": [
+        {
+          "id": "ui",
+          "title": "Biblioteca de componentes",
+          "special": "ui"
+        }
+      ]
+    },
+    {
+      "title": "Referencia",
+      "hint": "Firmas y tipos del paquete",
+      "pages": [
+        {
+          "id": "referencia",
+          "title": "API"
+        }
+      ]
+    },
+    {
+      "title": "Comparar",
+      "hint": "Números y características frente a otros",
+      "pages": [
+        {
+          "id": "benchmarks",
+          "title": "Benchmark"
+        },
+        {
+          "id": "comparativa",
+          "title": "Comparativa"
+        },
+        {
+          "id": "analisis",
+          "title": "Análisis frente a los demás",
+          "source": "analysis/gap-analysis.md"
+        }
+      ]
+    },
+    {
+      "title": "Proyecto",
+      "hint": "Seguridad y novedades",
+      "pages": [
+        {
+          "id": "politica-seguridad",
+          "title": "Política de seguridad",
+          "source": "analysis/SECURITY.md"
+        },
+        {
+          "id": "cambios",
+          "title": "Registro de cambios",
+          "source": "analysis/CHANGELOG.md"
+        }
+      ]
+    }
   ]
 }
