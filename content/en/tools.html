@@ -1,0 +1,46 @@
+<!--{"title":"Tools and tests","description":"TypeScript types, testing utilities, development warnings, template checking, DevTools, Vite and angelite-check.","examples":false}-->
+<h2 id="types">TypeScript</h2>
+<p>The package ships its <code>.d.ts</code> files (checked with <code>tsc</code> in CI): <code>signal&lt;T&gt;</code>, <code>input&lt;T&gt;</code>, <code>output&lt;T&gt;</code>, <code>viewChild&lt;T&gt;</code>, <code>Route</code>, <code>RouteGuard</code>, <code>OnInit</code>, <code>OnDestroy</code>, <code>OnError</code>… It works the same with JS and TS. The <a href="api.html">API reference</a> is generated from those same types.</p>
+
+<h2 id="tests">Tests</h2>
+<p><code>@duvanjamid/angelite/testing</code> mounts a component in the document and gives you the basics to interact with it:</p>
+<pre><code>import { render, cleanup } from '@duvanjamid/angelite/testing';
+
+afterEach(cleanup);
+
+test('adds', async () =&gt; {
+  const t = render(Counter, { props: { start: 5 }, provide: [[Api, fakeApi]] });  // props = inputs; provide = services
+  t.click('button');
+  await t.flush();                      // waits for signals to reach the DOM
+  assert.equal(t.text('output'), '6');
+  t.type('input', 'Ada');               // types and fires input + change
+});</code></pre>
+
+<h2 id="warnings">Development warnings</h2>
+<p><code>enableDevWarnings()</code> (development only, before mounting) warns about what would otherwise fail silently:</p>
+<ul>
+  <li>a <code>[prop]</code> the component does not declare as an input,</li>
+  <li>repeated keys in <code>@for</code>,</li>
+  <li>an unknown element,</li>
+  <li>an optional module (<code>portal</code>, <code>defer</code>) that was not imported.</li>
+</ul>
+
+<h2 id="checking">Template checking at compile time</h2>
+<p>The compiler warns (or fails, with <code>check: 'error'</code>) if a template uses an unknown element, a pipe that does not exist or, if you give it the list (or <code>members: 'auto'</code> to read it from the neighboring class), a name the component does not have. It does not check types.</p>
+<pre><code>aotPlugin({ components: ['ui-button'], members: 'auto', check: 'error' })
+
+// counter.ng.html: &lt;p&gt;&#123;&#123; counter() &#125;&#125;&lt;/p&gt;   →  error: "counter" is not a member of the component</code></pre>
+
+<h2 id="devtools">DevTools</h2>
+<p><code>enableDevtools({ panel: true })</code> (<code>@duvanjamid/angelite/devtools</code>) adds <code>window.__ANGELITE__</code> with <code>tree()</code>, <code>inspect(el)</code>, <code>state(instance)</code> and <code>set(instance, 'field', value)</code>, and a floating panel with the component tree and the value of their signals.</p>
+<div class="callout"><span class="t">Scope</span><p>It is a basic inspector: there is no timeline and no editing from the panel.</p></div>
+
+<h2 id="build">Vite and editor</h2>
+<p><code>tools/vite.mjs</code> compiles <code>*.ng.html</code> with reload on edit and the same warnings as the esbuild plugin. <code>angelite-check</code> (or <code>node tools/check.mjs src --members auto</code>) lists the problems as <code>file:1: message</code>, a format the editor understands as errors.</p>
+<pre><code>// vite.config.js
+import angelite from '@duvanjamid/angelite/tools/vite.mjs';
+export default { plugins: [angelite({ components: ['ui-button'], members: 'auto', check: 'error' })] };
+
+// package.json
+"scripts": { "check": "angelite-check src --members auto" }</code></pre>
+<p>There is no template autocompletion in the editor.</p>

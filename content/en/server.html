@@ -1,0 +1,52 @@
+<!--{"title":"SSR and precompiling","description":"Server-side rendering with hydrate() and template compilation at build time to ship only the runtime.","examples":false}-->
+<h2 id="ssr">Server-side rendering</h2>
+<p><code>@duvanjamid/angelite/tools/ssr.mjs</code> renders a component in Node (with jsdom, which is already a build dependency): there is no second implementation to maintain, the output is what the browser would build, with the same URL sanitizing and the same escaping. Requests are queued, so two renders at once do not step on each other.</p>
+<pre><code>// server (Node)
+import { renderPage } from '@duvanjamid/angelite/tools/ssr.mjs';
+import { provideRouter } from '@duvanjamid/angelite';
+
+const html = await renderPage(App, {
+  shell: '&lt;!doctype html&gt;&lt;body&gt;&lt;!--app--&gt;&lt;!--state--&gt;&lt;script type="module" src="/client.js"&gt;&lt;/script&gt;&lt;/body&gt;',
+  url: req.url,                                              // path and query
+  setup: () =&gt; provideRouter(routes, { mode: 'history' }),    // runs with the DOM already available
+  ready: async app =&gt; { await app.users.settled; },           // wait for your data
+  state: { users }                                           // reaches the client as window.__STATE__
+});</code></pre>
+<pre><code>// client
+import { hydrate } from '@duvanjamid/angelite/hydrate';
+hydrate(App, document.getElementById('app'));</code></pre>
+<ul>
+  <li><code>renderToString(Comp, options)</code> returns only the component's HTML; <code>renderPage</code> fills a <em>shell</em> (<code>&lt;!--app--&gt;</code> and <code>&lt;!--state--&gt;</code>); <code>serializeState(obj)</code> gives JSON that is safe to embed in a <code>&lt;script&gt;</code> (it escapes <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code> and the line separators).</li>
+  <li><code>setup</code> runs before mounting, with the DOM globals set: that is where you configure the router so it reads <code>url</code>.</li>
+  <li><code>ready</code> receives the instance and can return a promise: that is where you wait for your data.</li>
+</ul>
+<div class="callout warn"><span class="t">Hydration: what it does and what it does not</span><p><code>hydrate()</code> replaces the server HTML with the live app in the same task, so there is no flicker. It <b>does not adopt the existing nodes</b>: the client renders again. You gain visible content before the JavaScript arrives, and SEO; you do not save the work of a full hydration. There is no <em>streaming</em> either.</p></div>
+
+<h2 id="precompile">Precompiling templates</h2>
+<p>By default AngeLite compiles templates in the browser: one script, no build. If every KB matters to you, turn them into JavaScript during the build and ship <b>only the runtime</b> (no expression parser or compiler): about 6&nbsp;KB gzip for a real app, a little less than Preact (6.2&nbsp;KB).</p>
+<pre><code>&lt;!-- counter.ng.html --&gt;
+&lt;button (click)="inc()"&gt;Clicks: &#123;&#123; count() &#125;&#125;&lt;/button&gt;</code></pre>
+<pre><code>// counter.js
+import { signal, component, mount } from '@duvanjamid/angelite/runtime';
+import aot from './counter.ng.html';              // compiled by the plugin
+
+class Counter { count = signal(0); inc() { this.count.update(n =&gt; n + 1); } }
+component(Counter, { aot });                       // instead of template
+mount(Counter, document.body);</code></pre>
+<pre><code>// build with esbuild
+import { aotPlugin } from '@duvanjamid/angelite/tools/aot.mjs';
+esbuild.build({ entryPoints: ['counter.js'], bundle: true, minify: true,
+  plugins: [aotPlugin({ components: ['ui-button'], members: 'auto', check: 'error' })] });
+
+// or with Vite (reloads when you edit a template)
+import angelite from '@duvanjamid/angelite/tools/vite.mjs';
+export default { plugins: [angelite({ components: ['ui-button'], members: 'auto' })] };</code></pre>
+<p>There is also a CLI: <code>node tools/aot.mjs template.html output.js --components ui-button,ui-card</code>. A precompiled template produces <em>exactly</em> the same DOM as the one compiled in the browser (the tests check it).</p>
+<h3 id="checking">The compiler also checks your templates</h3>
+<ul>
+  <li><b>Unknown elements</b> (<code>&lt;ui-buton&gt;</code>), <b>pipes that do not exist</b> and, with <code>members</code>, <b>names the component does not have</b> (<code>&#123;&#123; counter() &#125;&#125;</code> when only <code>count</code> exists).</li>
+  <li><code>members: 'auto'</code> reads the fields and methods of the class next to the template (<code>x.ng.html</code> + <code>x.js</code>); you can also give the list.</li>
+  <li><code>check: 'warn'</code> (default) warns, <code>'error'</code> stops the build, <code>false</code> turns it off. It does not check types.</li>
+</ul>
+<div class="callout tip"><span class="t">Optional modules in a precompiled app</span><p>With the runtime alone, import <code>@duvanjamid/angelite/pipes</code> for pipes, or use <code>@duvanjamid/angelite/runtime-plus</code>, which brings portals, <code>@defer</code> and references without the compiler. <code>enableDevWarnings()</code> tells you if a template needs one that is missing.</p></div>
+<div class="callout warn"><span class="t">Never compile templates with user data</span><p>With in-browser compilation, a template is code. If a template is built with text you do not control, you are running that text. Precompiling removes the problem by construction: the browser only receives the result.</p></div>

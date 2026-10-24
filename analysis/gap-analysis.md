@@ -1,224 +1,167 @@
-# AngeLite frente a React, Preact, Vue y Angular
+# AngeLite against React, Preact, Vue and Angular
 
-Qué tienen ellos que nosotros no, qué tenemos nosotros que ellos no, y en qué orden conviene cerrar la brecha.
-La tabla completa está en [`benchmarks.html`](comparativa.html) (37 filas, con la fuente de cada dato).
+What they have that we do not, what we have that they do not, and in what order it makes sense to close the gap. The full table is on the [comparison page](comparison.html) (37 rows, with the source of each fact).
 
-## Cómo se comprobó
+## How it was checked
 
-Cada afirmación lleva una fuente:
+Every claim has a source:
 
-- **V** — comprobado en esta sesión: ejecutando el código o leyendo el paquete instalado
-  (React 19.3.1, Preact 10.29.8, Vue 3.5.44, Angular 20.3). Las pruebas de seguridad se pueden repetir con
-  `cd benchmarks && npm install && npm run probe:security`.
-- **D** — documentación oficial.
-- **G** — conocimiento general que no se comprobó aquí. Revísalo antes de citarlo.
+- **V**: verified in this session, by running the code or reading the installed package (React 19.3.1, Preact 10.29.8, Vue 3.5.44, Angular 20.3). The security tests can be repeated with `cd benchmarks && npm install && npm run probe:security`.
+- **D**: official documentation.
+- **G**: general knowledge that was not checked here. Review it before quoting it.
 
-De las 37 filas de la tabla: 16 son V, 2 son D y 19 son G. Las filas de seguridad son casi todas V.
+Of the 37 rows in the table: 16 are V, 2 are D and 19 are G. The security rows are almost all V.
 
-## Resumen
+## Summary
 
-1. **Estado: los seis huecos de seguridad que encontramos están cerrados** (ver la sección 1), con un test real para cada uno
-   y para su variante precompilada. AngeLite pasa de peor a mejor del grupo en las pruebas de ataque que ejecutamos.
-2. **Donde ganamos es tamaño, memoria y velocidad de listas** (ver el benchmark). Somos además el único con
-   un modo «sin build» pequeño: ~10 KB gzip frente a 63,7 KB de Vue con su compilador, y sin `eval`.
-3. **Donde perdemos es todo lo que rodea al núcleo**: tipos, SSR, router, formularios, herramientas, comunidad.
-   La tabla nos da 19,5 de 38 frente a 24,5 (Preact), 27 (Vue), 28,5 (React) y 33 (Angular). No es un ranking, pero la brecha es real.
+1. **Status: the six security gaps we found are closed** (see section 1), with a real test for each one and for its precompiled variant. AngeLite goes from worst to best of the group in the attack tests we run.
+2. **Where we win is size, memory and list speed** (see the benchmark). We are also the only one with a small "no build" mode: ~10 KB gzip against Vue's 63.7 KB with its compiler, and with no `eval`.
+3. **Where we lose is everything around the core**: types, SSR, router, forms, tooling, community. The table gives us 19.5 out of 38 against 24.5 (Preact), 27 (Vue), 28.5 (React) and 33 (Angular). It is not a ranking, but the gap is real.
 
-## 1. Seguridad
+## 1. Security
 
-### Lo que comprobamos que hace cada uno
+### What we verified each one does
 
-Se repite con `cd benchmarks && npm install && npm run probe:security`.
+Repeat it with `cd benchmarks && npm install && npm run probe:security`.
 
-| Prueba | AngeLite (antes) | **AngeLite (ahora)** | Preact | Vue | React | Angular |
+| Test | AngeLite (before) | **AngeLite (now)** | Preact | Vue | React | Angular |
 |---|---|---|---|---|---|---|
-| Texto escapado por defecto | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `href` con `javascript:` | pasaba | **`unsafe:` + aviso** | pasa | pasa | lo neutraliza | lo sanea |
-| `onclick` como texto | creaba el atributo | **error de compilación** | no lo crea | crea el atributo | no lo crea | lo prohíbe |
-| HTML en `innerHTML` | sin sanear | **solo con `trustHtml()`; si no, texto** | sin sanear | sin sanear | sin sanear | sanea |
-| Expresiones llegan a `window` | sí, vía `$el` | **no, por ningún camino** | n/a (JSX) | no | n/a (JSX) | no |
-| Funciona sin `eval` | sí | **sí** | sí | solo la build runtime-only | sí | solo AOT; el JIT usa `new Function` |
-| Trusted Types | no | **sí (política `angelite`)** | no | una referencia | no | integrado |
-| Estilos bajo CSP estricta | `<style>` sin nonce | **hojas construibles; fallback con nonce** | n/a | n/a | n/a | nonce |
+| Escaped text by default | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `href` with `javascript:` | let it through | **`unsafe:` + warning** | lets it through | lets it through | neutralizes it | sanitizes it |
+| `onclick` as text | created the attribute | **compile error** | does not create it | creates the attribute | does not create it | forbids it |
+| HTML in `innerHTML` | unsanitized | **only with `trustHtml()`; otherwise text** | unsanitized | unsanitized | unsanitized | sanitizes |
+| Expressions reach `window` | yes, via `$el` | **no, by no path** | n/a (JSX) | no | n/a (JSX) | no |
+| Works without `eval` | yes | **yes** | yes | only the runtime-only build | yes | only AOT; JIT uses `new Function` |
+| Trusted Types | no | **yes (`angelite` policy)** | no | one reference | no | built in |
+| Styles under a strict CSP | `<style>` without nonce | **constructable stylesheets; nonce fallback** | n/a | n/a | n/a | nonce |
 
-Vue y Preact siguen sin cerrar las URL; solo React y Angular lo hacen. Con estos cambios AngeLite cierra todo lo que cierran ellos,
-más lo que nadie más hace (compilación que rechaza bindings peligrosos, valor-guardia contra `window`).
+Vue and Preact still do not close URLs; only React and Angular do. With these changes AngeLite closes everything they close, plus what nobody else does (a compiler that rejects dangerous bindings, a guard value against `window`).
 
-### Cómo se cerró cada hueco
+### How each gap was closed
 
-| # | Hueco | Cierre | Test |
+| # | Gap | Fix | Test |
 |---|---|---|---|
-| 1 | `[href]` / `href="{{ }}"` aceptaban `javascript:` | Lista de esquemas (`http`, `https`, `mailto`, `tel`, `sms`, `ftp`, relativas) en `href`, `src`, `action`, `formaction`, `data` y `xlink:href`; ignora los caracteres que los navegadores descartan dentro del esquema (`java\tscript:`); el resto pasa a `unsafe:<url>` con aviso. `trustUrl()` como salida explícita. | matriz de 12 URLs peligrosas y 13 seguras en 7 contextos |
-| 2 | `[attr.onclick]` creaba un manejador | Error de compilación para `[on*]`, `[attr.on*]` y `on*="{{ }}"`, en el compilador del navegador y en el AOT | 5 variantes, también con mayúsculas |
-| 3 | `[innerHTML]` sin sanear | Solo se renderiza si está envuelto en `trustHtml()`; cualquier otro valor se inserta como texto y avisa | 3 tests |
-| 4 | `[srcdoc]` aceptado | Error de compilación (y `[outerHTML]`) | 3 tests |
-| 5 | Una plantilla llegaba a `window` con `$el.ownerDocument.defaultView.fn()` | Filtro **por valor**: el objeto global y los documentos nunca se devuelven a una plantilla, vengan de donde vengan (`$el.ownerDocument`, `$event.view`, `getRootNode()`, `composedPath()[n]`, un campo del componente). Además, métodos del DOM que convierten texto en marcado o atributos (`insertAdjacentHTML`, `setAttribute`, `write`…) quedan bloqueados por nombre. | 8 caminos de ataque + eventos |
-| 6 | El paquete UI inyectaba `<style>` sin nonce | `adoptedStyleSheets` (no necesita nonce); si no existen, `<style>` con el nonce de `<meta name="csp-nonce">` | 3 tests |
+| 1 | `[href]` / `href="{{ }}"` accepted `javascript:` | Allow-list of schemes (`http`, `https`, `mailto`, `tel`, `sms`, `ftp`, relative) on `href`, `src`, `action`, `formaction`, `data` and `xlink:href`; ignores the characters browsers drop inside the scheme (`java\tscript:`); everything else becomes `unsafe:<url>` with a warning. `trustUrl()` as the explicit way out. | matrix of 12 dangerous and 13 safe URLs in 7 contexts |
+| 2 | `[attr.onclick]` created a handler | Compile error for `[on*]`, `[attr.on*]` and `on*="{{ }}"`, in the browser compiler and in the AOT | 5 variants, also with capitals |
+| 3 | Unsanitized `[innerHTML]` | Only rendered when wrapped in `trustHtml()`; any other value is inserted as text and warns | 3 tests |
+| 4 | `[srcdoc]` accepted | Compile error (and `[outerHTML]`) | 3 tests |
+| 5 | A template reached `window` with `$el.ownerDocument.defaultView.fn()` | Filter **by value**: the global object and documents are never returned to a template, wherever they come from (`$el.ownerDocument`, `$event.view`, `getRootNode()`, `composedPath()[n]`, a component field). DOM methods that turn text into markup or attributes (`insertAdjacentHTML`, `setAttribute`, `write`…) are also blocked by name. | 8 attack paths + events |
+| 6 | The UI package injected `<style>` without a nonce | `adoptedStyleSheets` (needs no nonce); if they do not exist, `<style>` with the nonce from `<meta name="csp-nonce">` | 3 tests |
 
-Además: bindings e interpolación en `<script>`, `<style>`, `<base>`, `<link>` y `<meta>` son error de compilación;
-Trusted Types con una única política `angelite` para las plantillas y `trustHtml()`; `SECURITY.md` con el modelo de confianza y
-cómo reportar; CodeQL con consultas ampliadas, Dependabot y `npm audit` en el CI.
+Also: bindings and interpolation in `<script>`, `<style>`, `<base>`, `<link>` and `<meta>` are a compile error; Trusted Types with a single `angelite` policy for templates and `trustHtml()`; `SECURITY.md` with the trust model and how to report; CodeQL with extended queries, Dependabot and `npm audit` in CI.
 
-### Lo que queda (y es honesto)
+### What remains (and let us be honest)
 
-- **El sandbox de expresiones no es un límite de seguridad.** Una plantilla sigue pudiendo llamar métodos de su componente y de
-  los elementos que alcance. Es defensa en profundidad: **nunca se compilan plantillas con datos de usuario** (Vue dice lo mismo).
-  En producción, precompila con `tools/aot.mjs`: no se compila nada en el navegador.
-- **No incluimos un sanitizador de HTML.** Angular trae uno; nosotros exigimos `trustHtml()` y recomendamos DOMPurify
-  antes de envolver. Incluir un sanitizador propio costaría varios KB y es fácil equivocarse.
-- **Sin revisión externa ni historial.** Los demás llevan años de auditorías; nosotros, no.
-- **El framework antiguo (`src/angelite.js` y sus carpetas) no está endurecido** y está deprecado. Usa `lite`.
+- **The expression sandbox is not a security boundary.** A template can still call methods of its component and of the elements it reaches. It is defense in depth: **templates with user data are never compiled** (Vue says the same). In production, precompile with `tools/aot.mjs`: nothing is compiled in the browser.
+- **We do not ship an HTML sanitizer.** Angular has one; we require `trustHtml()` and recommend DOMPurify before wrapping. A sanitizer of our own would cost several KB and is easy to get wrong.
+- **No external review or track record.** The others have years of audits; we do not.
 
-### Qué tienen ellos que nosotros no (seguridad)
+### What they have that we do not (security)
 
-- **Angular**: un sanitizador de HTML y URL por contexto integrado, años de revisión de seguridad.
-- **Todos**: procesos de divulgación consolidados y una comunidad que encuentra y corrige fallos.
+- **Angular**: a built-in HTML and URL sanitizer per context, years of security review.
+- **All of them**: established disclosure processes and a community that finds and fixes flaws.
 
-## 2. Velocidad y rendimiento
+## 2. Speed and performance
 
-Medido tras la Ola 1 y la Ola 2 (5 rondas × 15 iteraciones por operación, arranque con 41 cargas intercaladas; contenedor compartido, sin pintado; esta máquina fue ~35 % más lenta que la de la medición anterior, así que los milisegundos absolutos no son comparables, sí las posiciones).
-Con la regla «a menos del 10 % es un empate»:
+Measured after Wave 1 and Wave 2 (5 rounds × 15 iterations per operation, startup with 41 interleaved loads; shared container, no painting; this machine was ~35 % slower than the previous measurement, so absolute milliseconds are not comparable, positions are). With the rule "within 10 % is a tie":
 
-| | AngeLite precompilado | Mejor de los demás |
+| | Precompiled AngeLite | Best of the others |
 |---|---|---|
-| Tamaño de la app (gzip) | **6,1 KB** (el más pequeño; las funciones nuevas costaron 0,2 KB) | Preact 6,2 KB |
-| Arranque | 23,1 ms (rangos intercuartílicos solapados: empate técnico) | Preact 21,3 ms |
-| Memoria con 10.000 filas | **6,6 MB** | Angular 11,8 MB |
-| 12 mediciones en total | **mediana más baja en 7**; empate dentro del 10 % en 4 (arranque, `replace1k`, `swap`, `create10k`); por detrás en `remove` (Preact, +16 % en esta corrida) | — |
+| App size (gzip) | **6.1 KB** (the smallest; the new features cost 0.2 KB) | Preact 6.2 KB |
+| Startup | 23.1 ms (overlapping interquartile ranges: a technical tie) | Preact 21.3 ms |
+| Memory with 10,000 rows | **6.6 MB** | Angular 11.8 MB |
+| 12 measurements in all | **lowest median in 7**; within 10 % in 4 (startup, `replace1k`, `swap`, `create10k`); behind in `remove` (Preact, +16 % in this run) | — |
 
-`swap` y `remove` varían de una corrida a otra: dos repeticiones dedicadas (5 × 15) dieron 4,70 ms frente a 4,90 de Preact en ambas, y otra sin el gancho de animaciones 4,75 frente a 4,70. Lo honesto es leerlas como empate con Preact y Angular. La puntuación global (media geométrica del tiempo relativo al mejor) es 1,03× para AngeLite precompilado; React queda en 1,55×.
-Mejoras de esta ronda que se midieron: el anfitrión raíz con `display: contents` (−1,5 ms tras el montaje) y una vía rápida en `@for`
-cuando la lista mantiene las mismas claves en el mismo orden (`update10th` pasó de ~9,8 a ~7,9 ms).
+`swap` and `remove` vary from one run to the next: two dedicated repetitions (5 × 15) gave 4.70 ms against Preact's 4.90 in both, and another without the animation hook 4.75 against 4.70. The honest reading is a tie with Preact and Angular. The overall score (geometric mean of the time relative to the best) is 1.03× for precompiled AngeLite; React is at 1.55×. Improvements of this round that were measured: the root host with `display: contents` (−1.5 ms after mount) and a fast path in `@for` when the list keeps the same keys in the same order (`update10th` went from ~9.8 to ~7.9 ms).
 
-Lo que **no** tenemos:
+What we do **not** have:
 
-| Falta | Quién lo tiene | Qué aportaría |
+| Missing | Who has it | What it would bring |
 |---|---|---|
-| Optimizaciones de compilación (subárboles estáticos elevados, constantes plegadas, banderas por nodo) | Vue (patch flags + hoisting), React Compiler, Angular AOT | Menos trabajo por actualización; hoy el AOT precompila pero no optimiza |
-| Renderizado concurrente y transiciones | React | Interfaz fluida con actualizaciones pesadas. **No lo recomendamos copiar**: la complejidad es enorme para un framework ligero |
-| SSR e hidratación | React, Vue, Angular (incluida la incremental), Preact (paquete aparte) | Primer pintado y SEO. Ver la ventaja arquitectónica abajo |
-| Carga diferida declarativa (`@defer`, `lazy`) | Todos | Dividir el código |
-| Detección de regresiones de rendimiento en CI | — | Hoy el benchmark es manual: una PR podría empeorar la velocidad sin que nadie lo vea |
+| Compile-time optimizations (hoisted static subtrees, folded constants, per-node flags) | Vue (patch flags + hoisting), React Compiler, Angular AOT | Less work per update; today the AOT precompiles but does not optimize |
+| Concurrent rendering and transitions | React | A fluid interface under heavy updates. **We do not recommend copying it**: the complexity is enormous for a lightweight framework |
+| SSR and hydration | React, Vue, Angular (including incremental), Preact (separate package) | First paint and SEO. See the architectural advantage below |
+| Declarative lazy loading (`@defer`, `lazy`) | All | Code splitting |
+| Performance regression detection in CI | — | The benchmark used to be manual: a PR could make speed worse and nobody would see |
 
-Límites propios que conviene conocer (verificados en el código):
+Limits of our own worth knowing (verified in the code):
 
-- **Un efecto por vista, no por binding.** Una señal que cambia re-evalúa todos los bindings de esa vista
-  (solo escribe en el DOM si el valor cambió). En filas con pocos bindings es lo más barato; en un componente
-  con cientos de bindings y una señal que cambia muchas veces por segundo puede costar. Vue y Solid son más finos.
-- **Listas inmutables.** Se compara identidad: mutar un array en el sitio y volver a asignar el mismo no actualiza.
-- **Ruido de la medición.** Los números salen de un contenedor compartido y sin pintado; las diferencias
-  menores del 10 % no son concluyentes.
+- **One effect per view, not per binding.** A signal that changes re-evaluates every binding in that view (it only writes to the DOM if the value changed). In rows with few bindings that is the cheapest; in a component with hundreds of bindings and a signal that changes many times per second it can cost. Vue and Solid are finer.
+- **Immutable lists.** Identity is compared: mutating an array in place and assigning the same one again does not update.
+- **Measurement noise.** The numbers come from a shared container with no painting; differences under 10 % are not conclusive.
 
-Ideas para seguir mejorando (en este orden): elevar subárboles estáticos en el AOT, scope plano en las filas
-(menos objetos por fila), propiedades internas con nombre reducido (~0,5 KB), y arranque más rápido (hoy
-empatamos con Preact con 28 ms).
+Ideas to keep improving (in this order): hoist static subtrees in the AOT, flat scope in rows (fewer objects per row), internal properties with shorter names (~0.5 KB), and faster startup (today we tie with Preact at 28 ms).
 
-## 3. Arquitectura y estructura (mirándolo como arquitecto)
+## 3. Architecture and structure (looking at it as an architect)
 
-Puntos débiles reales del diseño actual:
+Real weak points of the current design:
 
-1. **Estado global de módulo.** El registro de pipes, el mapa de servicios de `inject()`, el router, el conjunto de
-   eventos delegados y el enganche del router son singletons. No se puede tener dos aplicaciones aisladas en la misma
-   página, ni renderizar en servidor sin mezclar peticiones, ni ejecutar tests en paralelo con garantías.
-   *Dirección*: un objeto `app` (`createApp()`) que contenga registros, inyector y router.
-2. **Acoplamiento al DOM global.** El runtime llama a `document` directamente. Eso impide SSR y otros renderizadores.
-   *Dirección*: abstraer las pocas operaciones DOM (crear plantilla, insertar, mover, quitar).
-3. **Dos bases de código.** El framework antiguo (~7.000 líneas, `src/angelite.js`) convive con AngeLite. Duplica conceptos y
-   mantenimiento, y los tests del antiguo son humo y lógica de formularios. *Dirección*: congelarlo, marcarlo como
-   deprecado y portar a AngeLite lo que valga (formularios reactivos, guards y resolvers del router).
-4. **Ámbito por cadena de prototipos y claves de texto.** Cada fila crea un objeto con prototipo del padre y las
-   expresiones buscan por nombre. Es rápido y compacto, pero no se puede analizar estáticamente (sin tipos, sin
-   comprobación de plantillas) y `$event` / `$index` pueden colisionar con campos del usuario.
-5. **Eventos delegados en `document`.** Es lo que da la memoria baja, pero no funciona dentro de Shadow DOM ni iframes
-   y `event.currentTarget` no es el elemento. *Dirección*: delegar en la raíz de cada app (no en `document`).
-6. **Propiedades añadidas a los elementos** (`$s`, `$click`…) pueden colisionar con otras librerías. *Dirección*:
-   un `WeakMap` o prefijo con símbolo, si la medición lo permite.
-7. **Sin contrato de versionado ni de API estable**, sin tipos y sin modo desarrollo con avisos. Es lo que más frena
-   su adopción, más que cualquier medida de rendimiento.
+1. **Module-level global state.** The pipe registry, the `inject()` service map, the router, the set of delegated events and the router hook are singletons. You cannot have two isolated apps on the same page, nor render on the server without mixing requests, nor run tests in parallel with guarantees. *Direction*: an `app` object (`createApp()`) holding registries, injector and router.
+2. **Coupling to the global DOM.** The runtime calls `document` directly. That rules out SSR and other renderers. *Direction*: abstract the few DOM operations (create template, insert, move, remove).
+3. **Scope by prototype chain and text keys.** Every row creates an object whose prototype is the parent's and expressions look up by name. It is fast and compact, but it cannot be analyzed statically (no types, no template checking) and `$event` / `$index` can collide with user fields.
+4. **Events delegated on `document`.** That is what gives the low memory, but it does not work inside Shadow DOM or iframes and `event.currentTarget` is not the element. *Direction*: delegate on the root of each app (not on `document`).
+5. **Properties added to elements** (`$s`, `$click`…) can collide with other libraries. *Direction*: a `WeakMap` or a symbol prefix, if measurement allows.
+6. **No versioning contract or stable API**, no types and no development mode with warnings. That is what slows adoption most, more than any performance measure.
 
-Qué tienen ellos aquí que nosotros no (la **Ola 1** cerró lo marcado con ✓; ver `CHANGELOG.md`):
+What they have here that we do not (**Wave 1** closed what is marked ✓; see `CHANGELOG.md`):
 
-- ✓ inyección de dependencias con ámbitos (`providers`), ✓ router con rutas anidadas, guards y carga diferida,
-  ✓ TypeScript (`.d.ts` comprobados con `tsc`), ✓ límites de error (`ngOnError`; no capturan constructor ni `ngOnInit`),
-  ✓ portales, ✓ slots con nombre, ✓ referencias a hijos (`viewChild`), ✓ utilidades de testing, ✓ avisos de desarrollo,
-  ◐ comprobación de plantillas (elementos, pipes y nombres; no tipos).
-- La **Ola 2** añadió, como módulos opcionales: formularios reactivos, cliente HTTP con interceptores y `resource()`,
-  i18n, animaciones de entrada y salida, SSR con `hydrate()`, DevTools básicas, modo `history` con query y resolvers,
-  plugin de Vite y `angelite-check`. Cada uno es más pequeño y con menos funciones que el de Angular (la tabla lo dice).
-- Sigue sin existir: hidratación que adopte los nodos del servidor, servicio de lenguaje para el editor (autocompletado),
-  extensión de DevTools para el navegador, validadores asíncronos, `createApp()`, renderizado concurrente (decisión: no),
-  y madurez / comunidad (solo se arreglan con tiempo y usuarios).
+- ✓ dependency injection with scopes (`providers`), ✓ router with nested routes, guards and lazy loading, ✓ TypeScript (`.d.ts` checked with `tsc`), ✓ error boundaries (`ngOnError`; they do not catch the constructor or `ngOnInit`), ✓ portals, ✓ named slots, ✓ child references (`viewChild`), ✓ testing utilities, ✓ development warnings, ◐ template checking (elements, pipes and names; not types).
+- **Wave 2** added, as optional modules: reactive forms, an HTTP client with interceptors and `resource()`, i18n, enter and leave animations, SSR with `hydrate()`, basic DevTools, `history` mode with query and resolvers, a Vite plugin and `angelite-check`. Each one is smaller and has fewer features than Angular's (the table says so).
+- Still missing: hydration that adopts the server's nodes, a language service for the editor (autocompletion), a browser DevTools extension, async validators, `createApp()`, concurrent rendering (decision: no), and maturity / community (only fixed with time and users).
 
-Dónde lo tienen los demás importa: casi nada de esto viene en el núcleo de React, Preact o Vue (router, formularios,
-HTTP, i18n, animaciones y testing son paquetes aparte, oficiales o de terceros). Lo que sí traen dentro Vue, React y
-Angular es lo estructural (portales, límites de error, carga diferida, slots, DI), que es justo lo que cerramos en
-el propio paquete. La tabla de `docs/benchmarks.html` marca para cada fila si es integrado, módulo opcional, paquete
-oficial o de terceros.
+Where the others have it matters: almost none of this ships in the core of React, Preact or Vue (router, forms, HTTP, i18n, animations and testing are separate packages, official or third party). What Vue, React and Angular do ship inside is the structural part (portals, error boundaries, lazy loading, slots, DI), which is exactly what we closed in the package itself. The table on the comparison page marks for each row whether it is built in, an optional module, an official package or a third party.
 
-### Una ventaja arquitectónica que sí tenemos
+### An architectural advantage we do have
 
-El **blueprint es datos**: el AOT ya serializa la lista de instrucciones por posición de nodo. Eso hace que
-**SSR e hidratación sean un paso natural**: renderizar a texto evaluando las instrucciones sin DOM, y en el cliente
-recorrer el DOM existente con las mismas instrucciones (la numeración por posición ya existe). Pocos frameworks
-tienen esa base; hay que aprovecharla antes de añadir más funciones.
+The **blueprint is data**: the AOT already serializes the list of instructions per node position. That makes **SSR and hydration a natural step**: render to text by evaluating the instructions without a DOM, and on the client walk the existing DOM with the same instructions (numbering by position already exists). Few frameworks have that base; we should take advantage of it before adding more features.
 
-## 4. Lo que tenemos y ellos no (o no tanto)
+## 4. What we have and they do not (or not as much)
 
-Todo verificado:
+All verified:
 
-- **Modo «sin build» pequeño**: 10,1 KB gzip con compilador incluido, frente a 63,7 KB de la build con compilador de Vue.
-  Angular no tiene equivalente utilizable (su compilador JIT es grande y usa `new Function`).
-- **Sin `eval` ni `new Function` en ningún bundle**, también en el modo sin build. La build con compilador de Vue y el
-  JIT de Angular sí los usan, y requieren `unsafe-eval` en CSP.
-- **Cero dependencias de runtime** (Vue: 5, Angular: `tslib` más peers, React: `scheduler`).
-- **Memoria**: 6,4 MB con 10.000 filas frente a 11,8 – 17,8 MB.
-- **Un mismo código en dos modos** (navegador y precompilado) con un compilador de plantillas con backend intercambiable.
-- **Sintaxis de Angular (`@if`, `@for`, señales) sin Zone.js ni CLI.**
-- **Bloqueo de `constructor`, `__proto__` y `prototype`** en las expresiones.
+- **A small "no build" mode**: 10.1 KB gzip with the compiler included, against 63.7 KB for Vue's build with a compiler. Angular has no usable equivalent (its JIT compiler is large and uses `new Function`).
+- **No `eval` or `new Function` in any bundle**, also in the no-build mode. Vue's build with a compiler and Angular's JIT do use them, and require `unsafe-eval` in the CSP.
+- **Zero runtime dependencies** (Vue: 5, Angular: `tslib` plus peers, React: `scheduler`).
+- **Memory**: 6.4 MB with 10,000 rows against 11.8 – 17.8 MB.
+- **The same code in two modes** (browser and precompiled) with a template compiler with a swappable backend.
+- **Angular syntax (`@if`, `@for`, signals) without Zone.js or a CLI.**
+- **Blocking of `constructor`, `__proto__` and `prototype`** in expressions.
 
-Hay que ser honestos con el peso real de esto: casi todo son ventajas de tamaño, memoria y simplicidad. En
-funciones, ecosistema y madurez estamos muy por detrás.
+We have to be honest about the real weight of this: almost all of it is advantages in size, memory and simplicity. In features, ecosystem and maturity we are far behind.
 
-## 5. Hoja de ruta propuesta
+## 5. Proposed roadmap
 
-Esfuerzo: S = horas, M = días, L = semanas.
+Effort: S = hours, M = days, L = weeks.
 
-**P0 — seguridad y confianza (S–M):**
+**P0, security and trust (S–M):**
 
-1. Sanear URL en bindings y atributos interpolados (hueco 1). *S*
-2. Rechazar `on*` y `srcdoc` (huecos 2 y 4). *S*
-3. `[innerHTML]` solo con `trustHtml()` (hueco 3). *S*
-4. Denylist de globales en el evaluador y documentación sobre plantillas no confiables (hueco 5). *S*
+1. Sanitize URLs in bindings and interpolated attributes (gap 1). *S*
+2. Reject `on*` and `srcdoc` (gaps 2 and 4). *S*
+3. `[innerHTML]` only with `trustHtml()` (gap 3). *S*
+4. Denylist of globals in the evaluator and documentation about untrusted templates (gap 5). *S*
 5. `SECURITY.md`. *S*
-6. `adoptedStyleSheets` en el paquete UI (hueco 6). *S*
-7. Política opcional de Trusted Types para el compilador del navegador. *M*
+6. `adoptedStyleSheets` in the UI package (gap 6). *S*
+7. Optional Trusted Types policy for the browser compiler. *M*
 
-Al arreglar cada uno, quitar el `todo` de su test en `tests/security.test.mjs`.
+**P1, make it adoptable (M)** (✓ = done in Wave 1):
 
-**P1 — que sea adoptable (M):** (✓ = hecho en la Ola 1)
+8. ✓ `.d.ts` types, written by hand and checked with `tsc` in CI.
+9. ✓ Development mode with warnings (`enableDevWarnings()`: unknown input, duplicate keys, unknown element, module not imported) and ✓ per-component error hook (`ngOnError`). A global hook is missing.
+10. Router: ✓ nested routes, ✓ guards, ✓ lazy loading and ✓ `redirectTo`; resolvers, query parameters and `history` mode came later.
+11. ✓ Reactive forms on signals (Wave 2).
+12. ✓ Testing utilities (`render`, `click`, `type`, `flush`, `cleanup`).
+13. ✓ Named slots, ✓ references (`viewChild`) and ✓ portals.
+14. `createApp()` with per-app registries and injector (fixes the global state). *Wave 3*
 
-8. ✓ Tipos `.d.ts`, escritos a mano y comprobados con `tsc` en el CI.
-9. ✓ Modo desarrollo con avisos (`enableDevWarnings()`: input inexistente, claves duplicadas, elemento desconocido,
-   módulo sin importar) y ✓ gancho de errores por componente (`ngOnError`). Falta un gancho global.
-10. Router: ✓ rutas anidadas, ✓ guards, ✓ carga diferida y ✓ `redirectTo`. Faltan resolvers, parámetros de consulta y
-    modo `history`.
-11. ✓ Formularios reactivos sobre señales (Ola 2).
-12. ✓ Utilidades de testing (`render`, `click`, `type`, `flush`, `cleanup`).
-13. ✓ Slots con nombre, ✓ referencias (`viewChild`) y ✓ portales.
-14. `createApp()` con registros e inyector por aplicación (arregla el estado global). *Ola 2*
+**P2, platform and performance (L):**
 
-**P2 — plataforma y rendimiento (L):**
+15. ◐ SSR with jsdom and `hydrate()` that replaces the HTML (Wave 2). Pending: render blueprints without a DOM and adopt the nodes.
+16. ✓ `@defer` (triggers `idle`, `viewport`, `interaction`, `hover`, `timer`, `immediate`, `when`) and lazy routes. Automatic splitting of a single component's code is missing.
+17. AOT optimizations: hoisted static subtrees, flat scope, folded constants.
+18. ✓ Hook for DevTools and a minimal panel (`enableDevtools`).
+19. ✓ Performance budget in CI with deterministic metrics (number of DOM operations per scenario), not times.
+20. ✓ Remove the old code (done in 1.0.0).
 
-15. ◐ SSR con jsdom y `hydrate()` que sustituye el HTML (Ola 2). Pendiente: renderizar los blueprints sin DOM y adoptar los nodos.
-16. ✓ `@defer` (disparadores `idle`, `viewport`, `interaction`, `hover`, `timer`, `immediate`, `when`) y rutas perezosas.
-    Falta la división automática del código de un componente suelto.
-17. Optimizaciones del AOT: subárboles estáticos elevados, scope plano, constantes plegadas.
-18. ✓ Gancho para DevTools y un panel mínimo (`enableDevtools`).
-19. Presupuesto de rendimiento en CI con métricas deterministas (número de operaciones DOM por escenario), no tiempos.
-20. Retirar el código antiguo.
+**P3, on demand:** ✓ transitions and animations (basic), ✓ i18n, virtual scroll, ✓ Vite plugin, a language service for the editor.
 
-**P3 — según demanda:** ✓ transiciones y animaciones (básicas), ✓ i18n, virtual scroll, ✓ plugin de Vite, servicio de
-lenguaje para el editor.
-
-**Qué no copiar:** Zone.js; reactividad profunda por proxies (más lenta y más memoria); renderizado concurrente completo.
-(El cliente HTTP se hizo finalmente, pero como un módulo de ~1,3 KB sobre `fetch`, no como el de Angular.)
+**What not to copy:** Zone.js; deep reactivity through proxies (slower and more memory); full concurrent rendering. (The HTTP client was finally built, but as a module of ~1.3 KB on top of `fetch`, not like Angular's.)

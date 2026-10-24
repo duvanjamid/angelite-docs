@@ -29,7 +29,7 @@
 <h3>Con npm y un bundler</h3>
 <pre><code class="language-bash">npm install github:duvanjamid/angelite</code></pre>
 <pre><code class="language-js">import { signal, component, mount } from '@duvanjamid/angelite';</code></pre>
-<p>Con un bundler (esbuild, Vite, Rollup) cada módulo que no importes desaparece del resultado. Para pesar lo mínimo, <a href="servidor.html#precompilar">precompila las plantillas</a>: la app envía solo el runtime (unos 6&nbsp;KB), sin el compilador.</p>
+<p>Con un bundler (esbuild, Vite, Rollup) cada módulo que no importes desaparece del resultado. Para pesar lo mínimo, <a href="server.html#precompilar">precompila las plantillas</a>: la app envía solo el runtime (unos 6&nbsp;KB), sin el compilador.</p>
 
 <h2>Tu primer componente</h2>
 <p>Un componente es una clase de JavaScript más <code>component(Clase, { selector, template })</code>. Los campos de la clase están disponibles en la plantilla; las señales se leen llamándolas (<code>count()</code>) y se escriben con <code>set</code> o <code>update</code>.</p>
@@ -65,8 +65,8 @@ mount(Counter, root);
 
 <h2>Siguientes pasos</h2>
 <div class="cards">
-  <a class="card" href="plantillas.html"><b>Señales y plantillas</b><span>Todo lo que puedes escribir en una plantilla.</span></a>
-  <a class="card" href="componentes.html"><b>Componentes</b><span>Inputs, outputs, slots, portales y servicios.</span></a>
+  <a class="card" href="templates.html"><b>Señales y plantillas</b><span>Todo lo que puedes escribir en una plantilla.</span></a>
+  <a class="card" href="components.html"><b>Componentes</b><span>Inputs, outputs, slots, portales y servicios.</span></a>
   <a class="card" href="ui.html"><b>Componentes listos</b><span>Botones, formularios, diálogos, tablas…</span></a>
-  <a class="card" href="seguridad.html"><b>Seguridad</b><span>Qué protege AngeLite y qué te toca a ti.</span></a>
+  <a class="card" href="security.html"><b>Seguridad</b><span>Qué protege AngeLite y qué te toca a ti.</span></a>
 </div>

@@ -1,0 +1,166 @@
+<!--{"title":"Signals and templates","description":"Reactive state with signals and Angular-style templates: interpolation, bindings, @if, @for, pipes and @defer.","examples":true}-->
+<h2 id="signals">Signals</h2>
+<p>The state of an AngeLite app lives in <b>signals</b>: containers of a value that notify whoever reads them when they change. There are three pieces:</p>
+<div class="tablewrap"><table>
+  <tr><th>Function</th><th>What it is</th><th>How it is used</th></tr>
+  <tr><td><code>signal(value)</code></td><td>A value you can change</td><td><code>s()</code> reads, <code>s.set(x)</code> writes, <code>s.update(v =&gt; …)</code> transforms, <code>s.peek()</code> reads without subscribing</td></tr>
+  <tr><td><code>computed(fn)</code></td><td>A derived value: calculated when read and recalculated only when something it reads changes</td><td><code>total()</code> (read only)</td></tr>
+  <tr><td><code>effect(fn)</code></td><td>Code that runs now and every time the signals it reads change</td><td>Returns a function to stop it; <code>fn</code> can return a cleanup function</td></tr>
+</table></div>
+<p>The key is what happens in a template: when you read <code>count()</code> in an interpolation, that specific part of the DOM —a text node, an attribute, a block— subscribes to <code>count</code>. When it changes, AngeLite re-evaluates <em>only</em> those expressions and writes to the DOM <em>only</em> if the value is different. There is no virtual tree, no Zone.js, and no change-detection cycle walking the app.</p>
+<script type="text/plain" class="example" data-title="Counter with a conditional class">
+const { signal, computed, component, mount } = AngeLite;
+
+class Counter {
+  count = signal(0);
+  double = computed(() => this.count() * 2);
+  inc() { this.count.update(n => n + 1); }
+  reset() { this.count.set(0); }
+}
+
+component(Counter, {
+  template: `
+    <button (click)="inc()">+1</button>
+    <button (click)="reset()">reset</button>
+    <p [class.big]="count() >= 5">
+      count = {{ count() }} · double = {{ double() }}
+    </p>`
+});
+
+mount(Counter, root);
+  </script>
+<div class="callout"><span class="t">Updates are batched</span><p>Several <code>set()</code> calls in a row cause a single repaint: changes are applied in a microtask. That is why, right after a <code>set()</code>, the DOM does not reflect the change yet; if you need to wait, <code>await Promise.resolve()</code> (or <code>flush()</code> in tests) is enough.</p></div>
+<div class="callout warn"><span class="t">Changing a plain property does not repaint</span><p><code>this.name = 'Ada'</code> notifies nobody. Whatever you want to react has to be a signal: <code>name = signal('Ada')</code> and <code>this.name.set('Ada')</code>. If you change an object or an array, put in a new one: <code>items.update(l =&gt; [...l, next])</code>.</p></div>
+
+<h2 id="templates">Templates</h2>
+<p>A template is HTML with a few extensions. It is compiled once into a list of instructions ("this text node depends on this expression", "this element has this event"); after that, creating a view is cloning the HTML and applying the instructions.</p>
+<div class="tablewrap"><table>
+  <tr><th>Syntax</th><th>What it does</th></tr>
+  <tr><td><code>&#123;&#123; expr &#125;&#125;</code></td><td>Interpolation. Always text: it is never interpreted as HTML.</td></tr>
+  <tr><td><code>[prop]="expr"</code></td><td>Binds a DOM property, or an <code>input()</code> if the element is a component.</td></tr>
+  <tr><td><code>[class.x]="cond"</code> · <code>[style.width.px]="n"</code> · <code>[attr.x]="v"</code></td><td>A class, a style (with an optional unit) or an attribute. With <code>null</code> or <code>false</code> the attribute is removed.</td></tr>
+  <tr><td><code>(event)="statement"</code></td><td>Listens to an event. <code>$event</code> is the event (or the value emitted by an output). Several statements with <code>;</code>.</td></tr>
+  <tr><td><code>[(ngModel)]="sig"</code></td><td>Two-way binding with a <em>writable</em> signal.</td></tr>
+  <tr><td><code>&#123;&#123; x | pipe:arg &#125;&#125;</code></td><td>Pipes, chainable.</td></tr>
+  <tr><td><code>#name</code></td><td>Reference to the element, which you receive with <code>viewChild('name')</code> (see <a href="components.html#refs">Components</a>).</td></tr>
+</table></div>
+
+<h3 id="expressions">What you can write in an expression</h3>
+<p>Expressions are run by an interpreter of our own, with no <code>eval</code> or <code>new Function</code>. It supports literals, arithmetic, comparison and logical operators, the ternary (<code>a ? b : c</code>), <code>??</code>, access with <code>.</code>, <code>?.</code> and <code>[ ]</code>, arrays, and calls to component methods. It does <b>not</b> support arrow functions, object literals, assignments, <code>new</code> or backtick templates.</p>
+<div class="tablewrap"><table>
+  <tr><th>Instead of…</th><th>write…</th></tr>
+  <tr><td><code>(click)="x = 1"</code></td><td><code>(click)="x.set(1)"</code></td></tr>
+  <tr><td><code>(click)="n++"</code></td><td>a method in the class: <code>(click)="inc()"</code></td></tr>
+  <tr><td><code>[style]="&#123; color: c &#125;"</code></td><td><code>[style.color]="c"</code></td></tr>
+  <tr><td><code>items.filter(x =&gt; x.ok)</code></td><td>a <code>computed</code> or a method: <code>okItems()</code></td></tr>
+</table></div>
+<div class="callout tip"><span class="t">The practical rule</span><p>The template decides <em>what is shown</em>; logic goes in the class (methods and <code>computed</code>). If an expression needs more than one operator, give it a name in the class.</p></div>
+
+<h2 id="flow">Control flow</h2>
+<p>The <code>@if</code>, <code>@else if</code>, <code>@else</code>, <code>@for</code> and <code>@empty</code> blocks use the same syntax as Angular 17+. <code>@for</code> reuses DOM nodes according to the <code>track</code> key, so reordering or updating a list does not recreate the elements that still exist: they are only moved.</p>
+<script type="text/plain" class="example" data-title="To-do list: @for, @if, @empty, computed">
+const { signal, computed, component, mount } = AngeLite;
+
+class Todos {
+  draft = signal('');
+  items = signal([{ id: 1, text: 'Try AngeLite', done: true }]);
+  pending = computed(() => this.items().filter(t => !t.done).length);
+  next = 2;
+
+  add() {
+    const text = this.draft().trim();
+    if (!text) return;
+    this.items.update(l => [...l, { id: this.next++, text, done: false }]);
+    this.draft.set('');
+  }
+  toggle(id) {
+    this.items.update(l => l.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  }
+  remove(id) { this.items.update(l => l.filter(t => t.id !== id)); }
+}
+
+component(Todos, {
+  template: `
+    <input [(ngModel)]="draft" placeholder="New task">
+    <button (click)="add()">Add</button>
+
+    <ul>
+      @for (t of items(); track t.id) {
+        <li>
+          <input type="checkbox" [checked]="t.done" (change)="toggle(t.id)">
+          <span [style.text-decoration]="t.done ? 'line-through' : ''">{{ $index + 1 }}. {{ t.text }}</span>
+          <button (click)="remove(t.id)">×</button>
+        </li>
+      } @empty {
+        <li>No tasks 🎉</li>
+      }
+    </ul>
+
+    @if (pending() > 0) {
+      <p>You have {{ pending() }} left to do.</p>
+    } @else {
+      <p>All done!</p>
+    }`
+});
+
+mount(Todos, root);
+  </script>
+<p>Variables available inside <code>@for</code>: <code>$index</code>, <code>$count</code>, <code>$first</code>, <code>$last</code>, <code>$even</code> and <code>$odd</code>.</p>
+<div class="callout warn"><span class="t">Always use <code>track</code> with a stable key</span><p><code>track t.id</code> tells AngeLite which row is which. Without <code>track</code> the key is the item itself (fine for strings and numbers, not for objects that get recreated). With repeated keys, <code>enableDevWarnings()</code> warns you.</p></div>
+<p>There is no <code>@switch</code>: chain <code>@if (…) &#123;…&#125; @else if (…) &#123;…&#125; @else &#123;…&#125;</code>.</p>
+
+<h2 id="pipes">Pipes</h2>
+<p>A pipe transforms a value inside the template: <code>&#123;&#123; price | currency:'EUR' &#125;&#125;</code>. Included: <code>uppercase</code>, <code>lowercase</code>, <code>titlecase</code>, <code>json</code>, <code>number</code>, <code>percent</code>, <code>currency</code>, <code>slice</code> and <code>date</code>. The full bundle ships them; with the runtime alone (precompiled templates) import <code>@duvanjamid/angelite/pipes</code> or register your own.</p>
+<script type="text/plain" class="example" data-title="A custom pipe">
+const { signal, component, mount, registerPipe } = AngeLite;
+
+registerPipe('reverse', s => String(s).split('').reverse().join(''));
+registerPipe('repeat', (s, n) => String(s).repeat(n));
+
+class P { word = signal('angelite'); }
+component(P, {
+  template: `<p>{{ word() | reverse }} · {{ word() | slice:0:3 | repeat:3 }}</p>`
+});
+
+mount(P, root);
+  </script>
+<p>A pipe is just a function <code>(value, ...arguments) =&gt; result</code>. If it reads signals inside a template, the view updates when they change (that is how the <a href="data.html#i18n">i18n</a> pipes work).</p>
+
+<h2 id="defer">Lazy loading with @defer</h2>
+<p><code>@defer</code> does not render the block until a trigger is met, and meanwhile shows the <code>@placeholder</code>. It is for not paying the cost of what the user cannot see yet.</p>
+<div class="tablewrap"><table>
+  <tr><th>Trigger</th><th>It loads…</th></tr>
+  <tr><td><code>on idle</code> (default)</td><td>when the browser is idle</td></tr>
+  <tr><td><code>on viewport</code></td><td>when the <em>placeholder</em> enters the screen</td></tr>
+  <tr><td><code>on interaction</code> · <code>on hover</code></td><td>on a click or key press on the <em>placeholder</em> · on mouse over or focus</td></tr>
+  <tr><td><code>on timer(2s)</code> · <code>on immediate</code></td><td>after some time · as soon as the rest is painted</td></tr>
+  <tr><td><code>when expr</code></td><td>the first time the expression is true (it does not go back afterwards)</td></tr>
+</table></div>
+<p>They can be combined with <code>;</code>: <code>@defer (on viewport; on timer(5s))</code> loads on whichever happens first. <code>viewport</code>, <code>interaction</code> and <code>hover</code> need an element in the <code>@placeholder</code>.</p>
+<script type="text/plain" class="example" data-title="@defer: by interaction and by time">
+const { signal, component, mount } = AngeLite;
+
+class App {
+  ready = signal(false);
+}
+component(App, {
+  template: `
+    @defer (on interaction) {
+      <p>Loaded on click.</p>
+    } @placeholder {
+      <button>Click to load</button>
+    }
+    @defer (on timer(1500ms)) {
+      <p>Appeared after 1.5 s.</p>
+    } @placeholder {
+      <p><i>Waiting…</i></p>
+    }
+    <label><input type="checkbox" [(ngModel)]="ready"> check to load</label>
+    @defer (when ready()) {
+      <p>Loaded because <code>ready()</code> is true.</p>
+    }`
+});
+
+mount(App, root);
+  </script>
+<div class="callout"><span class="t">Separate code, not just separate render</span><p><code>@defer</code> delays the <em>render</em>. To split the <em>code</em> of a whole screen into another file, use <code>load: () =&gt; import('./screen.js')</code> in a <a href="router.html#lazy-loading">route</a>. In a precompiled app, <code>@defer</code> needs the <code>runtime-plus</code> bundle (the main package already includes it; <code>enableDevWarnings()</code> warns if it is missing).</p></div>

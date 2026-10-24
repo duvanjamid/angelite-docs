@@ -1,14 +1,14 @@
-// Comparison data for benchmarks.html. Evidence: V = verified by running/reading packages, D = official docs, G = general knowledge (verify before quoting).
+// Comparison data for comparison.html (English; features-data.es.js is the Spanish version). Evidence: V = verified by running/reading packages, D = official docs, G = general knowledge (verify before quoting).
 window.FEATURES = {
  "legend": {
-  "y": "Sí / integrado",
-  "p": "Parcial, limitado o paquete aparte",
+  "y": "Yes / built in",
+  "p": "Partial, limited or a separate package",
   "n": "No"
  },
  "evidence": {
-  "V": "Comprobado en esta sesión: ejecutando el código o leyendo el paquete instalado",
-  "D": "Según la documentación oficial",
-  "G": "Conocimiento general, no comprobado en esta sesión"
+  "V": "Verified in this session: by running the code or reading the installed package",
+  "D": "According to the official documentation",
+  "G": "General knowledge, not verified in this session"
  },
  "frameworks": [
   [
@@ -35,11 +35,11 @@ window.FEATURES = {
  "versions": "React 19.3.1, Preact 10.29.8, Vue 3.5.44, Angular 20.3",
  "groups": [
   {
-   "title": "Seguridad",
+   "title": "Security",
    "rows": [
     {
-     "name": "Texto escapado por defecto",
-     "why": "Interpolar datos del usuario como texto nunca debe ejecutar HTML.",
+     "name": "Escaped text by default",
+     "why": "Interpolating user data as text must never run HTML.",
      "ev": "V",
      "cells": {
       "angelite": [
@@ -60,153 +60,153 @@ window.FEATURES = {
       ],
       "angular": [
        "y",
-       "escapado por diseño"
+       "escaped by design"
       ]
      }
     },
     {
-     "name": "Neutraliza URLs `javascript:` en atributos",
-     "why": "Un `href` con datos del usuario es el XSS más común en frameworks.",
+     "name": "Neutralizes `javascript:` URLs in attributes",
+     "why": "An `href` with user data is the most common XSS in frameworks.",
      "ev": "V",
      "cells": {
       "angelite": [
        "y",
-       "lista de esquemas permitidos; `trustUrl()` para esquemas propios"
+       "allow-list of schemes; `trustUrl()` for your own schemes"
       ],
       "preact": [
        "n",
-       "las deja pasar"
+       "lets them through"
       ],
       "vue": [
        "n",
-       "las deja pasar"
+       "lets them through"
       ],
       "react": [
        "y",
-       "las reemplaza por un throw"
+       "replaces them with a throw"
       ],
       "angular": [
        "y",
-       "las sanea (`unsafe:`)"
+       "sanitizes them (`unsafe:`)"
       ]
      }
     },
     {
-     "name": "No ejecuta handlers `on*` pasados como texto",
-     "why": "Un `onclick` con una cadena es ejecución de código arbitrario.",
+     "name": "Does not run `on*` handlers passed as text",
+     "why": "An `onclick` with a string is arbitrary code execution.",
      "ev": "V",
      "cells": {
       "angelite": [
        "y",
-       "error de compilación (también en el AOT)"
+       "compile error (also in the AOT)"
       ],
       "preact": [
        "y",
-       "no lo crea"
+       "does not create it"
       ],
       "vue": [
        "n",
-       ":onclick con texto crea el atributo"
+       ":onclick with text creates the attribute"
       ],
       "react": [
        "y",
-       "no lo crea"
+       "does not create it"
       ],
       "angular": [
        "y",
-       "lo prohíbe en el compilador"
+       "forbids it in the compiler"
       ]
      }
     },
     {
-     "name": "Rechaza bindings peligrosos al compilar",
-     "why": "`[onclick]`, `[srcdoc]`, o enlazar datos a `<script>`: mejor un error al construir que un agujero en producción.",
+     "name": "Rejects dangerous bindings at compile time",
+     "why": "`[onclick]`, `[srcdoc]`, or binding data to `<script>`: better an error at build time than a hole in production.",
      "ev": "G",
      "cells": {
       "angelite": [
        "y",
-       "on*, srcdoc, outerHTML y bindings en script/style/base/link/meta: error de compilación (comprobado)"
+       "on*, srcdoc, outerHTML and bindings on script/style/base/link/meta: compile error (verified)"
       ],
       "preact": [
        "p",
-       "no hay plantillas; onClick con texto se ignora (comprobado)"
+       "there are no templates; onClick with text is ignored (verified)"
       ],
       "vue": [
        "n",
-       ":onclick con texto crea el atributo (comprobado)"
+       ":onclick with text creates the attribute (verified)"
       ],
       "react": [
        "p",
-       "onClick con texto se ignora (comprobado)"
+       "onClick with text is ignored (verified)"
       ],
       "angular": [
        "y",
-       "rechaza enlazar a propiedades de evento (según su documentación)"
+       "refuses to bind to event properties (according to its documentation)"
       ]
      }
     },
     {
-     "name": "HTML solo con confianza explícita (o saneado)",
-     "why": "Insertar HTML del usuario sin vigilar es XSS: lo seguro es que no se renderice salvo que lo marques.",
+     "name": "HTML only with explicit trust (or sanitized)",
+     "why": "Inserting user HTML unchecked is XSS: the safe thing is that it does not render unless you mark it.",
      "ev": "V",
      "cells": {
       "angelite": [
        "y",
-       "`trustHtml()` obligatorio; sin él se inserta como texto"
+       "`trustHtml()` is required; without it the value is inserted as text"
       ],
       "preact": [
        "p",
-       "lo renderiza si se lo pasas (dangerouslySetInnerHTML)"
+       "renders it if you pass it (dangerouslySetInnerHTML)"
       ],
       "vue": [
        "p",
-       "lo renderiza si se lo pasas (v-html)"
+       "renders it if you pass it (v-html)"
       ],
       "react": [
        "p",
-       "lo renderiza si se lo pasas (dangerouslySetInnerHTML)"
+       "renders it if you pass it (dangerouslySetInnerHTML)"
       ],
       "angular": [
        "y",
-       "DomSanitizer sanea las cadenas (según su documentación)"
+       "DomSanitizer sanitizes strings (according to its documentation)"
       ]
      }
     },
     {
-     "name": "Expresiones sin acceso a `window`/`document`",
-     "why": "Si alguien controla una plantilla, no debería llegar al navegador entero.",
+     "name": "Expressions with no access to `window`/`document`",
+     "why": "If someone controls a template, it should not reach the whole browser.",
      "ev": "V",
      "cells": {
       "angelite": [
        "y",
-       "bloqueo por valor: window y document no llegan a la plantilla por ningún camino"
+       "blocked by value: window and document reach the template by no path"
       ],
       "preact": [
        "y",
-       "JSX es código, no hay expresiones en cadenas"
+       "JSX is code, there are no expressions in strings"
       ],
       "vue": [
        "y",
-       "solo globales permitidas (window y document son undefined)"
+       "only allowed globals (window and document are undefined)"
       ],
       "react": [
        "y",
-       "JSX es código, no hay expresiones en cadenas"
+       "JSX is code, there are no expressions in strings"
       ],
       "angular": [
        "y",
-       "las expresiones solo ven el componente"
+       "expressions only see the component"
       ]
      }
     },
     {
-     "name": "Funciona con CSP sin `unsafe-eval` (modo sin build)",
-     "why": "Las políticas estrictas prohíben `eval` y `new Function`.",
+     "name": "Works with a CSP without `unsafe-eval` (no-build mode)",
+     "why": "Strict policies forbid `eval` and `new Function`.",
      "ev": "V",
      "cells": {
       "angelite": [
        "y",
-       "sin eval ni new Function en ningún bundle"
+       "no eval or new Function in any bundle"
       ],
       "preact": [
        "y",
@@ -214,7 +214,7 @@ window.FEATURES = {
       ],
       "vue": [
        "p",
-       "la build con compilador usa new Function; la runtime-only no"
+       "the build with the compiler uses new Function; the runtime-only one does not"
       ],
       "react": [
        "y",
@@ -222,18 +222,18 @@ window.FEATURES = {
       ],
       "angular": [
        "p",
-       "AOT sí; el compilador JIT usa new Function"
+       "AOT yes; the JIT compiler uses new Function"
       ]
      }
     },
     {
-     "name": "Soporte de Trusted Types",
-     "why": "Exigido por algunas políticas de seguridad empresariales.",
+     "name": "Trusted Types support",
+     "why": "Required by some enterprise security policies.",
      "ev": "V",
      "cells": {
       "angelite": [
        "y",
-       "política `angelite` para plantillas y `trustHtml()`"
+       "`angelite` policy for templates and `trustHtml()`"
       ],
       "preact": [
        "n",
@@ -241,7 +241,7 @@ window.FEATURES = {
       ],
       "vue": [
        "p",
-       "una referencia en runtime-dom"
+       "a reference in runtime-dom"
       ],
       "react": [
        "n",
@@ -249,18 +249,18 @@ window.FEATURES = {
       ],
       "angular": [
        "y",
-       "integrado en el sanitizer"
+       "built into the sanitizer"
       ]
      }
     },
     {
-     "name": "CSP para estilos inyectados (nonce)",
-     "why": "Si el framework inyecta `<style>`, una CSP estricta lo bloquea.",
+     "name": "CSP for injected styles (nonce)",
+     "why": "If the framework injects `<style>`, a strict CSP blocks it.",
      "ev": "V",
      "cells": {
       "angelite": [
        "y",
-       "hojas de estilo construibles; si no, <style> con nonce"
+       "constructable stylesheets; otherwise <style> with a nonce"
       ],
       "preact": [
        "y",
@@ -281,8 +281,8 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Dependencias de runtime",
-     "why": "Menos dependencias = menos superficie de cadena de suministro.",
+     "name": "Runtime dependencies",
+     "why": "Fewer dependencies = less supply-chain surface.",
      "ev": "V",
      "cells": {
       "angelite": [
@@ -308,13 +308,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Política de seguridad y proceso de reporte",
-     "why": "Saber cómo reportar y cómo se corrigen las vulnerabilidades.",
+     "name": "Security policy and reporting process",
+     "why": "Knowing how to report vulnerabilities and how they get fixed.",
      "ev": "G",
      "cells": {
       "angelite": [
        "y",
-       "SECURITY.md con el modelo de confianza"
+       "SECURITY.md with the trust model"
       ],
       "preact": [
        "y",
@@ -337,11 +337,11 @@ window.FEATURES = {
    ]
   },
   {
-   "title": "Velocidad y rendimiento",
+   "title": "Speed and performance",
    "rows": [
     {
-     "name": "Actualizaciones de grano fino (señales)",
-     "why": "Solo se toca lo que depende del dato que cambió.",
+     "name": "Fine-grained updates (signals)",
+     "why": "Only what depends on the changed data is touched.",
      "ev": "G",
      "cells": {
       "angelite": [
@@ -350,15 +350,15 @@ window.FEATURES = {
       ],
       "preact": [
        "p",
-       "con @preact/signals, paquete aparte"
+       "with @preact/signals, a separate package"
       ],
       "vue": [
        "y",
-       "reactividad por proxies"
+       "reactivity through proxies"
       ],
       "react": [
        "n",
-       "re-renderiza; el Compiler lo mitiga"
+       "re-renders; the Compiler mitigates it"
       ],
       "angular": [
        "y",
@@ -367,40 +367,40 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Reordenado mínimo de listas",
-     "why": "Mover solo los nodos necesarios al reordenar.",
+     "name": "Minimal list reordering",
+     "why": "Move only the needed nodes when reordering.",
      "ev": "G",
      "cells": {
       "angelite": [
        "y",
-       "subsecuencia creciente más larga"
+       "longest increasing subsequence"
       ],
       "preact": [
        "p",
-       "diff con keys"
+       "diff with keys"
       ],
       "vue": [
        "y",
-       "subsecuencia creciente más larga"
+       "longest increasing subsequence"
       ],
       "react": [
        "p",
-       "diff con keys"
+       "diff with keys"
       ],
       "angular": [
        "y",
-       "@for con track"
+       "@for with track"
       ]
      }
     },
     {
-     "name": "Delegación de eventos",
-     "why": "Un solo listener en lugar de uno por elemento: menos memoria.",
+     "name": "Event delegation",
+     "why": "One listener instead of one per element: less memory.",
      "ev": "G",
      "cells": {
       "angelite": [
        "y",
-       "en document"
+       "on document"
       ],
       "preact": [
        "n",
@@ -412,7 +412,7 @@ window.FEATURES = {
       ],
       "react": [
        "y",
-       "en la raíz"
+       "on the root"
       ],
       "angular": [
        "n",
@@ -421,13 +421,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Optimización en build (hoisting, flags, auto-memo)",
-     "why": "El compilador hace trabajo que el runtime no tiene que repetir.",
+     "name": "Build-time optimization (hoisting, flags, auto-memo)",
+     "why": "The compiler does work the runtime does not have to repeat.",
      "ev": "G",
      "cells": {
       "angelite": [
        "p",
-       "AOT precompila, sin hoisting ni flags"
+       "AOT precompiles, without hoisting or flags"
       ],
       "preact": [
        "n",
@@ -435,7 +435,7 @@ window.FEATURES = {
       ],
       "vue": [
        "y",
-       "patch flags y hoisting estático"
+       "patch flags and static hoisting"
       ],
       "react": [
        "y",
@@ -443,7 +443,7 @@ window.FEATURES = {
       ],
       "angular": [
        "y",
-       "AOT estricto"
+       "strict AOT"
       ]
      },
      "where": {
@@ -454,13 +454,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Renderizado concurrente / transiciones",
-     "why": "Mantener la interfaz fluida con actualizaciones pesadas.",
+     "name": "Concurrent rendering / transitions",
+     "why": "Keeping the interface fluid during heavy updates.",
      "ev": "G",
      "cells": {
       "angelite": [
        "n",
-       "no previsto: las señales ya actualizan solo lo que cambia"
+       "not planned: signals already update only what changes"
       ],
       "preact": [
        "n",
@@ -484,17 +484,17 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Carga diferida declarativa",
-     "why": "Dividir el código y cargar partes bajo demanda.",
+     "name": "Declarative lazy loading",
+     "why": "Split the code and load parts on demand.",
      "ev": "G",
      "cells": {
       "angelite": [
        "y",
-       "`@defer` (idle, viewport, interaction, hover, timer, when) y rutas con `load()`"
+       "`@defer` (idle, viewport, interaction, hover, timer, when) and routes with `load()`"
       ],
       "preact": [
        "y",
-       "lazy y Suspense con compat"
+       "lazy and Suspense with compat"
       ],
       "vue": [
        "y",
@@ -502,11 +502,11 @@ window.FEATURES = {
       ],
       "react": [
        "y",
-       "lazy y Suspense"
+       "lazy and Suspense"
       ],
       "angular": [
        "y",
-       "@defer con triggers"
+       "@defer with triggers"
       ]
      },
      "where": {
@@ -518,17 +518,17 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Renderizado en servidor (SSR)",
-     "why": "SEO y primer pintado rápido.",
+     "name": "Server-side rendering (SSR)",
+     "why": "SEO and a fast first paint.",
      "ev": "V",
      "cells": {
       "angelite": [
        "p",
-       "`tools/ssr.mjs`: renderiza en Node con jsdom; sin streaming"
+       "`tools/ssr.mjs`: renders in Node with jsdom; no streaming"
       ],
       "preact": [
        "p",
-       "preact-render-to-string aparte"
+       "preact-render-to-string, separate"
       ],
       "vue": [
        "y",
@@ -552,13 +552,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Hidratación",
-     "why": "Reusar el HTML del servidor en vez de re-crearlo.",
+     "name": "Hydration",
+     "why": "Reuse the server's HTML instead of recreating it.",
      "ev": "D",
      "cells": {
       "angelite": [
        "p",
-       "`hydrate()` sustituye el HTML del servidor sin parpadeo; no adopta los nodos (el cliente renderiza otra vez)"
+       "`hydrate()` replaces the server HTML without flicker; it does not adopt the nodes (the client renders again)"
       ],
       "preact": [
        "p",
@@ -574,7 +574,7 @@ window.FEATURES = {
       ],
       "angular": [
        "y",
-       "incluida la incremental"
+       "including incremental"
       ]
      },
      "where": {
@@ -586,45 +586,45 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Sin paso de build",
-     "why": "Usarlo con un solo <script>.",
+     "name": "No build step",
+     "why": "Use it with a single <script>.",
      "ev": "V",
      "cells": {
       "angelite": [
        "y",
-       "9,1 KB gzip con el compilador incluido"
+       "9.1 KB gzip with the compiler included"
       ],
       "preact": [
        "p",
-       "con htm"
+       "with htm"
       ],
       "vue": [
        "y",
-       "63,7 KB gzip la build con compilador"
+       "63.7 KB gzip the build with the compiler"
       ],
       "react": [
        "p",
-       "createElement sin JSX"
+       "createElement without JSX"
       ],
       "angular": [
        "n",
-       "necesita compilador o CLI"
+       "needs a compiler or the CLI"
       ]
      }
     }
    ]
   },
   {
-   "title": "Arquitectura y estructura",
+   "title": "Architecture and structure",
    "rows": [
     {
-     "name": "Inyección de dependencias con ámbitos",
-     "why": "Servicios distintos por árbol de componentes y fáciles de sustituir en tests.",
+     "name": "Dependency injection with scopes",
+     "why": "Different services per component tree, easy to replace in tests.",
      "ev": "G",
      "cells": {
       "angelite": [
        "y",
-       "`providers` por componente (ámbito: ese componente y sus descendientes); sin árbol de módulos"
+       "`providers` per component (scope: that component and its descendants); no module tree"
       ],
       "preact": [
        "y",
@@ -640,7 +640,7 @@ window.FEATURES = {
       ],
       "angular": [
        "y",
-       "inyectores jerárquicos"
+       "hierarchical injectors"
       ]
      },
      "where": {
@@ -652,25 +652,25 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Router con rutas anidadas, guards y lazy",
-     "why": "Aplicaciones de varias pantallas.",
+     "name": "Router with nested routes, guards and lazy loading",
+     "why": "Multi-screen applications.",
      "ev": "G",
      "cells": {
       "angelite": [
        "y",
-       "anidadas, `canActivate`, `resolve`, `load()`, `redirectTo`, query; modos hash e history"
+       "nested, `canActivate`, `resolve`, `load()`, `redirectTo`, query; hash and history modes"
       ],
       "preact": [
        "p",
-       "preact-iso aparte"
+       "preact-iso, separate"
       ],
       "vue": [
        "p",
-       "vue-router oficial, aparte"
+       "official vue-router, separate"
       ],
       "react": [
        "n",
-       "react-router no es oficial"
+       "react-router is not official"
       ],
       "angular": [
        "y",
@@ -686,13 +686,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Formularios reactivos",
-     "why": "Validación y estado de formularios complejos.",
+     "name": "Reactive forms",
+     "why": "Validation and state of complex forms.",
      "ev": "G",
      "cells": {
       "angelite": [
        "y",
-       "`FormControl`/`FormGroup`/`FormArray` sobre señales y validadores; sin validadores asíncronos"
+       "`FormControl`/`FormGroup`/`FormArray` on signals with validators; no async validators"
       ],
       "preact": [
        "n",
@@ -704,7 +704,7 @@ window.FEATURES = {
       ],
       "react": [
        "p",
-       "controlados y actions"
+       "controlled inputs and actions"
       ],
       "angular": [
        "y",
@@ -719,13 +719,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Cliente HTTP con interceptores",
-     "why": "Peticiones con reintentos, cabeceras y errores centralizados.",
+     "name": "HTTP client with interceptors",
+     "why": "Requests with retries, headers and centralized errors.",
      "ev": "G",
      "cells": {
       "angelite": [
        "y",
-       "sobre `fetch`: interceptores, `retry`, `timeout`, cancelación y `resource()` con señales"
+       "on top of `fetch`: interceptors, `retry`, `timeout`, cancellation and `resource()` with signals"
       ],
       "preact": [
        "n",
@@ -750,29 +750,29 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Tipos de TypeScript oficiales",
-     "why": "Autocompletado y errores en el editor.",
+     "name": "Official TypeScript types",
+     "why": "Autocompletion and errors in the editor.",
      "ev": "V",
      "cells": {
       "angelite": [
        "y",
-       "`.d.ts` incluidos, comprobados con `tsc` en CI"
+       "`.d.ts` included, checked with `tsc` in CI"
       ],
       "preact": [
        "y",
-       "incluidos"
+       "included"
       ],
       "vue": [
        "y",
-       "incluidos"
+       "included"
       ],
       "react": [
        "p",
-       "@types/react aparte"
+       "@types/react, separate"
       ],
       "angular": [
        "y",
-       "escrito en TS"
+       "written in TS"
       ]
      },
      "where": {
@@ -784,13 +784,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Chequeo de plantillas en compilación",
-     "why": "Detectar errores de plantilla antes de ejecutar.",
+     "name": "Template checking at compile time",
+     "why": "Catch template errors before running.",
      "ev": "V",
      "cells": {
       "angelite": [
        "p",
-       "elementos, pipes y nombres que el componente no tiene; no comprueba tipos"
+       "elements, pipes and names the component does not have; it does not check types"
       ],
       "preact": [
        "y",
@@ -818,13 +818,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Límites de error",
-     "why": "Que un fallo no tumbe toda la aplicación.",
+     "name": "Error boundaries",
+     "why": "A failure should not take down the whole app.",
      "ev": "G",
      "cells": {
       "angelite": [
        "p",
-       "`ngOnError` captura bindings, handlers y contenido proyectado; no el constructor ni `ngOnInit`"
+       "`ngOnError` catches bindings, handlers and projected content; not the constructor or `ngOnInit`"
       ],
       "preact": [
        "y",
@@ -840,7 +840,7 @@ window.FEATURES = {
       ],
       "angular": [
        "p",
-       "ErrorHandler global"
+       "global ErrorHandler"
       ]
      },
      "where": {
@@ -852,8 +852,8 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Portales / teleport",
-     "why": "Modales y menús fuera de su contenedor.",
+     "name": "Portals / teleport",
+     "why": "Modals and menus outside their container.",
      "ev": "G",
      "cells": {
       "angelite": [
@@ -886,13 +886,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Animaciones y transiciones integradas",
-     "why": "Entrada y salida de elementos.",
+     "name": "Built-in animations and transitions",
+     "why": "Elements entering and leaving.",
      "ev": "G",
      "cells": {
       "angelite": [
        "p",
-       "`animate.enter` / `animate.leave` con clases CSS; sin estados ni orquestación"
+       "`animate.enter` / `animate.leave` with CSS classes; no states or orchestration"
       ],
       "preact": [
        "n",
@@ -918,8 +918,8 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Slots con nombre",
-     "why": "Componentes con varias zonas de contenido.",
+     "name": "Named slots",
+     "why": "Components with several content areas.",
      "ev": "G",
      "cells": {
       "angelite": [
@@ -952,13 +952,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Referencias al DOM y a hijos",
-     "why": "Acceder a un elemento o componente hijo.",
+     "name": "References to the DOM and to children",
+     "why": "Access an element or a child component.",
      "ev": "G",
      "cells": {
       "angelite": [
        "y",
-       "`#ref` + `viewChild()` (elemento o instancia), `$el`"
+       "`#ref` + `viewChild()` (element or instance), `$el`"
       ],
       "preact": [
        "y",
@@ -986,13 +986,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Internacionalización (i18n)",
-     "why": "Traducciones y formatos por idioma.",
+     "name": "Internationalization (i18n)",
+     "why": "Translations and formats per language.",
      "ev": "G",
      "cells": {
       "angelite": [
        "p",
-       "mensajes, plurales (`Intl`), idiomas con respaldo, carga perezosa y formatos; sin extracción de textos"
+       "messages, plurals (`Intl`), fallback languages, lazy loading and formats; no text extraction"
       ],
       "preact": [
        "n",
@@ -1019,16 +1019,16 @@ window.FEATURES = {
    ]
   },
   {
-   "title": "Ecosistema y herramientas",
+   "title": "Ecosystem and tooling",
    "rows": [
     {
      "name": "DevTools",
-     "why": "Inspeccionar componentes y estado.",
+     "why": "Inspect components and state.",
      "ev": "V",
      "cells": {
       "angelite": [
        "p",
-       "`enableDevtools()`: árbol de componentes y señales (API y panel); sin extensión de navegador"
+       "`enableDevtools()`: component and signal tree (API and panel); no browser extension"
       ],
       "preact": [
        "y",
@@ -1056,8 +1056,8 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Utilidades de testing oficiales",
-     "why": "Probar componentes sin montar el navegador.",
+     "name": "Official testing utilities",
+     "why": "Test components without mounting a browser.",
      "ev": "V",
      "cells": {
       "angelite": [
@@ -1070,7 +1070,7 @@ window.FEATURES = {
       ],
       "vue": [
        "p",
-       "@vue/test-utils aparte"
+       "@vue/test-utils, separate"
       ],
       "react": [
        "y",
@@ -1090,13 +1090,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Mensajes de desarrollo (dev warnings)",
-     "why": "Avisos útiles cuando se usa mal.",
+     "name": "Development messages (dev warnings)",
+     "why": "Useful warnings when something is misused.",
      "ev": "V",
      "cells": {
       "angelite": [
        "p",
-       "`enableDevWarnings()`: inputs inexistentes, claves repetidas, módulos y elementos desconocidos"
+       "`enableDevWarnings()`: unknown inputs, repeated keys, missing modules and unknown elements"
       ],
       "preact": [
        "p",
@@ -1112,7 +1112,7 @@ window.FEATURES = {
       ],
       "angular": [
        "y",
-       "errores NG0xxx"
+       "NG0xxx errors"
       ]
      },
      "where": {
@@ -1123,13 +1123,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "CLI, HMR y herramientas",
-     "why": "Arrancar y desarrollar sin configurar.",
+     "name": "CLI, HMR and tooling",
+     "why": "Start and develop without configuring anything.",
      "ev": "G",
      "cells": {
       "angelite": [
        "p",
-       "plugins de esbuild y Vite (recarga al editar) y `angelite-check`; sin generador de proyectos"
+       "esbuild and Vite plugins (reload on edit) and `angelite-check`; no project generator"
       ],
       "preact": [
        "y",
@@ -1141,7 +1141,7 @@ window.FEATURES = {
       ],
       "react": [
        "p",
-       "depende de Vite o Next"
+       "depends on Vite or Next"
       ],
       "angular": [
        "y",
@@ -1157,13 +1157,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Soporte de editor para plantillas",
-     "why": "Autocompletado dentro de las plantillas.",
+     "name": "Editor support for templates",
+     "why": "Autocompletion inside templates.",
      "ev": "G",
      "cells": {
       "angelite": [
        "p",
-       "`angelite-check` da `archivo:línea: mensaje`; sin autocompletado ni servicio de lenguaje"
+       "`angelite-check` gives `file:line: message`; no autocompletion or language service"
       ],
       "preact": [
        "y",
@@ -1191,13 +1191,13 @@ window.FEATURES = {
      }
     },
     {
-     "name": "Madurez, comunidad y estabilidad de API",
-     "why": "Quién lo usa, qué garantías hay entre versiones.",
+     "name": "Maturity, community and API stability",
+     "why": "Who uses it, what guarantees exist between versions.",
      "ev": "V",
      "cells": {
       "angelite": [
        "n",
-       "proyecto nuevo, sin garantía de API"
+       "new project, no API guarantee"
       ],
       "preact": [
        "y",
@@ -1221,10 +1221,10 @@ window.FEATURES = {
   }
  ],
  "where": {
-  "core": "Integrado en el paquete principal",
-  "mod": "Módulo opcional del mismo paquete (import aparte, no pesa si no lo usas)",
-  "off": "Paquete oficial aparte (mismo equipo)",
-  "ext": "Terceros / ecosistema"
+  "core": "Built into the main package",
+  "mod": "Optional module of the same package (separate import, costs nothing if unused)",
+  "off": "Separate official package (same team)",
+  "ext": "Third party / ecosystem"
  },
- "evidenceWhere": "La ubicación (columna de etiquetas) es conocimiento general (G): verifícala en la documentación antes de citarla."
+ "evidenceWhere": "The location (tag column) is general knowledge (G): check it in the documentation before quoting it."
 };

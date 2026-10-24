@@ -1,0 +1,46 @@
+<!--{"title": "AngeLite", "description": "A signals framework with Angular-style templates: small, fast and secure."}-->
+<div class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">Signals · Angular-style templates · no Zone.js</p>
+    <p>AngeLite gives you what people miss most from Angular —<code>@if</code>, <code>@for</code>, <code>@defer</code>, components with inputs and outputs, dependency injection, a router— in a core of <b>about 6&nbsp;KB</b> that updates only what changes. And it does not fall short: forms, HTTP, i18n, SSR and a library of 33 accessible components exist as optional modules, and you only pay for the ones you import.</p>
+    <p class="cta"><a class="btn primary" href="getting-started.html">Get started</a> <a class="btn" href="ui.html">See the components</a> <a class="btn" href="benchmarks.html">See the benchmark</a></p>
+  </div>
+  <div class="hero-demo">
+    <script type="text/plain" class="example" data-title="A complete component">
+const { signal, component, mount } = AngeLite;
+
+class Counter {
+  count = signal(0);
+  inc() { this.count.update(n => n + 1); }
+}
+component(Counter, {
+  template: `
+    <button (click)="inc()">Clicks: {{ count() }}</button>
+    @if (count() > 2) {<b class="big"> That's {{ count() }} already!</b>}`
+});
+mount(Counter, root);
+    </script>
+  </div>
+</div>
+
+<div class="stats" id="stats" aria-label="Benchmark figures"></div>
+
+<h2>Why AngeLite</h2>
+<div class="cards">
+  <div class="card"><b>Truly small</b><span>An app with precompiled templates weighs as much as the lightest framework. What you do not use is not downloaded: every module is optional and components can be imported one by one.</span></div>
+  <div class="card"><b>Fast without tricks</b><span>Fine-grained signals, delegated events and lists with minimal reordering. A performance budget in CI keeps a new feature from spoiling it.</span></div>
+  <div class="card"><b>Secure by default</b><span>Text is escaped, URLs are sanitized, <code>[innerHTML]</code> requires <code>trustHtml()</code> and expressions never see <code>window</code>. No <code>eval</code>: it works with a strict CSP and Trusted Types.</span></div>
+  <div class="card"><b>Familiar syntax</b><span>If you have written modern Angular, you already know how to write it: <code>@if</code>, <code>@for</code>, <code>[prop]</code>, <code>(event)</code>, <code>[(ngModel)]</code>, pipes, inputs and outputs.</span></div>
+  <div class="card"><b>Optional batteries</b><span>Router with guards and lazy loading, reactive forms, HTTP client, i18n, animations, SSR, DevTools, TypeScript types and testing utilities.</span></div>
+  <div class="card"><b>Measured honestly</b><span>The benchmark compares against Preact, Vue, React and Angular with the same app, and the comparison also says what we are missing.</span></div>
+</div>
+
+<h2>Where to go next</h2>
+<div class="cards">
+  <a class="card" href="getting-started.html"><b>Quick start</b><span>Install, write your first component and choose how to ship it.</span></a>
+  <a class="card" href="templates.html"><b>Signals and templates</b><span>The reactive model and the template syntax.</span></a>
+  <a class="card" href="ui.html"><b>Component library</b><span>33 accessible components, with controls to try them and accessibility notes.</span></a>
+  <a class="card" href="api.html"><b>API reference</b><span>Generated from the types: every signature is the real one.</span></a>
+  <a class="card" href="benchmarks.html"><b>Benchmark</b><span>Size, startup, memory and speed against four other frameworks.</span></a>
+  <a class="card" href="comparison.html"><b>Comparison</b><span>38 features and where each framework offers them.</span></a>
+</div>

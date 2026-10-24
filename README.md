@@ -1,57 +1,49 @@
-# AngeLite · documentación
+# AngeLite · documentation
 
-Documentación de [AngeLite](https://github.com/duvanjamid/angelite): un framework de señales con plantillas al estilo de
-Angular, pequeño, rápido y seguro.
+Documentation of [AngeLite](https://github.com/duvanjamid/angelite): a signals framework with Angular-style templates, small, fast and secure.
 
-**Sitio:** <https://duvanjamid.github.io/angelite-docs/> (se publica con GitHub Pages con Actions: `node scripts/build.mjs` genera `dist/`).
+**Site:** <https://duvanjamid.github.io/angelite-docs/> in English, and in Spanish at <https://duvanjamid.github.io/angelite-docs/es/> (a switch in the top bar changes language and remembers the choice). Published with GitHub Pages through Actions: `node scripts/build.mjs` generates `dist/`.
 
-## Qué hay aquí
+*Documentación en español: <https://duvanjamid.github.io/angelite-docs/es/>.*
 
-| Carpeta | Contenido |
+## What is here
+
+| Folder | Contents |
 |---|---|
-| `content/`, `public/`, `nav.json` | Fuente del sitio (el generador `scripts/build.mjs` produce `dist/`): portada, **guía con ejemplos que se ejecutan**, **biblioteca de componentes**, **benchmark** y **comparativa de características** frente a Preact, Vue, React y Angular |
-| `analysis/` | Análisis frente a los demás frameworks, guía de rendimiento, seguridad, registro de cambios y los resultados en bruto del benchmark (`benchmark-results.json`) |
-| `legacy/` | Documentación del framework antiguo (`src/angelite.js`), en desuso |
-| `scripts/` | `build.mjs` (generador), `check.mjs` (enlaces, anclas, ids, alt), `browser-check.mjs` (Chromium), `sync.mjs`: trae bundles, resultados y registro de cambios desde un checkout de `angelite` |
+| `content/en/`, `content/es/` | The pages, one folder per language with the same file names |
+| `public/`, `nav.json` | Static files (bundles, styles, scripts, data) and the navigation, with titles in both languages |
+| `scripts/strings.mjs` | Every text the generator and the browser scripts write, in both languages |
+| `analysis/` | Analysis against other frameworks and the performance guide (English; Spanish copies in `analysis/es/`), the security policy and changelog (synced from the framework, English) and the raw benchmark results |
+| `data/` | Types (`data/types`) and the component metadata: `ui-meta.json` (English, from the framework) and `ui-meta.es.json` (the Spanish text, by component id) |
+| `scripts/` | `build.mjs` (generator), `check.mjs` (links, anchors, ids, alt), `browser-check.mjs` (Chromium), `sync.mjs` (brings bundles, results and the changelog from a checkout of `angelite`) |
+| `legacy/` | Documentation of the old framework, no longer used |
 
-## Cómo se actualiza
+English is the primary language: it lives at the site root and every page has a Spanish counterpart under `/es/`.
 
-El framework vive en su propio repositorio ([`angelite`](https://github.com/duvanjamid/angelite)); esta documentación
-tiene tres partes que se generan a partir de él y el resto se escribe aquí:
+## Writing and translating
+
+- A page is `content/<lang>/<id>.html` with a `<!--{"title": …, "description": …}-->` header. Add the English page first, then the Spanish one with the same file name.
+- Titles and hints of the navigation are in `nav.json` as `{ "en": …, "es": … }`.
+- Texts written by scripts (the component library page, the benchmark, the feature table) are in `scripts/strings.mjs`; `public/ui-examples*.js` and `public/features-data*.js` have one file per language.
+- The check (`npm run check`) fails on broken links and anchors in either language.
+
+## How it is updated
+
+The framework lives in its own repository ([`angelite`](https://github.com/duvanjamid/angelite)); three parts of this site are generated from it and the rest is written here:
 
 ```bash
-# con angelite clonado al lado (../angelite)
-node scripts/sync.mjs ../angelite     # reconstruye los bundles y trae resultados, SECURITY y CHANGELOG
+# with angelite cloned next to this repository (../angelite)
+node scripts/sync.mjs ../angelite     # rebuilds the bundles and brings results, SECURITY and CHANGELOG
 git add -A && git commit -m "docs: sync with angelite <commit>"
 ```
 
-`sync.mjs` ejecuta `npm run build` en el framework (para que `public/` use exactamente el código publicado), copia los tres
-bundles que usan las páginas, convierte `benchmarks/results.json` en `public/benchmarks-data.js` y copia `SECURITY.md` y
-`CHANGELOG.md`. Las páginas, la tabla de características (`public/features-data.js`) y los textos de `analysis/` se editan
-en este repositorio.
+`sync.mjs` runs `npm run build` in the framework (so `public/` uses exactly the published code), copies the three bundles the pages use, turns `benchmarks/results.json` into `public/benchmarks-data.js`, writes `data/ui-meta.json` and copies `SECURITY.md` and `CHANGELOG.md`.
 
-## Ver el sitio en local
-
-```bash
-npx http-server site -c-1
-```
-
-(la vista previa local es `dist/`; sírvela con cualquier servidor estático, por ejemplo `npx serve dist`).
-
-## Qué contiene cada medición
-
-Las cifras del benchmark salen de `analysis/benchmark-results.json`: 5 rondas × 15 iteraciones por operación, arranque con
-41 cargas intercaladas, mediana, en Chromium sin cabeza. La regla de lectura es «a menos del 10 % es un empate».
-La metodología completa está en la propia página de benchmarks.
-
-## Estado
-
-Sincronizada con `duvanjamid/angelite` en el commit `3451b6e` (PR #3 integrado en `main`: ola 1 y 2, seguridad, rendimiento).
-
-## Desarrollo
+## Development
 
 ```bash
 npm ci
-npm run build   # genera dist/
-npm run check   # enlaces, anclas, ids duplicados, imágenes sin alt
+npm run build   # generates dist/ (English at the root, Spanish in dist/es/)
+npm run check   # links, anchors, duplicate ids, images without alt
+npx serve dist  # preview
 ```

@@ -267,3 +267,10 @@ article :is(pre,code) { overflow-wrap:normal; }
 .ovprev .snapbox { transform-origin:top center; transform:scale(.62); }
 .ovprev .ovin > ui-skeleton { display:block; }
 @media (max-width:560px) { .ov { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; } .ovprev { height:96px; padding:6px; } }
+
+/* language switch */
+.langbtn { display:inline-flex; align-items:center; gap:4px; height:34px; padding:0 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--fg); text-decoration:none; font-size:.8rem; }
+.langbtn b { color:var(--fg); } .langbtn span { color:var(--muted); } .langbtn i { font-style:normal; color:var(--link); font-weight:600; }
+.langbtn:hover { border-color:var(--primary); }
+.snap { max-width:100%; }
+.vcell .snap { width:340px; }

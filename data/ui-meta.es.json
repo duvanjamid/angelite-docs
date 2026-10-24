@@ -1,0 +1,561 @@
+{
+ "groups": [
+  "Básicos",
+  "Formularios",
+  "Navegación",
+  "Superposiciones",
+  "Datos"
+ ],
+ "components": {
+  "button": {
+   "group": "Básicos",
+   "summary": "Botón con variantes, tamaños, estado de carga y ancho completo.",
+   "a11y": "Es un <button> nativo: foco, Enter y Espacio funcionan solos. Con loading=\"true\" expone aria-busy.",
+   "inputs": {
+    "variant": "Estilo visual",
+    "size": "Tamaño",
+    "disabled": "Deshabilita el botón",
+    "loading": "Muestra un spinner, deshabilita y marca aria-busy",
+    "type": "Tipo del botón nativo",
+    "block": "Ocupa todo el ancho"
+   },
+   "outputs": {},
+   "slots": {
+    "(por defecto)": "Contenido del botón"
+   }
+  },
+  "badge": {
+   "group": "Básicos",
+   "summary": "Etiqueta corta para estados y contadores.",
+   "a11y": "Es texto: si el color transmite significado, di el estado también con palabras.",
+   "inputs": {
+    "variant": "Color",
+    "dot": "Añade un punto delante"
+   },
+   "outputs": {},
+   "slots": {
+    "(por defecto)": "Texto"
+   }
+  },
+  "chip": {
+   "group": "Básicos",
+   "summary": "Etiqueta que se puede quitar (filtros, destinatarios).",
+   "a11y": "El botón de quitar tiene aria-label (configurable).",
+   "inputs": {
+    "variant": "Estilo",
+    "removable": "Muestra el botón para quitarla",
+    "removeLabel": "Etiqueta accesible del botón"
+   },
+   "outputs": {
+    "removed": {
+     "payload": "void",
+     "desc": "Se pulsó el botón de quitar"
+    }
+   },
+   "slots": {
+    "(por defecto)": "Texto"
+   }
+  },
+  "avatar": {
+   "group": "Básicos",
+   "summary": "Imagen o iniciales de una persona, con indicador de estado.",
+   "a11y": "role=\"img\" con aria-label igual al nombre.",
+   "inputs": {
+    "name": "Nombre: da las iniciales y la etiqueta accesible",
+    "src": "URL de la imagen (se sanea como cualquier src)",
+    "size": "Tamaño en píxeles",
+    "shape": "Forma",
+    "status": "Punto de estado"
+   },
+   "outputs": {},
+   "slots": {}
+  },
+  "divider": {
+   "group": "Básicos",
+   "summary": "Línea separadora, con texto opcional.",
+   "a11y": "role=\"separator\".",
+   "inputs": {
+    "label": "Texto centrado sobre la línea"
+   },
+   "outputs": {},
+   "slots": {}
+  },
+  "card": {
+   "group": "Básicos",
+   "summary": "Contenedor con título y pie opcionales.",
+   "a11y": "Es un contenedor neutro; el título es un h4.",
+   "inputs": {
+    "title": "Título de la cabecera"
+   },
+   "outputs": {},
+   "slots": {
+    "(por defecto)": "Cuerpo",
+    "footer": "Pie (slot=\"footer\")"
+   }
+  },
+  "alert": {
+   "group": "Básicos",
+   "summary": "Aviso en línea, con título y cierre opcionales.",
+   "a11y": "error y warning usan role=\"alert\" (se anuncian al instante); info y success, role=\"status\".",
+   "inputs": {
+    "type": "Tipo",
+    "title": "Título en negrita",
+    "dismissible": "Muestra el botón de cerrar",
+    "closeLabel": "Etiqueta accesible del botón"
+   },
+   "outputs": {
+    "closed": {
+     "payload": "void",
+     "desc": "Se cerró el aviso"
+    }
+   },
+   "slots": {
+    "(por defecto)": "Mensaje"
+   }
+  },
+  "spinner": {
+   "group": "Básicos",
+   "summary": "Indicador de carga.",
+   "a11y": "role=\"status\" con aria-label; la animación se ralentiza con prefers-reduced-motion.",
+   "inputs": {
+    "label": "Texto para lectores de pantalla"
+   },
+   "outputs": {},
+   "slots": {}
+  },
+  "progress": {
+   "group": "Básicos",
+   "summary": "Barra de progreso determinada o indeterminada.",
+   "a11y": "role=\"progressbar\" con aria-valuenow/min/max; en modo indeterminado no hay aria-valuenow.",
+   "inputs": {
+    "value": "Valor actual",
+    "max": "Valor máximo",
+    "label": "Texto sobre la barra (con porcentaje)",
+    "variant": "Color",
+    "indeterminate": "Animación continua sin valor"
+   },
+   "outputs": {},
+   "slots": {}
+  },
+  "skeleton": {
+   "group": "Básicos",
+   "summary": "Marcador de posición mientras carga el contenido.",
+   "a11y": "aria-hidden: avisa de la carga con otro elemento (por ejemplo un Spinner).",
+   "inputs": {
+    "height": "Alto en píxeles",
+    "width": "Ancho CSS",
+    "circle": "Forma circular"
+   },
+   "outputs": {},
+   "slots": {}
+  },
+  "empty-state": {
+   "group": "Básicos",
+   "summary": "Mensaje cuando no hay datos, con una acción opcional.",
+   "a11y": "Texto normal; pon la acción en el slot.",
+   "inputs": {
+    "title": "Título",
+    "description": "Explicación"
+   },
+   "outputs": {},
+   "slots": {
+    "(por defecto)": "Acción (un botón, por ejemplo)"
+   }
+  },
+  "text-field": {
+   "group": "Formularios",
+   "summary": "Campo de texto con etiqueta, ayuda y error.",
+   "a11y": "La etiqueta está enlazada al input (for/id); con error pone aria-invalid y aria-describedby apunta al mensaje.",
+   "inputs": {
+    "label": "Etiqueta",
+    "value": "Valor",
+    "type": "Tipo de input (email, password, date…)",
+    "placeholder": "Texto de ejemplo",
+    "hint": "Ayuda",
+    "error": "Mensaje de error (sustituye a la ayuda)",
+    "name": "Atributo name",
+    "disabled": "Deshabilitado",
+    "readonly": "Solo lectura",
+    "required": "Obligatorio (muestra *)"
+   },
+   "outputs": {
+    "valueChange": {
+     "payload": "string",
+     "desc": "El usuario escribió"
+    }
+   },
+   "slots": {}
+  },
+  "textarea": {
+   "group": "Formularios",
+   "summary": "Campo de texto de varias líneas.",
+   "a11y": "Igual que TextField.",
+   "inputs": {
+    "label": "Etiqueta",
+    "value": "Valor",
+    "rows": "Filas visibles",
+    "placeholder": "Texto de ejemplo",
+    "hint": "Ayuda",
+    "error": "Mensaje de error",
+    "name": "Atributo name",
+    "disabled": "Deshabilitado",
+    "readonly": "Solo lectura",
+    "required": "Obligatorio"
+   },
+   "outputs": {
+    "valueChange": {
+     "payload": "string",
+     "desc": "El usuario escribió"
+    }
+   },
+   "slots": {}
+  },
+  "select": {
+   "group": "Formularios",
+   "summary": "Lista desplegable nativa con etiqueta.",
+   "a11y": "<select> nativo: teclado y lectores de pantalla funcionan como en cualquier formulario.",
+   "inputs": {
+    "label": "Etiqueta",
+    "options": "Opciones",
+    "value": "Valor elegido",
+    "hint": "Ayuda",
+    "error": "Mensaje de error",
+    "disabled": "Deshabilitado",
+    "required": "Obligatorio"
+   },
+   "outputs": {
+    "valueChange": {
+     "payload": "string",
+     "desc": "Se eligió una opción"
+    }
+   },
+   "slots": {}
+  },
+  "checkbox": {
+   "group": "Formularios",
+   "summary": "Casilla de verificación, con estado indeterminado.",
+   "a11y": "<input type=\"checkbox\"> nativo dentro de su <label>.",
+   "inputs": {
+    "label": "Texto (o usa el slot)",
+    "checked": "Marcada",
+    "indeterminate": "Estado mixto",
+    "disabled": "Deshabilitada",
+    "name": "Atributo name"
+   },
+   "outputs": {
+    "changed": {
+     "payload": "boolean",
+     "desc": "Nuevo estado marcado"
+    }
+   },
+   "slots": {
+    "(por defecto)": "Texto de la casilla"
+   }
+  },
+  "radio-group": {
+   "group": "Formularios",
+   "summary": "Grupo de opciones excluyentes.",
+   "a11y": "<fieldset> con <legend> y radios nativos con el mismo name: las flechas cambian la opción.",
+   "inputs": {
+    "label": "Leyenda del grupo",
+    "options": "Opciones",
+    "value": "Valor elegido",
+    "disabled": "Deshabilita el grupo"
+   },
+   "outputs": {
+    "valueChange": {
+     "payload": "string",
+     "desc": "Se eligió una opción"
+    }
+   },
+   "slots": {}
+  },
+  "toggle": {
+   "group": "Formularios",
+   "summary": "Interruptor de encendido/apagado.",
+   "a11y": "role=\"switch\" con aria-checked, en un <button>: Enter y Espacio lo accionan.",
+   "inputs": {
+    "checked": "Encendido",
+    "label": "Texto",
+    "disabled": "Deshabilitado"
+   },
+   "outputs": {
+    "changed": {
+     "payload": "boolean",
+     "desc": "Nuevo estado"
+    }
+   },
+   "slots": {}
+  },
+  "slider": {
+   "group": "Formularios",
+   "summary": "Selector de un valor numérico en un rango.",
+   "a11y": "<input type=\"range\"> nativo: flechas, Inicio/Fin y Re Pág/Av Pág funcionan solos.",
+   "inputs": {
+    "label": "Etiqueta",
+    "value": "Valor",
+    "min": "Mínimo",
+    "max": "Máximo",
+    "step": "Paso",
+    "disabled": "Deshabilitado",
+    "showValue": "Muestra el valor"
+   },
+   "outputs": {
+    "valueChange": {
+     "payload": "number",
+     "desc": "El valor cambió"
+    }
+   },
+   "slots": {}
+  },
+  "rating": {
+   "group": "Formularios",
+   "summary": "Valoración con estrellas.",
+   "a11y": "role=\"radiogroup\" con radios; flechas cambian el valor, tabindex itinerante.",
+   "inputs": {
+    "value": "Valoración actual",
+    "max": "Número de estrellas",
+    "readonly": "Solo muestra",
+    "label": "Etiqueta del grupo"
+   },
+   "outputs": {
+    "valueChange": {
+     "payload": "number",
+     "desc": "Se eligió una valoración"
+    }
+   },
+   "slots": {}
+  },
+  "combobox": {
+   "group": "Formularios",
+   "summary": "Campo con búsqueda y lista de sugerencias.",
+   "a11y": "Patrón combobox: role=\"combobox\", aria-expanded, aria-controls, aria-activedescendant; flechas, Inicio/Fin, Enter y Escape.",
+   "inputs": {
+    "label": "Etiqueta",
+    "options": "Opciones",
+    "value": "Valor elegido",
+    "placeholder": "Texto de ejemplo",
+    "emptyText": "Mensaje sin resultados",
+    "disabled": "Deshabilitado"
+   },
+   "outputs": {
+    "valueChange": {
+     "payload": "string",
+     "desc": "Se eligió una opción"
+    }
+   },
+   "slots": {}
+  },
+  "tabs": {
+   "group": "Navegación",
+   "summary": "Pestañas; el contenido de cada una lo pones tú.",
+   "a11y": "role=\"tablist\"/\"tab\" con aria-selected y tabindex itinerante; flechas, Inicio y Fin.",
+   "inputs": {
+    "tabs": "Pestañas",
+    "active": "Id de la activa",
+    "label": "Etiqueta de la lista"
+   },
+   "outputs": {
+    "activeChange": {
+     "payload": "string",
+     "desc": "Se eligió una pestaña"
+    }
+   },
+   "slots": {}
+  },
+  "breadcrumb": {
+   "group": "Navegación",
+   "summary": "Ruta de navegación.",
+   "a11y": "<nav aria-label> con lista ordenada; el último tramo lleva aria-current=\"page\".",
+   "inputs": {
+    "items": "Tramos (el último es la página actual)",
+    "separator": "Separador",
+    "label": "Etiqueta del nav"
+   },
+   "outputs": {},
+   "slots": {}
+  },
+  "pagination": {
+   "group": "Navegación",
+   "summary": "Paginación con ventana de páginas y puntos suspensivos.",
+   "a11y": "<nav aria-label>, aria-current=\"page\" en la actual y etiquetas en los botones.",
+   "inputs": {
+    "total": "Total de elementos",
+    "pageSize": "Elementos por página",
+    "page": "Página actual",
+    "siblings": "Páginas a cada lado de la actual",
+    "prevLabel": "Etiqueta del botón anterior",
+    "nextLabel": "Etiqueta del botón siguiente",
+    "label": "Etiqueta del nav"
+   },
+   "outputs": {
+    "pageChange": {
+     "payload": "number",
+     "desc": "Se pidió otra página"
+    }
+   },
+   "slots": {}
+  },
+  "stepper": {
+   "group": "Navegación",
+   "summary": "Indicador de pasos.",
+   "a11y": "Lista ordenada; el paso actual lleva aria-current=\"step\".",
+   "inputs": {
+    "steps": "Nombres de los pasos",
+    "current": "Índice del paso actual",
+    "label": "Etiqueta de la lista"
+   },
+   "outputs": {},
+   "slots": {}
+  },
+  "accordion-item": {
+   "group": "Navegación",
+   "summary": "Sección que se abre y se cierra.",
+   "a11y": "Botón con aria-expanded y aria-controls; el panel es role=\"region\" etiquetado por el botón.",
+   "inputs": {
+    "title": "Título",
+    "open": "Estado inicial"
+   },
+   "outputs": {
+    "toggled": {
+     "payload": "boolean",
+     "desc": "Nuevo estado abierto"
+    }
+   },
+   "slots": {
+    "(por defecto)": "Contenido"
+   }
+  },
+  "dropdown": {
+   "group": "Navegación",
+   "summary": "Botón con menú de acciones.",
+   "a11y": "aria-haspopup=\"menu\" y role=\"menu\"/\"menuitem\"; flechas, Inicio/Fin, Escape (devuelve el foco) y cierre al hacer clic fuera.",
+   "inputs": {
+    "label": "Texto del botón",
+    "items": "Acciones",
+    "align": "Alineación del menú",
+    "variant": "Variante del botón"
+   },
+   "outputs": {
+    "picked": {
+     "payload": "valor",
+     "desc": "Se eligió una acción (su value)"
+    }
+   },
+   "slots": {}
+  },
+  "modal": {
+   "group": "Superposiciones",
+   "summary": "Diálogo modal.",
+   "a11y": "role=\"dialog\" aria-modal con aria-labelledby; el foco entra, Tab queda dentro, Escape cierra, el scroll de la página se bloquea y el foco vuelve al disparador.",
+   "inputs": {
+    "open": "Visible",
+    "title": "Título",
+    "size": "Ancho",
+    "closeOnBackdrop": "Cierra al pulsar el fondo",
+    "closeLabel": "Etiqueta accesible del botón"
+   },
+   "outputs": {
+    "closed": {
+     "payload": "void",
+     "desc": "Se pidió cerrar (X, Escape o fondo): tú decides si cerrar"
+    }
+   },
+   "slots": {
+    "(por defecto)": "Contenido"
+   }
+  },
+  "drawer": {
+   "group": "Superposiciones",
+   "summary": "Panel lateral o inferior.",
+   "a11y": "Igual que Modal. Ideal para menús en móvil.",
+   "inputs": {
+    "open": "Visible",
+    "title": "Título",
+    "side": "Lado",
+    "closeLabel": "Etiqueta accesible del botón"
+   },
+   "outputs": {
+    "closed": {
+     "payload": "void",
+     "desc": "Se pidió cerrar (X, Escape o fondo)"
+    }
+   },
+   "slots": {
+    "(por defecto)": "Contenido"
+   }
+  },
+  "popover": {
+   "group": "Superposiciones",
+   "summary": "Panel flotante junto a un botón.",
+   "a11y": "Botón con aria-expanded y aria-controls; Escape cierra y devuelve el foco; clic fuera cierra.",
+   "inputs": {
+    "label": "Texto del botón",
+    "placement": "Posición",
+    "align": "Alineación",
+    "variant": "Variante del botón"
+   },
+   "outputs": {
+    "toggled": {
+     "payload": "boolean",
+     "desc": "Se abrió o se cerró"
+    }
+   },
+   "slots": {
+    "(por defecto)": "Contenido del panel"
+   }
+  },
+  "tooltip": {
+   "group": "Superposiciones",
+   "summary": "Texto de ayuda al pasar el ratón o enfocar.",
+   "a11y": "Enfocable con el teclado; el texto es role=\"tooltip\" y el elemento lo referencia con aria-describedby.",
+   "inputs": {
+    "text": "Texto de la ayuda",
+    "placement": "Posición"
+   },
+   "outputs": {},
+   "slots": {
+    "(por defecto)": "Elemento al que se refiere"
+   }
+  },
+  "toasts": {
+   "group": "Superposiciones",
+   "summary": "Avisos temporales; se lanzan con ToastService.",
+   "a11y": "Región aria-live=\"polite\"; cada aviso tiene botón de cierre. ToastService.show(mensaje, tipo, ms) con ms=0 lo deja hasta cerrarlo.",
+   "inputs": {
+    "closeLabel": "Etiqueta accesible del botón"
+   },
+   "outputs": {},
+   "slots": {}
+  },
+  "table": {
+   "group": "Datos",
+   "summary": "Tabla ordenable.",
+   "a11y": "<caption>, th scope=\"col\", aria-sort y botones de ordenación operables con el teclado.",
+   "inputs": {
+    "columns": "Columnas",
+    "rows": "Filas",
+    "caption": "Título de la tabla",
+    "empty": "Mensaje sin filas",
+    "dense": "Filas compactas",
+    "striped": "Filas alternas",
+    "rowKey": "Campo único de cada fila (mejora las actualizaciones)"
+   },
+   "outputs": {},
+   "slots": {}
+  },
+  "code-block": {
+   "group": "Datos",
+   "summary": "Bloque de código con botón de copiar.",
+   "a11y": "El botón anuncia el resultado con aria-live. Usa la API del portapapeles y, si no existe, un respaldo.",
+   "inputs": {
+    "code": "Código",
+    "language": "Nombre del lenguaje (etiqueta)",
+    "copyLabel": "Texto del botón",
+    "copiedLabel": "Texto tras copiar"
+   },
+   "outputs": {},
+   "slots": {}
+  }
+ }
+}

@@ -41,7 +41,7 @@ component(App, {
 mount(App, root);
   </script>
 <div class="callout warn"><span class="t">Las etiquetas personalizadas no se auto-cierran</span><p>En HTML escribe siempre <code>&lt;ui-card&gt;&lt;/ui-card&gt;</code>, no <code>&lt;ui-card /&gt;</code>: el navegador ignora la barra y se «come» lo que siga.</p></div>
-<div class="callout"><span class="t">Con TypeScript o decoradores</span><p><code>@Component({ selector, template })</code> hace lo mismo que <code>component()</code> si tu herramienta admite decoradores. Los tipos (<code>Signal&lt;T&gt;</code>, <code>OutputEmitter&lt;T&gt;</code>, <code>OnInit</code>…) vienen en el paquete: mira la <a href="referencia.html">referencia</a>.</p></div>
+<div class="callout"><span class="t">Con TypeScript o decoradores</span><p><code>@Component({ selector, template })</code> hace lo mismo que <code>component()</code> si tu herramienta admite decoradores. Los tipos (<code>Signal&lt;T&gt;</code>, <code>OutputEmitter&lt;T&gt;</code>, <code>OnInit</code>…) vienen en el paquete: mira la <a href="api.html">referencia</a>.</p></div>
 
 <h2 id="slots">Slots con nombre</h2>
 <p>El contenido que pones entre las etiquetas de un componente se proyecta donde esté <code>&lt;ng-content&gt;</code>. Si necesitas varias zonas, el componente declara <code>&lt;ng-content select="titulo"&gt;</code> y quien lo usa marca los hijos con <code>slot="titulo"</code>. Lo que no lleva <code>slot</code> va a la zona por defecto. El contenido se evalúa en el ámbito del <em>padre</em> y sigue siendo reactivo.</p>

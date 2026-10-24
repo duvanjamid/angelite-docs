@@ -7,121 +7,217 @@
   },
   "groups": [
     {
-      "title": "Empezar",
-      "hint": "Instala y crea tu primera app",
+      "title": {
+        "en": "Start",
+        "es": "Empezar"
+      },
+      "hint": {
+        "en": "Install it and build your first app",
+        "es": "Instala y crea tu primera app"
+      },
       "pages": [
         {
-          "id": "empezar",
-          "title": "Inicio rápido"
+          "id": "getting-started",
+          "title": {
+            "en": "Quick start",
+            "es": "Inicio rápido"
+          }
         },
         {
-          "id": "diferencias",
-          "title": "Si vienes de Angular"
+          "id": "from-angular",
+          "title": {
+            "en": "If you come from Angular",
+            "es": "Si vienes de Angular"
+          }
         }
       ]
     },
     {
-      "title": "Aprender",
-      "hint": "En este orden se entiende mejor",
+      "title": {
+        "en": "Learn",
+        "es": "Aprender"
+      },
+      "hint": {
+        "en": "It makes the most sense in this order",
+        "es": "En este orden se entiende mejor"
+      },
       "steps": true,
       "pages": [
         {
-          "id": "plantillas",
-          "title": "Señales y plantillas"
+          "id": "templates",
+          "title": {
+            "en": "Signals and templates",
+            "es": "Señales y plantillas"
+          }
         },
         {
-          "id": "componentes",
-          "title": "Componentes"
+          "id": "components",
+          "title": {
+            "en": "Components",
+            "es": "Componentes"
+          }
         },
         {
-          "id": "formularios",
-          "title": "Formularios"
+          "id": "forms",
+          "title": {
+            "en": "Forms",
+            "es": "Formularios"
+          }
         },
         {
           "id": "router",
-          "title": "Router"
+          "title": {
+            "en": "Router",
+            "es": "Router"
+          }
         },
         {
-          "id": "datos",
-          "title": "HTTP, i18n y animaciones"
+          "id": "data",
+          "title": {
+            "en": "HTTP, i18n and animations",
+            "es": "HTTP, i18n y animaciones"
+          }
         }
       ]
     },
     {
-      "title": "Llevarlo a producción",
-      "hint": "Servidor, seguridad y calidad",
+      "title": {
+        "en": "Go to production",
+        "es": "Llevarlo a producción"
+      },
+      "hint": {
+        "en": "Server, security and quality",
+        "es": "Servidor, seguridad y calidad"
+      },
       "pages": [
         {
-          "id": "servidor",
-          "title": "SSR y precompilación"
+          "id": "server",
+          "title": {
+            "en": "SSR and precompiling",
+            "es": "SSR y precompilación"
+          }
         },
         {
-          "id": "seguridad",
-          "title": "Seguridad"
+          "id": "security",
+          "title": {
+            "en": "Security",
+            "es": "Seguridad"
+          }
         },
         {
-          "id": "rendimiento",
-          "title": "Rendimiento",
+          "id": "performance",
+          "title": {
+            "en": "Performance",
+            "es": "Rendimiento"
+          },
           "source": "analysis/performance.md"
         },
         {
-          "id": "herramientas",
-          "title": "Herramientas y tests"
+          "id": "tools",
+          "title": {
+            "en": "Tools and tests",
+            "es": "Herramientas y tests"
+          }
         }
       ]
     },
     {
-      "title": "Componentes UI",
-      "hint": "33 componentes accesibles, en vivo",
+      "title": {
+        "en": "UI components",
+        "es": "Componentes UI"
+      },
+      "hint": {
+        "en": "33 accessible components, live",
+        "es": "33 componentes accesibles, en vivo"
+      },
       "pages": [
         {
           "id": "ui",
-          "title": "Biblioteca de componentes",
+          "title": {
+            "en": "Component library",
+            "es": "Biblioteca de componentes"
+          },
           "special": "ui"
         }
       ]
     },
     {
-      "title": "Referencia",
-      "hint": "Firmas y tipos del paquete",
+      "title": {
+        "en": "Reference",
+        "es": "Referencia"
+      },
+      "hint": {
+        "en": "Signatures and types of the package",
+        "es": "Firmas y tipos del paquete"
+      },
       "pages": [
         {
-          "id": "referencia",
-          "title": "API"
+          "id": "api",
+          "title": {
+            "en": "API",
+            "es": "API"
+          }
         }
       ]
     },
     {
-      "title": "Comparar",
-      "hint": "Números y características frente a otros",
+      "title": {
+        "en": "Compare",
+        "es": "Comparar"
+      },
+      "hint": {
+        "en": "Numbers and features against others",
+        "es": "Números y características frente a otros"
+      },
       "pages": [
         {
           "id": "benchmarks",
-          "title": "Benchmark"
+          "title": {
+            "en": "Benchmark",
+            "es": "Benchmark"
+          }
         },
         {
-          "id": "comparativa",
-          "title": "Comparativa"
+          "id": "comparison",
+          "title": {
+            "en": "Comparison",
+            "es": "Comparativa"
+          }
         },
         {
-          "id": "analisis",
-          "title": "Análisis frente a los demás",
+          "id": "analysis",
+          "title": {
+            "en": "Analysis against the others",
+            "es": "Análisis frente a los demás"
+          },
           "source": "analysis/gap-analysis.md"
         }
       ]
     },
     {
-      "title": "Proyecto",
-      "hint": "Seguridad y novedades",
+      "title": {
+        "en": "Project",
+        "es": "Proyecto"
+      },
+      "hint": {
+        "en": "Security and news",
+        "es": "Seguridad y novedades"
+      },
       "pages": [
         {
-          "id": "politica-seguridad",
-          "title": "Política de seguridad",
+          "id": "security-policy",
+          "title": {
+            "en": "Security policy",
+            "es": "Política de seguridad"
+          },
           "source": "analysis/SECURITY.md"
         },
         {
-          "id": "cambios",
-          "title": "Registro de cambios",
+          "id": "changelog",
+          "title": {
+            "en": "Changelog",
+            "es": "Registro de cambios"
+          },
           "source": "analysis/CHANGELOG.md"
         }
       ]

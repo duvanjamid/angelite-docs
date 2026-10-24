@@ -22,4 +22,4 @@ link = signal(trustUrl('whatsapp://send?text=hola'));       // esquema permitido
 <pre><code>Content-Security-Policy: default-src 'self'; script-src 'self';
   require-trusted-types-for 'script'; trusted-types angelite</code></pre>
 <p>Con la política <code>angelite</code> el navegador solo acepta HTML que haya pasado por <code>trustHtml()</code>.</p>
-<div class="callout"><span class="t">Defensa en profundidad, no un límite</span><p>El sandbox de expresiones reduce el daño, pero no es una frontera de seguridad. Nunca compiles plantillas que incluyan datos de usuario; en producción <a href="servidor.html#precompilar">precompila</a>. Más detalle en <a href="https://github.com/duvanjamid/angelite/blob/main/SECURITY.md">SECURITY.md</a>.</p></div>
+<div class="callout"><span class="t">Defensa en profundidad, no un límite</span><p>El sandbox de expresiones reduce el daño, pero no es una frontera de seguridad. Nunca compiles plantillas que incluyan datos de usuario; en producción <a href="server.html#precompilar">precompila</a>. Más detalle en <a href="https://github.com/duvanjamid/angelite/blob/main/SECURITY.md">SECURITY.md</a>.</p></div>

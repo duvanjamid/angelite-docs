@@ -19,7 +19,8 @@ await new Promise(r => server.listen(0, r));
 const base = `http://localhost:${server.address().port}`;
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium', args: ['--no-sandbox'] });
 
-const pages = readdirSync(root).filter(f => f.endsWith('.html') && !['guia.html', 'components.html'].includes(f));
+const isStub = f => readFileSync(join(root, f), 'utf8').includes('http-equiv="refresh"');
+const pages = [...readdirSync(root).filter(f => f.endsWith('.html') && !isStub(f)), ...readdirSync(join(root, 'es')).filter(f => f.endsWith('.html')).map(f => `es/${f}`)];
 let failures = 0;
 const fail = (where, what) => { failures++; console.log(`FAIL ${where}: ${what}`); };
 
@@ -33,7 +34,7 @@ for (const [name, size] of [['desktop', { width: 1280, height: 900 }], ['phone',
     page.on('requestfailed', r => errors.push('request failed: ' + r.url()));
     page.on('response', r => { if (r.status() >= 400 && !r.url().endsWith('/favicon.ico')) errors.push(`${r.status()} ${r.url()}`); });
     await page.goto(`${base}/${file}`);
-    await page.waitForTimeout(file === 'ui.html' ? 900 : 300);
+    await page.waitForTimeout(file.endsWith('ui.html') ? 900 : 300);
     const where = `${name} ${file}`;
     if (errors.length) fail(where, errors.slice(0, 3).join(' | '));
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
@@ -54,7 +55,7 @@ for (const [name, size] of [['desktop', { width: 1280, height: 900 }], ['phone',
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 800 } });
   const page = await ctx.newPage();
-  await page.goto(`${base}/empezar.html`);
+  await page.goto(`${base}/getting-started.html`);
   const hidden = await page.evaluate(() => getComputedStyle(document.getElementById('sidebar')).visibility);
   if (hidden !== 'hidden') fail('phone sidebar', `visible before opening (${hidden})`);
   await page.click('#menu');
@@ -94,13 +95,30 @@ for (const [name, size] of [['desktop', { width: 1280, height: 900 }], ['phone',
   await page.keyboard.type('portal');
   await page.waitForTimeout(400);
   const hits = await page.$$eval('#results a', a => a.map(x => x.getAttribute('href')));
-  if (!hits.some(h => h.startsWith('componentes.html'))) fail('search', `"portal" did not find the components chapter: ${hits.join(', ')}`);
+  if (!hits.some(h => h.startsWith('components.html'))) fail('search', `"portal" did not find the components chapter: ${hits.join(', ')}`);
   await page.keyboard.press('Enter');
-  await page.waitForURL('**/componentes.html*');
+  await page.waitForURL('**/components.html*');
   const before = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.click('#theme');
   const after = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   if (before === after) fail('theme', 'the switch does not change the page colors');
+  await ctx.close();
+}
+
+// language: the switch goes to the same page in the other language, and the choice is remembered
+{
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/templates.html`);
+  if ((await page.evaluate(() => document.documentElement.lang)) !== 'en') fail('language', 'the root is not English');
+  await page.click('.langbtn');
+  await page.waitForURL('**/es/templates.html');
+  if ((await page.evaluate(() => document.documentElement.lang)) !== 'es') fail('language', 'the Spanish page is not lang=es');
+  await page.goto(`${base}/getting-started.html`);
+  await page.waitForURL('**/es/getting-started.html');   // the remembered choice
+  await page.click('.langbtn');
+  await page.waitForURL('**/getting-started.html');
+  if (new URL(page.url()).pathname.includes('/es/')) fail('language', 'switching back to English did not work');
   await ctx.close();
 }
 

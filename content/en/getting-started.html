@@ -1,0 +1,72 @@
+<!--{"title": "Quick start", "description": "Install AngeLite, write your first component and choose how to ship it: a single script, or precompiled for the smallest size.", "examples": true}-->
+<h2>What AngeLite is</h2>
+<p>It is a user-interface framework built from three ideas:</p>
+<ul>
+  <li><b>Signals</b> (<code>signal</code>, <code>computed</code>, <code>effect</code>): state lives in reactive values; when one changes, only what depends on it is updated. There is no global change detection and no Zone.js.</li>
+  <li><b>Angular-style templates</b>: HTML with <code>{{ }}</code>, <code>[prop]</code>, <code>(event)</code>, <code>@if</code> and <code>@for</code>. Templates are compiled once into a list of instructions; there is no virtual DOM.</li>
+  <li><b>Optional modules</b>: the core is small and everything else (router, forms, HTTP, i18n, animations, SSR) is imported only if you use it.</li>
+</ul>
+
+<h2>Installation</h2>
+<p>There are two paths. The fastest needs no tools at all: a <code>&lt;script&gt;</code>.</p>
+<h3>With a script (no build)</h3>
+<p>Include the bundle and write your app. Templates are compiled in the browser on startup (about 10&nbsp;KB gzip in total, optional modules included in the full bundle).</p>
+<pre><code class="language-html">&lt;div id="app"&gt;&lt;/div&gt;
+&lt;script src="https://duvanjamid.github.io/angelite-docs/angelite.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const { signal, component, mount } = AngeLite;
+
+  class Hello {
+    name = signal('world');
+  }
+  component(Hello, {
+    template: `&lt;input [(ngModel)]="name"&gt; &lt;p&gt;Hello, {{ name() }}&lt;/p&gt;`
+  });
+  mount(Hello, document.getElementById('app'));
+&lt;/script&gt;</code></pre>
+<div class="callout tip"><span class="t">For production</span><p>Download the bundle and serve it yourself, or install the package. That URL always points to the version of this documentation.</p></div>
+
+<h3>With npm and a bundler</h3>
+<pre><code class="language-bash">npm install github:duvanjamid/angelite</code></pre>
+<pre><code class="language-js">import { signal, component, mount } from '@duvanjamid/angelite';</code></pre>
+<p>With a bundler (esbuild, Vite, Rollup) every module you do not import disappears from the output. For the smallest size, <a href="server.html#precompile">precompile the templates</a>: the app ships only the runtime (about 6&nbsp;KB), without the compiler.</p>
+
+<h2>Your first component</h2>
+<p>A component is a JavaScript class plus <code>component(Class, { selector, template })</code>. The class fields are available in the template; signals are read by calling them (<code>count()</code>) and written with <code>set</code> or <code>update</code>.</p>
+<script type="text/plain" class="example" data-title="Counter with derived state">
+const { signal, computed, component, mount } = AngeLite;
+
+class Counter {
+  count = signal(1);
+  double = computed(() => this.count() * 2);
+  add(n) { this.count.update(v => v + n); }
+}
+component(Counter, {
+  template: `
+    <button (click)="add(-1)">−</button>
+    <b>{{ count() }}</b>
+    <button (click)="add(1)">+</button>
+    <span> × 2 = {{ double() }}</span>`
+});
+mount(Counter, root);
+</script>
+<div class="callout"><span class="t">How it updates</span><p>When you press <b>+</b>, <code>count</code> changes and AngeLite re-evaluates <em>only</em> the template expressions that read it, and writes to the DOM only what changed value.</p></div>
+
+<h2>How to ship it</h2>
+<div class="tablewrap"><table>
+  <tr><th></th><th>One script</th><th>Precompiled</th></tr>
+  <tr><td>Tools</td><td>none</td><td>esbuild, Vite or the <code>tools/aot.mjs</code> CLI</td></tr>
+  <tr><td>Size (gzip)</td><td>~10&nbsp;KB with the compiler</td><td>~6&nbsp;KB, runtime only</td></tr>
+  <tr><td>Startup</td><td>compiles templates on load</td><td>templates are already JS</td></tr>
+  <tr><td>Strict CSP</td><td>works (it does not use <code>eval</code>)</td><td>works</td></tr>
+  <tr><td>Templates with user data</td><td><b>never</b></td><td>impossible by construction</td></tr>
+</table></div>
+<p>The usual path is to start with the script and move to precompiling when the app grows. The component code does not change.</p>
+
+<h2>Next steps</h2>
+<div class="cards">
+  <a class="card" href="templates.html"><b>Signals and templates</b><span>Everything you can write in a template.</span></a>
+  <a class="card" href="components.html"><b>Components</b><span>Inputs, outputs, slots, portals and services.</span></a>
+  <a class="card" href="ui.html"><b>Ready-made components</b><span>Buttons, forms, dialogs, tables…</span></a>
+  <a class="card" href="security.html"><b>Security</b><span>What AngeLite protects and what is up to you.</span></a>
+</div>

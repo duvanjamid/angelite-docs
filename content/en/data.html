@@ -1,0 +1,109 @@
+<!--{"title":"HTTP, i18n and animations","description":"HTTP client with interceptors and resource(), internationalization with plurals, and enter and leave animations.","examples":true}-->
+<h2 id="http">HTTP client and data</h2>
+<p><code>createHttp()</code> (<code>@duvanjamid/angelite/http</code>) is a client on top of <code>fetch</code>: base URL, query parameters, automatic JSON, <code>timeout</code>, cancellation with <code>AbortSignal</code> and <b>interceptors</b>. Responses that are not 2xx throw an <code>HttpError</code> with <code>status</code> and <code>data</code>.</p>
+<pre><code>import { createHttp, retry } from '@duvanjamid/angelite/http';
+
+const http = createHttp({
+  baseUrl: '/api',
+  headers: { 'X-App': 'demo' },
+  interceptors: [
+    (req, next) =&gt; next({ ...req, headers: { ...req.headers, Authorization: `Bearer ${token()}` } }),
+    retry(2)                                   // retries network errors and 5xx
+  ]
+});
+
+const user  = await http.get('/users/1', { params: { fields: 'name' }, timeout: 5000 });
+await http.post('/users', { name: 'Ada' });    // objects are sent as JSON</code></pre>
+<p>An interceptor is <code>(request, next) =&gt; response</code>: it can change the request, the response, or answer without going to the network (a cache, for example). They chain: the first in the list is the first to see the request and the last to see the response.</p>
+<h3 id="resource"><code>resource()</code>: data in signals</h3>
+<p><code>resource(() =&gt; promise)</code> keeps <code>data</code>, <code>loading</code> and <code>error</code> in signals, reloads when a signal read by the loader changes, and <b>ignores late responses</b> from old requests (if you go from page 2 to page 3, a slow response for page 2 does not overwrite page 3). <code>reload()</code> forces another load and <code>destroy()</code> stops it.</p>
+<script type="text/plain" class="example" data-title="Interceptors and resource() (with a simulated fetch)">
+const { signal, component, mount, createHttp, resource } = AngeLite;
+
+// a fake "server" for the example
+const server = async (url, init) => {
+  await new Promise(r => setTimeout(r, 300));
+  const page = new URL(url, 'http://x').searchParams.get('page');
+  return new Response(JSON.stringify({ page, auth: init.headers.Authorization, items: ['a' + page, 'b' + page] }), { status: 200 });
+};
+
+const http = createHttp({
+  baseUrl: '/api',
+  fetch: server,
+  interceptors: [(req, next) => next({ ...req, headers: { ...req.headers, Authorization: 'Bearer demo' } })]
+});
+
+class List {
+  page = signal(1);
+  data = resource(() => http.get('/items', { params: { page: this.page() } }));   // reloads on its own when the page changes
+}
+component(List, {
+  template: `
+    <button (click)="page.set(page() + 1)">Page {{ page() }} → next</button>
+    @if (data.loading()) {<p>Loading…</p>}
+    @else if (data.error()) {<p class="err">Error</p>}
+    @else {<p>{{ data.data().items.join(', ') }} · {{ data.data().auth }}</p>}`
+});
+
+mount(List, root);
+  </script>
+
+<h2 id="i18n">Internationalization</h2>
+<p><code>createI18n()</code> (<code>@duvanjamid/angelite/i18n</code>) keeps the active language in a signal: any template that calls <code>t()</code> repaints when it changes.</p>
+<ul>
+  <li><b>Parameters:</b> <code>t('hello', &#123; name: 'Ada' &#125;)</code> with <code>&#123;name&#125;</code> in the message. A missing parameter stays visible.</li>
+  <li><b>Plurals:</b> a message can be an object with <code>zero</code>, <code>one</code>, <code>few</code>, <code>many</code>, <code>other</code>…; the right one is chosen with <code>Intl.PluralRules</code> according to <code>count</code>.</li>
+  <li><b>Regional languages:</b> <code>es-MX</code> falls back to <code>es</code> and then to the default language.</li>
+  <li><b>Lazy loading:</b> <code>await i18n.load('fr', () =&gt; import('./fr.json'))</code>.</li>
+  <li><b>Formats:</b> <code>number()</code>, <code>date()</code> and <code>relative()</code> follow the language.</li>
+  <li><b>Pipes:</b> <code>i18n.installPipes()</code> registers <code>t</code>, <code>num</code> and <code>date</code>: <code>&#123;&#123; 'items' | t:n() &#125;&#125;</code>.</li>
+</ul>
+<script type="text/plain" class="example" data-title="Languages and plurals">
+const { signal, component, mount, createI18n } = AngeLite;
+
+const i18n = createI18n({ locale: 'en', fallback: 'es', messages: {
+  en: { hello: 'Hello', items: { one: '{count} item', other: '{count} items' } },
+  es: { hello: 'Hola', items: { one: '{count} elemento', other: '{count} elementos' } }
+} });
+i18n.installPipes();
+
+class App {
+  i18n = i18n;
+  n = signal(1);
+}
+component(App, {
+  template: `
+    <button (click)="i18n.setLocale(i18n.locale() === 'en' ? 'es' : 'en')">{{ i18n.locale() }}</button>
+    <button (click)="n.set(n() + 1)">+1</button>
+    <p>{{ 'hello' | t }} · {{ 'items' | t:n() }} · {{ 1234.5 | num }}</p>`
+});
+
+mount(App, root);
+  </script>
+<div class="callout"><span class="t">Messages are text</span><p>Even if a message or a parameter contains HTML, it is shown as text: it cannot inject markup. If you need bold inside a sentence, split the message into parts or use a component.</p></div>
+
+<h2 id="animations">Enter and leave animations</h2>
+<p>With <code>animate.enter="class"</code> and <code>animate.leave="class"</code> an element receives that CSS class when created, and when it disappears from an <code>@if</code> or a <code>@for</code> <b>it stays in the DOM until its animation or transition ends</b> (with a safety cap so it never gets stuck). With <code>prefers-reduced-motion</code> there is no animation. You write the classes in CSS:</p>
+<pre><code>@keyframes enter { from { opacity: 0; transform: translateY(-6px); } }
+.fade-in  { animation: enter .3s ease both; }
+.fade-out { animation: enter .3s ease reverse both; }</code></pre>
+<script type="text/plain" class="example" data-title="animate.enter / animate.leave">
+const { signal, component, mount } = AngeLite;
+
+class List {
+  items = signal([1, 2, 3]);
+  next = 4;
+  add() { this.items.update(l => [...l, this.next++]); }
+  remove(n) { this.items.update(l => l.filter(x => x !== n)); }
+}
+component(List, {
+  template: `
+    <button (click)="add()">Add</button>
+    <ul>@for (n of items(); track n) {
+      <li animate.enter="fade-in" animate.leave="fade-out">Row {{ n }} <button (click)="remove(n)">×</button></li>
+    }</ul>`
+});
+
+mount(List, root);
+  </script>
+<div class="callout"><span class="t">Scope</span><p>This is the minimum that is useful for entering and leaving. There are no route transitions, no animated list reordering (<code>FLIP</code>) and no state orchestration.</p></div>

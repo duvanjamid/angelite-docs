@@ -8,6 +8,8 @@ const { signal, computed, component, mount, input, inject } = AngeLite;
 const ui = AngeLiteUI;
 const { groups, components } = window.UI_META;
 const EX = window.UI_EXAMPLES || {};
+const U = window.DOCS_I18N.u;
+const tpl = (str, v) => str.replace(/\{(\w+)\}/g, (_, k) => v[k]);
 
 const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const parse = text => { try { return Function(`return (${text})`)(); } catch (e) { return text; } };
@@ -20,7 +22,7 @@ function controlFor(input, def, ex) {
   if (input.type === 'boolean') return 'bool';
   if (input.type === 'number') return 'number';
   const values = union(input.type.replace(/^'' \| /, "'' | "));
-  if (values) return { options: values.map(v => ({ value: v, label: v === '' ? '(vacío)' : v })) };
+  if (values) return { options: values.map(v => ({ value: v, label: v === '' ? U.empty : v })) };
   if (input.type === 'string') return 'text';
   return null;
 }
@@ -37,17 +39,17 @@ const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(
 /* Overlays cannot be open all at once on a page (they lock scroll and trap focus), so their open states are shown as
    static snapshots built with the library's own classes. The playground below each one still opens the real thing. */
 const btn = (text, v) => `<button type="button" class="ui-btn"${v ? ` data-variant="${v}"` : ''}>${text}</button>`;
-const modalSnap = size => `<div class="snap" style="width:min(100%,${{ sm: 340, md: 460, lg: 620 }[size]}px)"><div class="ui-backdrop"><div class="ui-modal" data-size="${size}" role="img" aria-label="Modal abierto"><header><span>Título del diálogo</span><button type="button" tabindex="-1">×</button></header><div class="body"><p>Contenido del diálogo. Tab se queda dentro y Escape lo cierra.</p>${btn('Aceptar', 'primary')}</div></div></div></div>`;
-const drawerSnap = side => `<div class="snap"><div class="ui-drawer-wrap" data-side="${side}"><div class="ui-drawer" role="img" aria-label="Panel abierto"><header><span>Menú</span><button type="button" tabindex="-1">×</button></header><div class="body"><p>Un panel lateral, útil para menús en móvil.</p></div></div></div></div>`;
-const popSnap = (placement, align) => `<div class="snapbox" data-placement="${placement}"><div class="ui-pop" data-placement="${placement}" data-align="${align}">${btn('Más información')}<div class="panel" role="img" aria-label="Panel abierto"><p style="margin:0">Contenido del panel flotante.</p></div></div></div>`;
-const ddSnap = align => `<div class="snapbox"><div class="ui-dd" data-align="${align}">${btn('Acciones')}<div class="menu" role="img" aria-label="Menú abierto"><button type="button" role="menuitem" tabindex="-1">Editar</button><button type="button" role="menuitem" tabindex="-1">Duplicar</button><button type="button" role="menuitem" aria-disabled="true" tabindex="-1">Borrar</button></div></div></div>`;
-const toastSnap = (type, text) => `<div class="ui-toast" data-type="${type}" role="img" aria-label="Aviso"><span class="m">${text}</span><button type="button" tabindex="-1">×</button></div>`;
+const modalSnap = size => `<div class="snap" style="width:${{ sm: 340, md: 460, lg: 620 }[size]}px;max-width:100%"><div class="ui-backdrop"><div class="ui-modal" data-size="${size}" role="img" aria-label="${U.modalOpen}"><header><span>${U.modalTitle}</span><button type="button" tabindex="-1">×</button></header><div class="body"><p>${U.modalBody}</p>${btn(U.accept, 'primary')}</div></div></div></div>`;
+const drawerSnap = side => `<div class="snap"><div class="ui-drawer-wrap" data-side="${side}"><div class="ui-drawer" role="img" aria-label="${U.panelOpen}"><header><span>${U.menu}</span><button type="button" tabindex="-1">×</button></header><div class="body"><p>${U.drawerBody}</p></div></div></div></div>`;
+const popSnap = (placement, align) => `<div class="snapbox" data-placement="${placement}"><div class="ui-pop" data-placement="${placement}" data-align="${align}">${btn(U.moreInfo)}<div class="panel" role="img" aria-label="${U.panelOpen}"><p style="margin:0">${U.panelBody}</p></div></div></div>`;
+const ddSnap = align => `<div class="snapbox"><div class="ui-dd" data-align="${align}">${btn(U.actions)}<div class="menu" role="img" aria-label="${U.menuOpen}"><button type="button" role="menuitem" tabindex="-1">${U.edit}</button><button type="button" role="menuitem" tabindex="-1">${U.duplicate}</button><button type="button" role="menuitem" aria-disabled="true" tabindex="-1">${U.del}</button></div></div></div>`;
+const toastSnap = (type, text) => `<div class="ui-toast" data-type="${type}" role="img" aria-label="${U.notice}"><span class="m">${text}</span><button type="button" tabindex="-1">×</button></div>`;
 const SNAP = {
   modal: [{ name: 'size', cells: ['sm', 'md', 'lg'].map(v => ({ label: v, html: modalSnap(v) })) }],
   drawer: [{ name: 'side', cells: ['left', 'right', 'bottom'].map(v => ({ label: v, html: drawerSnap(v), cls: 'wide' })) }],
   popover: [{ name: 'placement', cells: [{ label: 'bottom', html: popSnap('bottom', 'start') }, { label: 'top', html: popSnap('top', 'start') }] }],
   dropdown: [{ name: 'align', cells: [{ label: 'start', html: ddSnap('start') }, { label: 'end', html: ddSnap('end') }] }],
-  toasts: [{ name: 'type', cells: [['success', 'Guardado correctamente'], ['error', 'No se pudo guardar'], ['warning', 'Conexión lenta'], ['info', 'Hay una versión nueva']].map(([t, x]) => ({ label: t, html: toastSnap(t, x), cls: 'toast' })) }]
+  toasts: [{ name: 'type', cells: [['success', U.toastSaved], ['error', U.toastFailed], ['warning', U.toastSlow], ['info', U.toastNew]].map(([t, x]) => ({ label: t, html: toastSnap(t, x), cls: 'toast' })) }]
 };
 
 /** Rows of cells: one row per input with a few string options, plus one row with the boolean states. */
@@ -62,8 +64,8 @@ function galleryRows(m, ex) {
     if (opts && opts.length > 1 && opts.length <= 8) rows.push({ name: inp.name, cells: opts.filter(v => v !== '').map(v => ({ label: v, set: { [inp.name]: v }, cls: m.id === 'tooltip' ? 'room' : '' })) });
   }
   const flags = m.inputs.filter(i => i.type === 'boolean' && !(i.name in data) && !FLAG_SKIP.has(i.name)).slice(0, 6);
-  if (ex.extra) rows.push({ name: 'otros', cells: ex.extra });
-  if (flags.length) rows.push({ name: 'estados', cells: flags.map(f => ({ label: f.name, set: { [f.name]: true } })) });
+  if (ex.extra) rows.push({ name: U.others, cells: ex.extra });
+  if (flags.length) rows.push({ name: U.states, cells: flags.map(f => ({ label: f.name, set: { [f.name]: true } })) });
   return rows;
 }
 
@@ -163,14 +165,14 @@ component(Playground, {
   selector: 'docs-playground',
   imports: [ui.Checkbox, ui.Select, ui.TextField, ui.CodeBlock],
   template: `
-    @if (rows.length) {<div class="variants" role="group" aria-label="Variantes"><div class="vhead">Variantes</div><div class="vbody"></div></div>}
+    @if (rows.length) {<div class="variants" role="group" aria-label="${U.variants}"><div class="vhead">${U.variants}</div><div class="vbody"></div></div>}
     <div class="pg">
       <div class="pg-stage">
         <div class="preview"></div>
-        <p class="evlog" aria-live="polite"><span>Último evento:</span> <code>{{ last() }}</code></p>
+        <p class="evlog" aria-live="polite"><span>${U.lastEvent}</span> <code>{{ last() }}</code></p>
       </div>
       @if (controls.length) {
-        <div class="pg-controls" role="group" aria-label="Controles de las propiedades">
+        <div class="pg-controls" role="group" aria-label="${U.propControls}">
           @for (c of controls; track c.name) {
             @if (c.kind === 'bool') {<ui-checkbox [label]="c.name" [checked]="c.value()" (changed)="c.set($event)"></ui-checkbox>}
             @else if (c.kind === 'select') {<ui-select [label]="c.name" [options]="c.options" [value]="c.value()" (valueChange)="c.set($event)"></ui-select>}
@@ -180,30 +182,30 @@ component(Playground, {
         </div>
       }
     </div>
-    <ui-code-block language="plantilla" [code]="snippet()" copyLabel="Copiar" copiedLabel="Copiado"></ui-code-block>`
+    <ui-code-block language="${U.template}" [code]="snippet()" copyLabel="${U.copy}" copiedLabel="${U.copied}"></ui-code-block>`
 });
 
 /* ---------- one component: summary, playground, API ---------- */
 
 class Section {
   item = input(null);
-  inputCols = [{ key: 'name', label: 'Input' }, { key: 'type', label: 'Tipo' }, { key: 'default', label: 'Por defecto' }, { key: 'desc', label: 'Descripción' }];
-  outputCols = [{ key: 'name', label: 'Output' }, { key: 'payload', label: 'Valor' }, { key: 'desc', label: 'Cuándo' }];
-  slotCols = [{ key: 'name', label: 'Slot' }, { key: 'desc', label: 'Contenido' }];
+  inputCols = [{ key: 'name', label: U.colInput }, { key: 'type', label: U.colType }, { key: 'default', label: U.colDefault }, { key: 'desc', label: U.colDesc }];
+  outputCols = [{ key: 'name', label: U.colOutput }, { key: 'payload', label: U.colValue }, { key: 'desc', label: U.colWhen }];
+  slotCols = [{ key: 'name', label: U.colSlot }, { key: 'desc', label: U.colContent }];
 }
 component(Section, {
   selector: 'docs-section',
   imports: [Playground, ui.Badge, ui.Table, ui.Alert],
   template: `
     <section class="ui-sec" [attr.id]="item().id" [attr.aria-labelledby]="item().id + '-h'">
-      <h3 [attr.id]="item().id + '-h'">{{ item().name }} <ui-badge>{{ item().tag }}</ui-badge><a class="anchor" [href]="'#' + item().id" [attr.aria-label]="'Enlace a ' + item().name">#</a></h3>
+      <h3 [attr.id]="item().id + '-h'">{{ item().name }} <ui-badge>{{ item().tag }}</ui-badge><a class="anchor" [href]="'#' + item().id" [attr.aria-label]="'${U.linkTo} ' + item().name">#</a></h3>
       <p>{{ item().summary }}</p>
       <docs-playground [item]="item()"></docs-playground>
-      <h4>Inputs</h4>
-      @if (item().inputs.length) {<ui-table [columns]="inputCols" [rows]="item().inputs" rowKey="name" [dense]="true"></ui-table>} @else {<p class="muted">No tiene inputs.</p>}
-      @if (item().outputs.length) {<h4>Outputs</h4><ui-table [columns]="outputCols" [rows]="item().outputs" rowKey="name" [dense]="true"></ui-table>}
-      @if (item().slots.length) {<h4>Slots</h4><ui-table [columns]="slotCols" [rows]="item().slots" rowKey="name" [dense]="true"></ui-table>}
-      <ui-alert type="info" title="Accesibilidad">{{ item().a11y }}</ui-alert>
+      <h4>${U.inputs}</h4>
+      @if (item().inputs.length) {<ui-table [columns]="inputCols" [rows]="item().inputs" rowKey="name" [dense]="true"></ui-table>} @else {<p class="muted">${U.noInputs}</p>}
+      @if (item().outputs.length) {<h4>${U.outputs}</h4><ui-table [columns]="outputCols" [rows]="item().outputs" rowKey="name" [dense]="true"></ui-table>}
+      @if (item().slots.length) {<h4>${U.slots}</h4><ui-table [columns]="slotCols" [rows]="item().slots" rowKey="name" [dense]="true"></ui-table>}
+      <ui-alert type="info" title="${U.a11y}">{{ item().a11y }}</ui-alert>
     </section>`
 });
 
@@ -235,7 +237,7 @@ component(ThemePanel, {
       <ui-text-field label="--ui-primary" type="color" [value]="primary()" (valueChange)="setPrimary($event)"></ui-text-field>
       <ui-text-field label="--ui-accent" type="color" [value]="accent()" (valueChange)="setAccent($event)"></ui-text-field>
       <ui-slider label="--ui-radius" [min]="0" [max]="20" [value]="radius()" (valueChange)="setRadius($event)"></ui-slider>
-      <div><ui-button size="sm" (click)="reset()">Restablecer</ui-button></div>
+      <div><ui-button size="sm" (click)="reset()">${U.reset}</ui-button></div>
     </div>
     <ui-code-block language="css" [code]="css()"></ui-code-block>`
 });
@@ -291,13 +293,14 @@ component(Overview, {
 
 class UiPage {
   query = signal('');
-  groups = groups.map(g => ({ name: g, id: 'grupo-' + slug(g), items: components.filter(c => c.group === g) }));
+  groups = groups.map(g => ({ name: g, id: 'group-' + slug(g), items: components.filter(c => c.group === g) }));
   total = components.length;
   matches(c) {
     const q = this.query().trim().toLowerCase();
     return !q || `${c.name} ${c.tag} ${c.summary}`.toLowerCase().includes(q);
   }
   visible = computed(() => components.filter(c => this.matches(c)).length);
+  countText = computed(() => tpl(U.count, { n: this.visible(), total: this.total }));
   ngAfterViewInit() {
     if (location.hash) setTimeout(() => { const t = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (t) t.scrollIntoView(); }, 50);
   }
@@ -307,28 +310,28 @@ component(UiPage, {
   imports: [Section, ThemePanel, Overview, ui.TextField, ui.EmptyState, ui.Button],
   template: `
     <div class="ui-lib">
-      <p>{{ total }} componentes accesibles: <code>{{ '<' }}ui-button{{ '>' }}</code>, <code>{{ '<' }}ui-modal{{ '>' }}</code>, <code>{{ '<' }}ui-table{{ '>' }}</code>… Se usan como cualquier componente de AngeLite: los importas en <code>imports</code> y los pones en la plantilla. Cada uno es una clase marcada como pura, así que un bundler se queda solo con los que importes.</p>
-      <div class="callout"><span class="t">Cómo se usan</span>
+      <p>${tpl(U.intro, { total: components.length })}</p>
+      <div class="callout"><span class="t">${U.usesTitle}</span>
         <pre class="plain"><code>import { Button, Modal } from '@duvanjamid/angelite/ui';
 
 component(App, {
   imports: [Button, Modal],
-  template: \`&lt;ui-button variant="primary"&gt;Guardar&lt;/ui-button&gt;\`
+  template: \`&lt;ui-button variant="primary"&gt;${U.usesLabel}&lt;/ui-button&gt;\`
 });</code></pre>
       </div>
-      <h2 id="vista-general">Vista general</h2>
-      <p>Los 33 componentes de un vistazo, ya montados. Pulsa el nombre para ver sus variantes, controles y API.</p>
+      <h2 id="overview">${U.overviewTitle}</h2>
+      <p>${tpl(U.overviewText, { total: components.length })}</p>
       <docs-overview></docs-overview>
-      <h2 id="tema">Tema</h2>
-      <p>Todo el aspecto sale de variables CSS (<code>--ui-*</code>). Cambia estas tres, o define las tuyas en <code>:root</code>. El modo oscuro sigue al sistema, o al interruptor de arriba (<code>&lt;html data-theme="dark"&gt;</code>).</p>
+      <h2 id="theme">${U.themeTitle}</h2>
+      <p>${U.themeText}</p>
       <docs-theme></docs-theme>
-      <ui-text-field class="filter" label="Filtrar componentes" placeholder="botón, tabla, modal…" [value]="query()" (valueChange)="query.set($event)"></ui-text-field>
-      <p class="muted" aria-live="polite">{{ visible() }} de {{ total }} componentes</p>
+      <ui-text-field class="filter" label="${U.filterLabel}" placeholder="${U.filterPh}" [value]="query()" (valueChange)="query.set($event)"></ui-text-field>
+      <p class="muted" aria-live="polite">{{ countText() }}</p>
       @for (g of groups; track g.id) {
         <h2 [attr.id]="g.id">{{ g.name }}</h2>
         @for (c of g.items; track c.id) {@if (matches(c)) {<docs-section [item]="c"></docs-section>}}
       }
-      @if (visible() === 0) {<ui-empty-state title="Ningún componente coincide" description="Prueba con otra palabra."><ui-button (click)="query.set('')">Quitar el filtro</ui-button></ui-empty-state>}
+      @if (visible() === 0) {<ui-empty-state title="${U.noMatch}" description="${U.tryAnother}"><ui-button (click)="query.set('')">${U.clearFilter}</ui-button></ui-empty-state>}
     </div>`
 });
 

@@ -1,0 +1,15 @@
+<!--{"title":"If you come from Angular","description":"What changes on purpose compared with Angular and which optional modules replace its packages.","examples":false}-->
+<h2 id="limits">A counterpart, not a clone</h2>
+<p>AngeLite takes the shape of Angular (templates, signals, routes, forms) and gives up what would make it big. What changes on purpose:</p>
+<table>
+  <tr><th>Angular</th><th>AngeLite</th></tr>
+  <tr><td>Decorators + TypeScript + compiler</td><td><code>component(Class, meta)</code> in plain JS (also <code>Component(meta)</code> as a decorator if your toolchain supports them).</td></tr>
+  <tr><td>Zone.js / change detection</td><td>Signals: only what depends on them is updated. Mutating a plain property does not repaint; use <code>signal</code>.</td></tr>
+  <tr><td><code>@Input()</code> / <code>@Output()</code></td><td><code>input()</code> / <code>output()</code></td></tr>
+  <tr><td><code>[(ngModel)]="prop"</code></td><td><code>[(ngModel)]="signal"</code> (the signal must be writable).</td></tr>
+  <tr><td>Assignments in templates (<code>(click)="x = 1"</code>)</td><td>No: <code>(click)="x.set(1)"</code>. Also no arrow functions, object literals or <code>new</code>.</td></tr>
+  <tr><td><code>@angular/forms</code>, <code>HttpClient</code>, <code>@angular/localize</code>, animations, SSR</td><td>Optional modules: <a href="forms.html"><code>forms</code></a>, <a href="data.html#http"><code>http</code></a>, <a href="data.html#i18n"><code>i18n</code></a>, <a href="data.html#animations"><code>animate</code></a> and <a href="server.html"><code>tools/ssr.mjs</code></a>. Smaller and with fewer features (no <code>FormBuilder</code>, async validators, <code>ng extract-i18n</code>, animations with states, incremental hydration).</td></tr>
+  <tr><td><code>@defer</code>, <code>viewChild()</code>, <code>providers</code>, <code>children</code>/<code>canActivate</code>/<code>loadComponent</code></td><td>Yes, with the same idea: <code>@defer</code>, <code>viewChild()</code>, <code>providers</code>, <code>children</code>/<code>canActivate</code>/<code>load</code>.</td></tr>
+</table>
+<p><a href="comparison.html">The comparison table</a> says what is missing, feature by feature.</p>
+<div class="callout tip"><span class="t">Migrate an idea, not a project</span><p>If you know Angular, the templates will feel familiar. What you will have to change are your state habits: instead of mutating properties, write to signals.</p></div>

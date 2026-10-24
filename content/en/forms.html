@@ -1,0 +1,62 @@
+<!--{"title":"Forms","description":"Bind fields with ngModel and reactive forms with validators on top of signals.","examples":true}-->
+<h2 id="ngmodel">Binding fields with ngModel</h2>
+<p><code>[(ngModel)]="signal"</code> connects a field to a <em>writable</em> signal: what the user types updates the signal, and if you change the signal, the field updates. It works for <code>input</code> (text, number, checkbox) and <code>select</code>. For forms with validation, use the reactive forms below.</p>
+<script type="text/plain" class="example" data-title="ngModel + pipes">
+const { signal, computed, component, mount } = AngeLite;
+
+class Greeter {
+  name = signal('world');
+  price = signal(1234.5);
+  today = new Date();
+}
+
+component(Greeter, {
+  template: `
+    <input [(ngModel)]="name">
+    <p>Hello, {{ name() | titlecase }}! ({{ name() | uppercase }})</p>
+    <p>Price: {{ price() | currency:'EUR' }} · Today: {{ today | date }}</p>`
+});
+
+mount(Greeter, root);
+  </script>
+<div class="callout warn"><span class="t">The signal has to be writable</span><p><code>[(ngModel)]</code> with a <code>computed</code> or with a value that is not a signal throws a clear error ("needs a writable signal").</p></div>
+
+<h2 id="reactive">Reactive forms</h2>
+<p><code>FormControl</code>, <code>FormGroup</code> and <code>FormArray</code> (<code>@duvanjamid/angelite/forms</code>) keep their state in signals: <code>value</code>, <code>errors</code>, <code>valid</code>, <code>touched</code> and <code>dirty</code>. Because <code>value</code> is a writable signal, it binds with <code>[(ngModel)]</code>, and because the rest are signals, the template reacts on its own.</p>
+<p>A validator is a function <code>(value) =&gt; null | &#123; key: detail &#125;</code>. <code>required</code>, <code>minLength</code>, <code>maxLength</code>, <code>min</code>, <code>max</code>, <code>pattern</code>, <code>email</code> and <code>matches</code> (for "repeat the password") are included. The errors of several validators are merged in <code>errors()</code>.</p>
+<script type="text/plain" class="example" data-title="FormGroup with validators">
+const { signal, component, mount, FormControl, FormGroup, Validators: V } = AngeLite;
+
+class Signup {
+  form = new FormGroup({
+    name:  new FormControl('', [V.required, V.minLength(2)]),
+    email: new FormControl('', [V.required, V.email])
+  });
+  sent = signal('');
+  submit() {
+    this.form.touch();                                   // marks everything as touched so errors show
+    if (this.form.valid()) this.sent.set('Sent: ' + JSON.stringify(this.form.value()));
+  }
+}
+component(Signup, {
+  template: `
+    <p><input [(ngModel)]="form.get('name').value" (blur)="form.get('name').touch()" placeholder="Name">
+       @if (form.get('name').touched() && form.get('name').errors()) {<span class="err">at least 2 letters</span>}</p>
+    <p><input [(ngModel)]="form.get('email').value" (blur)="form.get('email').touch()" placeholder="Email">
+       @if (form.get('email').touched() && form.get('email').errors()) {<span class="err">invalid email</span>}</p>
+    <button (click)="submit()" [disabled]="!form.valid()">Send</button>
+    <p>{{ sent() }}</p>`
+});
+
+mount(Signup, root);
+  </script>
+<div class="tablewrap"><table>
+  <tr><th>You want…</th><th>Use</th></tr>
+  <tr><td>Show an error only after the user touches the field</td><td><code>(blur)="field.touch()"</code> and <code>field.touched() &amp;&amp; field.errors()</code></td></tr>
+  <tr><td>Show all errors on submit</td><td><code>form.touch()</code> marks everything as touched</td></tr>
+  <tr><td>Nested fields</td><td><code>new FormGroup(&#123; address: new FormGroup(&#123; street: … &#125;) &#125;)</code> and <code>form.get('address.street')</code></td></tr>
+  <tr><td>Lists of fields that grow</td><td><code>FormArray</code> with <code>push()</code> and <code>removeAt()</code>; <code>@for (c of list.controls(); track $index)</code></td></tr>
+  <tr><td>Go back to the initial state</td><td><code>form.reset()</code> or <code>form.reset(&#123; name: 'x' &#125;)</code></td></tr>
+  <tr><td>A rule that looks at several fields</td><td>a validator on the group: <code>new FormGroup(controls, [v =&gt; …])</code></td></tr>
+</table></div>
+<div class="callout"><span class="t">What is missing</span><p>There are no async validators yet. For "does that email already exist?", validate on submit with <a href="data.html#http">http</a> and set the error by hand in your own state.</p></div>

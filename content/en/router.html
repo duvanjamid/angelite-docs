@@ -1,0 +1,64 @@
+<!--{"title":"Router","description":"Routes with parameters, nested routes, guards, resolvers, lazy loading and hash and history modes.","examples":false}-->
+<p>The router decides which component to show according to the address. It is enabled with <code>provideRouter(routes)</code>, and screens are painted wherever you put <code>&lt;router-outlet&gt;</code>. Links are <code>&lt;a routerLink="/path"&gt;</code>. (It is not enabled on this page so it does not clobber its anchors.)</p>
+
+<h2 id="routes">Routes, parameters and nesting</h2>
+<pre><code>const { component, mount, provideRouter, router } = AngeLite;
+
+class Home {}
+component(Home, { template: `&lt;h2&gt;Home&lt;/h2&gt;` });
+
+// the parent has its own outlet for the child routes
+class Admin {}
+component(Admin, { template: `&lt;nav&gt;Administration&lt;/nav&gt;&lt;router-outlet&gt;&lt;/router-outlet&gt;` });
+class AdminHome {} component(AdminHome, { template: `&lt;h3&gt;Summary&lt;/h3&gt;` });
+class AdminUser { id = () =&gt; router.params().id; }
+component(AdminUser, { template: `&lt;h3&gt;User {{ id() }}&lt;/h3&gt;` });
+
+class NotFound {} component(NotFound, { template: `&lt;h2&gt;404&lt;/h2&gt;` });
+
+provideRouter([
+  { path: '/', component: Home },
+  { path: 'admin', component: Admin, children: [
+    { path: '',          component: AdminHome },
+    { path: 'users/:id', component: AdminUser }
+  ] },
+  { path: 'old', redirectTo: '/' },
+  { path: '**',  component: NotFound }
+]);
+
+class App {}
+component(App, {
+  template: `
+    &lt;nav&gt;&lt;a routerLink="/"&gt;Home&lt;/a&gt; &lt;a routerLink="/admin/users/42"&gt;User 42&lt;/a&gt;&lt;/nav&gt;
+    &lt;router-outlet&gt;&lt;/router-outlet&gt;`
+});
+mount(App, document.getElementById('app'));</code></pre>
+<ul>
+  <li><code>:id</code> declares a parameter; <code>router.params()</code> returns it (already decoded) as a reactive object.</li>
+  <li><code>children</code> nests routes: the parent component paints the children in its own <code>&lt;router-outlet&gt;</code>, and is <b>not rebuilt</b> when only the child route changes.</li>
+  <li><code>''</code> is a parent's index route; <code>**</code> catches everything else; <code>redirectTo</code> replaces the history entry.</li>
+</ul>
+
+<h2 id="guards">Guards</h2>
+<p>A route can declare <code>canActivate: [guard]</code>. A guard receives <code>&#123; path, params, query, route &#125;</code> and returns <code>true</code> (proceed), <code>false</code> (stay where you were: the address is restored) or a route (redirect). It can be asynchronous; if the user navigates elsewhere while it waits, the old navigation is cancelled.</p>
+<pre><code>const adminOnly = async ({ path }) =&gt; (await session.isAdmin()) || '/login';
+
+provideRouter([
+  { path: 'admin', component: Admin, canActivate: [adminOnly] },
+  { path: 'login', component: Login }
+]);</code></pre>
+
+<h2 id="resolvers">Data before painting: resolvers and query</h2>
+<p><code>resolve: &#123; user: ({ params }) =&gt; … &#125;</code> loads data before showing the page; if it fails, you stay where you were and the error is logged. <code>router.data().user</code> delivers it. Query parameters (<code>?page=2</code>) arrive in <code>router.query()</code> as <code>&#123; page: '2' &#125;</code>.</p>
+<pre><code>&#123; path: 'users/:id', component: User,
+  resolve: &#123; user: ({ params }) =&gt; http.get('/users/' + params.id) &#125; &#125;
+
+// in the component:  router.data().user   ·   router.query().tab</code></pre>
+
+<h2 id="lazy-loading">Lazy-loading screens</h2>
+<p><code>load: () =&gt; import('./screen.js')</code> downloads a route's code the first time it is visited (the module exports the component as <code>default</code>, or is the component). If the download fails, the error is logged and you stay on the previous screen.</p>
+<pre><code>&#123; path: 'reports', load: () =&gt; import('./reports.js') &#125;</code></pre>
+
+<h2 id="modes">Hash and history modes</h2>
+<p>By default the router uses the hash (<code>#/path</code>): it works on any static hosting. With <code>provideRouter(routes, &#123; mode: 'history', base: '/app' &#125;)</code> it uses real paths; the server must then return the same page for all of them. Clicks on <code>routerLink</code> navigate without reloading (with Ctrl, Cmd, Shift or <code>target</code> the browser acts as usual), and a shared address such as <code>/app#/path</code> lands on <code>/app/path</code>.</p>
+<div class="callout tip"><span class="t">Navigating from code</span><p><code>router.navigate('/path?x=1')</code> adds a history entry; <code>router.navigate('/path', &#123; replace: true &#125;)</code> replaces the current one. In history mode a path such as <code>//somewhere-else</code> never takes the user out of the site.</p></div>

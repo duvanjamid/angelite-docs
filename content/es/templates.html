@@ -42,7 +42,7 @@ mount(Counter, root);
   <tr><td><code>(evento)="sentencia"</code></td><td>Escucha un evento. <code>$event</code> es el evento (o el valor emitido por un output). Varias sentencias con <code>;</code>.</td></tr>
   <tr><td><code>[(ngModel)]="sig"</code></td><td>Enlace bidireccional con una señal <em>escribible</em>.</td></tr>
   <tr><td><code>&#123;&#123; x | pipe:arg &#125;&#125;</code></td><td>Pipes, encadenables.</td></tr>
-  <tr><td><code>#nombre</code></td><td>Referencia al elemento, que recibes con <code>viewChild('nombre')</code> (ver <a href="componentes.html#refs">Componentes</a>).</td></tr>
+  <tr><td><code>#nombre</code></td><td>Referencia al elemento, que recibes con <code>viewChild('nombre')</code> (ver <a href="components.html#refs">Componentes</a>).</td></tr>
 </table></div>
 
 <h3 id="expresiones">Qué se puede escribir en una expresión</h3>
@@ -124,7 +124,7 @@ component(P, {
 
 mount(P, root);
   </script>
-<p>Un pipe es solo una función <code>(valor, ...argumentos) =&gt; resultado</code>. Si lee señales dentro de una plantilla, la vista se actualiza cuando cambian (así funcionan los pipes de <a href="datos.html#i18n">i18n</a>).</p>
+<p>Un pipe es solo una función <code>(valor, ...argumentos) =&gt; resultado</code>. Si lee señales dentro de una plantilla, la vista se actualiza cuando cambian (así funcionan los pipes de <a href="data.html#i18n">i18n</a>).</p>
 
 <h2 id="defer">Carga diferida con @defer</h2>
 <p><code>@defer</code> no renderiza el bloque hasta que se cumple un disparador, y mientras tanto muestra el <code>@placeholder</code>. Sirve para no pagar el coste de lo que el usuario aún no ve.</p>

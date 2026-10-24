@@ -1,8 +1,8 @@
 (() => {
-  const F = window.FEATURES;
+  const F = window.FEATURES, I = window.DOCS_I18N;
   const el = id => document.getElementById(id);
   const SYM = { y: '✓', p: '<span class="half"></span>', n: '✕' };
-  const WHERE = { core: 'integrado', mod: 'módulo', off: 'oficial', ext: 'terceros' };
+  const WHERE = I.where;
   const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/`([^`]+)`/g, '<code>$1</code>');
   el('fver').textContent = F.versions;
   el('flegend').innerHTML = Object.entries(F.legend).map(([k, v]) => `<span><b style="color:${k === 'y' ? '#2f9e5b' : '#d63a3a'}">${SYM[k]}</b> ${v}</span>`).join('') +
@@ -11,7 +11,7 @@
   el('wnote').textContent = F.evidenceWhere;
   const fw = F.frameworks;
   const totals = Object.fromEntries(fw.map(([k]) => [k, { score: 0, n: 0, bundled: 0 }]));
-  let html = '<div class="feat"><table><thead><tr><th>Característica</th>' + fw.map(([k, n]) => `<th style="color:var(--c-${k === 'angelite' ? 'angelite' : k})">${n}</th>`).join('') + '<th>Fuente</th></tr></thead><tbody>';
+  let html = '<div class="feat"><table><thead><tr><th>' + I.featName + '</th>' + fw.map(([k, n]) => `<th style="color:var(--c-${k === 'angelite' ? 'angelite' : k})">${n}</th>`).join('') + '<th>' + I.featSource + '</th></tr></thead><tbody>';
   for (const g of F.groups) {
     html += `<tr class="grp"><td colspan="${fw.length + 2}">${esc(g.title)}</td></tr>`;
     for (const r of g.rows) {
@@ -25,7 +25,7 @@
       }).join('') + `<td class="ev" title="${esc(F.evidence[r.ev])}">${r.ev}</td></tr>`;
     }
   }
-  html += '</tbody><tfoot><tr><td>Cubre (sí = 1, parcial = ½)</td>' + fw.map(([k]) => `<td class="c">${totals[k].score.toLocaleString('es-ES')} de ${totals[k].n}</td>`).join('') + '<td></td></tr>' +
-    '<tr><td>Filas que vienen en el propio paquete (integrado o módulo)<small>sin instalar nada aparte; solo las filas con etiqueta de ubicación</small></td>' + fw.map(([k]) => `<td class="c">${totals[k].bundled}</td>`).join('') + '<td></td></tr></tfoot></table></div>';
+  html += '</tbody><tfoot><tr><td>' + I.featCovers + '</td>' + fw.map(([k]) => `<td class="c">${totals[k].score.toLocaleString(I.locale)} ${I.of} ${totals[k].n}</td>`).join('') + '<td></td></tr>' +
+    '<tr><td>' + I.featBundled + '<small>' + I.featBundledNote + '</small></td>' + fw.map(([k]) => `<td class="c">${totals[k].bundled}</td>`).join('') + '<td></td></tr></tfoot></table></div>';
   el('features-table').innerHTML = html;
 })();

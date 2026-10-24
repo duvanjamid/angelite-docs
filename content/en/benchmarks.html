@@ -1,0 +1,39 @@
+<!--{"title": "Benchmark", "description": "AngeLite against Preact, Vue, React and Angular with the same app: size, startup, memory and speed measured in Chromium.", "wide": true, "css": ["assets/benchmarks.css"], "scripts": ["benchmarks-data.js"], "inline": ["assets/benchmarks.js"]}-->
+<div class="bench"><div class="legend" id="legend"></div>
+  <div id="summary"></div>
+
+  <h2 id="bundle-size">Size</h2>
+  <p>JavaScript of the complete application (framework + the table), minified. It is what the browser downloads.</p>
+  <div id="size"></div>
+
+  <h2 id="startup-memory">Startup and memory</h2>
+  <p>Startup: time from the start of navigation until the app is mounted (it includes downloading, parsing and running the JS, on localhost). Memory: JavaScript heap after forcing a GC.</p>
+  <div id="startup"></div>
+  <div id="memory"></div>
+
+  <h2 id="speed">Speed</h2>
+  <p>Median in milliseconds of each operation (less is better): from the moment it is triggered until the DOM reflects the change and layout has been computed.</p>
+  <div id="ops"></div>
+  <div id="score"></div>
+
+  <h2 id="honest-reading">An honest reading</h2>
+  <ul id="reading"></ul>
+
+<h2 id="method">Method and limits</h2>
+  <ul>
+    <li><b>Same app, same DOM</b>: <code>table &gt; tbody &gt; tr</code> with 3 cells, one click handler per row and the selected row with the <code>danger</code> class. The data comes from the same deterministic generator (<code>benchmarks/apps/shared.js</code>).</li>
+    <li><b>Idiomatic implementations</b>: React 19 with <code>memo</code> + <code>useCallback</code>; Preact (core + hooks only, <code>shouldComponentUpdate</code> on the row); Vue 3 with a compiled template and <code>shallowRef</code>; Angular 20 with signals, <code>OnPush</code>, <code>@for … track</code> and no Zone.js (<code>provideZonelessChangeDetection</code>); AngeLite with signals and <code>@for … track</code>.</li>
+    <li><b>What is measured</b>: <code>performance.now()</code> until a DOM condition is met (e.g. "there are 1,000 rows") and style + layout is forced. It <b>does not include painting</b> (paint/composite). 2 discarded warm-up iterations per operation; rounds alternate the order of the frameworks.</li>
+    <li><b>Environment</b>: <span id="env"></span>. It is a shared container, with no CPU throttling: use it to compare <i>between frameworks in the same run</i>, not as absolute figures. Differences of a few ms are within the noise; the p10–p90 is shown when you hover each cell.</li>
+    <li><b>Two AngeLite modes</b>: "in the browser" compiles templates on load (no build). "Precompiled" uses <code>tools/aot.mjs</code> to turn the template into JS at build time and ships only the runtime, as JSX (React/Preact), Vue or Angular do. AngeLite's built-in pipes are opt-in and do not count in these bundles because the app does not use them.</li>
+    <li><b>Size</b>: production bundle of each app with the usual bundler (esbuild for React, Preact and AngeLite; Vite for Vue; <code>ng build</code> for Angular). It includes the table code, identical in all five. Preact does not include <code>preact/compat</code>.</li>
+    <li><b>What it does not measure</b>: SSR, hydration, ecosystem, DevTools, accessibility, performance on mobile or real long-term memory use. Angular and React offer much more than AngeLite; this compares only the rendering core.</li>
+  </ul>
+
+  <h2 id="repro">Reproduce</h2>
+  <pre><code>cd benchmarks
+npm install
+npm run build     # builds the 5 apps → benchmarks/dist
+npm run bench     # runs the suite → benchmarks/results.json
+ROUNDS=3 ITER=7 npm run bench   # (default values)</code></pre>
+  <p class="small">Data generated: <span id="when"></span>. Versions: <span id="versions"></span>.</p></div>

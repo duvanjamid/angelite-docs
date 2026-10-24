@@ -1,16 +1,17 @@
 (() => {
-  const D = window.BENCH;
+  const D = window.BENCH, I = window.DOCS_I18N, B = I.b;
+  const tpl = (str, v) => str.replace(/\{(\w+)\}/g, (_, k) => v[k]);
   const FW = ['angelite-aot', 'angelite', 'preact', 'vue', 'react', 'angular'];
-  const NAME = { 'angelite-aot': 'AngeLite precompilado', angelite: 'AngeLite en navegador', preact: 'Preact', vue: 'Vue', react: 'React', angular: 'Angular' };
+  const NAME = { 'angelite-aot': B.precompiled, angelite: B.inBrowser, preact: 'Preact', vue: 'Vue', react: 'React', angular: 'Angular' };
   const $ = id => document.getElementById(id);
   const f = D.frameworks;
   const LA = f['angelite-aot'], LJ = f.angelite;
-  const fmt = (n, d = 1) => n.toLocaleString('es-ES', { maximumFractionDigits: d, minimumFractionDigits: d });
+  const fmt = (n, d = 1) => n.toLocaleString(I.locale, { maximumFractionDigits: d, minimumFractionDigits: d });
   const kb = n => fmt(n / 1024) + ' KB';
 
   $('legend').innerHTML = FW.map(k => `<span><i style="background:var(--c-${k})"></i>${NAME[k]}</span>`).join('');
-  $('env').textContent = `${D.env.chromium} headless, ${D.env.cpus} CPU (${D.env.cpu}), Node ${D.env.node}, ${D.env.rounds} rondas × ${D.env.iterations} iteraciones`;
-  $('when').textContent = new Date(D.generatedAt).toLocaleString('es-ES');
+  $('env').textContent = tpl(B.env, D.env);
+  $('when').textContent = new Date(D.generatedAt).toLocaleString(I.locale);
   $('versions').textContent = Object.entries(D.versions).map(([k, v]) => `${k === 'angelite' ? 'AngeLite' : k} ${v}`).join(' · ');
 
   const TIE = 0.10; // within 10% of the best counts as a tie: below that the measurement cannot separate them
@@ -25,20 +26,21 @@
   const pick = fn => Object.fromEntries(FW.map(k => [k, fn(f[k])]));
 
   $('size').innerHTML =
-    chart('Min + gzip', pick(x => x.size.gzip / 1024), 'KB') +
-    chart('Min + brotli', pick(x => x.size.brotli / 1024), 'KB') +
-    chart('Min (sin comprimir)', pick(x => x.size.raw / 1024), 'KB');
-  $('startup').innerHTML = chart('Arranque (mediana)', pick(x => x.startup.median), 'ms');
+    chart(B.gz, pick(x => x.size.gzip / 1024), 'KB') +
+    chart(B.br, pick(x => x.size.brotli / 1024), 'KB') +
+    chart(B.raw, pick(x => x.size.raw / 1024), 'KB');
+  $('startup').innerHTML = chart(B.startup, pick(x => x.startup.median), 'ms');
   $('memory').innerHTML =
-    chart('Heap en reposo (0 filas)', pick(x => x.memory.idle), 'MB', 2) +
-    chart('Heap con 1.000 filas', pick(x => x.memory.rows1k), 'MB', 2) +
-    chart('Heap con 10.000 filas', pick(x => x.memory.rows10k), 'MB', 2);
+    chart(B.idle, pick(x => x.memory.idle), 'MB', 2) +
+    chart(B.rows1k, pick(x => x.memory.rows1k), 'MB', 2) +
+    chart(B.rows10k, pick(x => x.memory.rows10k), 'MB', 2);
 
   // operations table
-  const head = '<tr><th>Operación</th>' + FW.map(k => `<th style="color:var(--c-${k})">${NAME[k]}</th>`).join('') + '</tr>';
+  const head = '<tr><th>' + B.operation + '</th>' + FW.map(k => `<th style="color:var(--c-${k})">${NAME[k]}</th>`).join('') + '</tr>';
   const rel = {};
   FW.forEach(k => rel[k] = []);
   const rows = D.benches.map(b => {
+    b = { ...b, label: B.labels[b.id] || b.label };
     const vals = FW.map(k => f[k].ops[b.id].median);
     const best = Math.min(...vals);
     FW.forEach((k, i) => rel[k].push(vals[i] / best));
@@ -47,22 +49,22 @@
       return `<td class="${vals[i] <= best * (1 + TIE) ? 'best' : ''}" title="p10 ${fmt(o.p10)} – p90 ${fmt(o.p90)} ms (n=${o.n})">${fmt(vals[i])}</td>`;
     }).join('') + '</tr>';
   });
-  $('ops').innerHTML = `<div class="chart"><table>${head}${rows.join('')}</table><p class="small">Milisegundos, mediana. En negrita, el más rápido y los que quedan a menos de un 10 % (empate técnico: la medición no los separa).</p></div>`;
+  $('ops').innerHTML = `<div class="chart"><table>${head}${rows.join('')}</table><p class="small">${B.opsNote}</p></div>`;
 
   const geo = k => Math.exp(rel[k].reduce((s, r) => s + Math.log(r), 0) / rel[k].length);
   const score = Object.fromEntries(FW.map(k => [k, geo(k)]));
-  $('score').innerHTML = chart('Puntuación global (media geométrica del tiempo relativo al mejor; 1,00 = el más rápido en todo)', score, '×', 2);
+  $('score').innerHTML = chart(B.scoreTitle, score, '×', 2);
 
   // data-driven reading, so the text can never drift from the numbers
   const bestOf = (vals, low = true) => FW.reduce((a, b) => (low ? vals[b] < vals[a] : vals[b] > vals[a]) ? b : a);
   const rank = (vals, k) => FW.slice().sort((a, b) => vals[a] - vals[b]).indexOf(k) + 1;
-  const ord = n => ['primero', 'segundo', 'tercero', 'cuarto', 'quinto', 'sexto'][n - 1];
+  const ord = n => B.ord[n - 1];
+  const lab = x => B.labels[x.id] || x.label;
   const gz = pick(x => x.size.gzip / 1024), st = pick(x => x.startup.median), mem = pick(x => x.memory.rows10k);
-  const metrics = { 'peso': gz, 'arranque': st, 'velocidad global': score, 'memoria': mem };
-  // every individual measurement: size, startup, memory and each operation
+    // every individual measurement: size, startup, memory and each operation
   const all = {
-    'peso': gz, 'arranque': st, 'memoria con 10.000 filas': mem,
-    ...Object.fromEntries(D.benches.map(b => [b.label.toLowerCase(), Object.fromEntries(FW.map(k => [k, f[k].ops[b.id].median]))]))
+    [B.mSize]: gz, [B.mStartup]: st, [B.mMemory]: mem,
+    ...Object.fromEntries(D.benches.map(b => [lab(b).toLowerCase(), Object.fromEntries(FW.map(k => [k, f[k].ops[b.id].median]))]))
   };
   const strict = [], tied = [], behind = [];
   for (const [name, v] of Object.entries(all)) {
@@ -72,22 +74,24 @@
     else behind.push(`${name} (${NAME[bestOf(v)]}, +${Math.round((v['angelite-aot'] / best - 1) * 100)} %)`);
   }
   const wins = strict, losses = behind;
-  const slow = k => D.benches.filter(b => f[k].ops[b.id].median / Math.min(...FW.map(x => f[x].ops[b.id].median)) > 1.25).map(b => b.label.toLowerCase());
+  const slow = k => D.benches.filter(b => f[k].ops[b.id].median / Math.min(...FW.map(x => f[x].ops[b.id].median)) > 1.25).map(b => lab(b).toLowerCase());
   const slowLA = slow('angelite-aot');
 
+  const R = (v, d = 1) => fmt(v, d);
+  const overlap = f['angelite-aot'].startup.p25 <= f.preact.startup.p75 && f.preact.startup.p25 <= f['angelite-aot'].startup.p75;
   const bullets = [
-    `<b>Peso</b>: AngeLite precompilado ${fmt(gz['angelite-aot'])} KB gzip (${ord(rank(gz, 'angelite-aot'))}); con las plantillas compiladas en el navegador ${fmt(gz.angelite)} KB (${ord(rank(gz, 'angelite'))}). Preact: ${fmt(gz.preact)} KB, Vue ${fmt(gz.vue)}, Angular ${fmt(gz.angular)}, React ${fmt(gz.react)}.`,
-    `<b>Arranque</b>: ${fmt(st['angelite-aot'], 1)} ms precompilado (${ord(rank(st, 'angelite-aot'))}) y ${fmt(st.angelite, 1)} ms con compilador en el navegador (${ord(rank(st, 'angelite'))}); Preact ${fmt(st.preact, 1)} ms, React ${fmt(st.react, 1)} ms.${(f['angelite-aot'].startup.p25 <= f.preact.startup.p75 && f.preact.startup.p25 <= f['angelite-aot'].startup.p75) ? ' Los rangos de medición (p25–p75) de AngeLite precompilado y Preact se solapan: es un empate técnico, no una victoria clara.' : ''}`,
-    `<b>Velocidad</b>: puntuación global ${fmt(score['angelite-aot'], 2)}× precompilado y ${fmt(score.angelite, 2)}× en navegador (${NAME[bestOf(score)]} es la mejor con ${fmt(score[bestOf(score)], 2)}×; ${NAME[bestOf(score, false)]}, la peor con ${fmt(score[bestOf(score, false)], 2)}×). ${slowLA.length ? `El precompilado tarda más de un 25 % más que el mejor en: ${slowLA.join(', ')}.` : 'El precompilado no queda a más de un 25 % del mejor en ninguna operación.'} Diferencias de pocos ms o por debajo del ~10 % están dentro del ruido.`,
-    `<b>Memoria</b> con 10.000 filas: ${fmt(mem['angelite-aot'], 1)} MB (${ord(rank(mem, 'angelite-aot'))}), frente a ${fmt(mem.angular, 1)} MB de Angular, ${fmt(mem.preact, 1)} MB de Preact y ${fmt(mem.react, 1)} MB de React.`,
-    `<b>En resumen</b> (${Object.keys(all).length} mediciones): AngeLite precompilado tiene la mediana más baja en ${strict.length} (${strict.join(', ')})${tied.length ? `; empata dentro del 10 % en ${tied.length}: ${tied.join(', ')}` : ''}${behind.length ? `; queda por detrás en ${behind.join(', ')}` : '; no queda por detrás en ninguna'}. El precio del modo precompilado es un paso de build (como el JSX de React/Preact o las plantillas de Vue/Angular); sin él, el modo en navegador mantiene la ergonomía de «un solo script».`
+    tpl(B.size, { la: R(gz['angelite-aot']), laRank: ord(rank(gz, 'angelite-aot')), lj: R(gz.angelite), ljRank: ord(rank(gz, 'angelite')), preact: R(gz.preact), vue: R(gz.vue), angular: R(gz.angular), react: R(gz.react) }),
+    tpl(B.start, { la: R(st['angelite-aot']), laRank: ord(rank(st, 'angelite-aot')), lj: R(st.angelite), ljRank: ord(rank(st, 'angelite')), preact: R(st.preact), react: R(st.react) }) + (overlap ? B.overlap : ''),
+    tpl(B.speed, { la: R(score['angelite-aot'], 2), lj: R(score.angelite, 2), best: NAME[bestOf(score)], bestV: R(score[bestOf(score)], 2), worst: NAME[bestOf(score, false)], worstV: R(score[bestOf(score, false)], 2), slow: slowLA.length ? tpl(B.slow, { list: slowLA.join(', ') }) : B.noSlow }),
+    tpl(B.memory, { la: R(mem['angelite-aot']), laRank: ord(rank(mem, 'angelite-aot')), angular: R(mem.angular), preact: R(mem.preact), react: R(mem.react) }),
+    tpl(B.summary, { n: Object.keys(all).length, strict: strict.length, strictList: strict.join(', '), tied: tied.length ? tpl(B.tied, { n: tied.length, list: tied.join(', ') }) : '', behind: behind.length ? tpl(B.behind, { list: behind.join(', ') }) : B.notBehind })
   ];
   $('reading').innerHTML = bullets.map(b => `<li>${b}</li>`).join('');
 
   $('summary').innerHTML = `<div class="cards">
-    <div class="card"><b>${fmt(gz['angelite-aot'])} KB</b><span>AngeLite precompilado, min+gzip (Preact: ${fmt(gz.preact)} KB)</span></div>
-    <div class="card"><b>${fmt(gz.react / gz['angelite-aot'], 1)}×</b><span>React pesa más que AngeLite precompilado</span></div>
-    <div class="card"><b>${fmt(gz.angular / gz['angelite-aot'], 1)}×</b><span>Angular pesa más que AngeLite precompilado</span></div>
-    <div class="card"><b>${fmt(score['angelite-aot'], 2)}×</b><span>velocidad global vs el mejor (${NAME[bestOf(score)]}: ${fmt(score[bestOf(score)], 2)}×)</span></div>
+    <div class="card"><b>${fmt(gz['angelite-aot'])} KB</b><span>${tpl(B.cardSize, { preact: fmt(gz.preact) })}</span></div>
+    <div class="card"><b>${fmt(gz.react / gz['angelite-aot'], 1)}×</b><span>${B.cardReact}</span></div>
+    <div class="card"><b>${fmt(gz.angular / gz['angelite-aot'], 1)}×</b><span>${B.cardAngular}</span></div>
+    <div class="card"><b>${fmt(score['angelite-aot'], 2)}×</b><span>${tpl(B.cardSpeed, { best: NAME[bestOf(score)], bestV: fmt(score[bestOf(score)], 2) })}</span></div>
   </div>`;
 })();

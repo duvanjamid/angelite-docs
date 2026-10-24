@@ -1,0 +1,216 @@
+<!--{"title":"Components","description":"How to write a component: inputs, outputs, slots, portals, references, error boundaries and scoped services.","examples":true}-->
+<h2 id="basics">A component</h2>
+<p>A component is a JavaScript class plus a call to <code>component(Class, meta)</code>. The class holds the state (signals) and the methods; <code>meta</code> says what the tag is called (<code>selector</code>), what the template is and which other components it uses (<code>imports</code>).</p>
+<ul>
+  <li><b>Inputs:</b> fields created with <code>input(initialValue)</code>. They are writable signals that the parent fills with <code>[name]="expr"</code> or with a plain attribute (<code>name="text"</code>).</li>
+  <li><b>Outputs:</b> fields created with <code>output()</code>. The child calls <code>emit(value)</code> and the parent listens with <code>(name)="..."</code>; the value arrives as <code>$event</code>.</li>
+  <li><b>Lifecycle:</b> <code>ngOnInit()</code> (before painting), <code>ngAfterViewInit()</code> (already in the DOM) and <code>ngOnDestroy()</code> (when removed). <code>this.$el</code> is the host element.</li>
+  <li><b>Methods:</b> they can be passed bare to the template (<code>(click)="save()"</code>): they are already bound to the instance.</li>
+</ul>
+<script type="text/plain" class="example" data-title="Child component with input, output and ng-content">
+const { signal, component, mount, input, output } = AngeLite;
+
+class Card {
+  title = input('');
+  closed = output();
+  close() { this.closed.emit('closed'); }
+}
+component(Card, {
+  selector: 'ui-card',
+  template: `
+    <div class="card">
+      <b>{{ title() }}</b> <button (click)="close()">×</button>
+      <div><ng-content></ng-content></div>
+    </div>`
+});
+
+class App {
+  name = signal('Ada');
+  last = signal('—');
+  log(e) { this.last.set(e); }
+}
+component(App, {
+  imports: [Card],
+  template: `
+    <ui-card [title]="'Profile of ' + name()" (closed)="log($event)">
+      Projected content: {{ name() }}
+    </ui-card>
+    <p>Last event: {{ last() }}</p>`
+});
+
+mount(App, root);
+  </script>
+<div class="callout warn"><span class="t">Custom tags do not self-close</span><p>In HTML always write <code>&lt;ui-card&gt;&lt;/ui-card&gt;</code>, not <code>&lt;ui-card /&gt;</code>: the browser ignores the slash and "eats" whatever follows.</p></div>
+<div class="callout"><span class="t">With TypeScript or decorators</span><p><code>@Component({ selector, template })</code> does the same as <code>component()</code> if your tooling supports decorators. The types (<code>Signal&lt;T&gt;</code>, <code>OutputEmitter&lt;T&gt;</code>, <code>OnInit</code>…) ship with the package: see the <a href="api.html">reference</a>.</p></div>
+
+<h2 id="slots">Named slots</h2>
+<p>The content you put between a component's tags is projected where <code>&lt;ng-content&gt;</code> is. If you need several areas, the component declares <code>&lt;ng-content select="title"&gt;</code> and whoever uses it marks the children with <code>slot="title"</code>. Whatever has no <code>slot</code> goes to the default area. The content is evaluated in the <em>parent's</em> scope and stays reactive.</p>
+<script type="text/plain" class="example" data-title="Named slots">
+const { signal, component, mount } = AngeLite;
+
+class Panel {}
+component(Panel, {
+  selector: 'ui-panel',
+  template: `
+    <div class="card">
+      <header><ng-content select="title"></ng-content></header>
+      <section><ng-content></ng-content></section>
+      <footer><small><ng-content select="footer"></ng-content></small></footer>
+    </div>`
+});
+
+class App {
+  n = signal(1);
+}
+component(App, {
+  imports: [Panel],
+  template: `
+    <ui-panel>
+      <b slot="title">Order #{{ n() }}</b>
+      Panel body
+      <span slot="footer">{{ n() }} item(s)</span>
+    </ui-panel>
+    <button (click)="n.set(n() + 1)">+1 item</button>`
+});
+
+mount(App, root);
+  </script>
+
+<h2 id="portals">Portals</h2>
+<p><code>&lt;ng-portal to="#target"&gt;</code> paints its content inside another element (<code>document.body</code> by default) but keeps it in the component's scope: it is for modals, menus and tooltips that must not get trapped by an <code>overflow</code> or a <code>z-index</code>. It cleans itself up when the block is destroyed. It is in the main package and in <code>runtime-plus</code>.</p>
+<script type="text/plain" class="example" data-title="A portal to another container">
+const { signal, component, mount } = AngeLite;
+
+const target = document.createElement('div');
+target.style.cssText = 'margin-top:10px;padding:10px;border:1px dashed currentColor';
+target.id = 'portal-target';
+target.textContent = 'Portal target: ';
+root.after(target);
+
+class App {
+  open = signal(false);
+}
+component(App, {
+  template: `
+    <button (click)="open.set(!open())">{{ open() ? 'Close' : 'Open' }} notice</button>
+    @if (open()) {
+      <ng-portal to="#portal-target"><b>Hello from elsewhere in the DOM!</b></ng-portal>
+    }`
+});
+
+mount(App, root);
+  </script>
+
+<h2 id="refs">References to elements</h2>
+<p>Mark an element with <code>#name</code> and receive it with <code>viewChild('name')</code>: a signal holding the element (or the component instance, if you put it on a component tag) that goes back to <code>null</code> when it leaves the DOM. It is how you focus a field, measure an element or call a method on the child.</p>
+<script type="text/plain" class="example" data-title="viewChild">
+const { component, mount, viewChild } = AngeLite;
+
+class App {
+  field = viewChild('field');
+  focusIt() { this.field().focus(); }
+}
+component(App, {
+  template: `
+    <input #field placeholder="Type here">
+    <button (click)="focusIt()">Focus the field</button>`
+});
+
+mount(App, root);
+  </script>
+
+<h2 id="errors">Handled errors</h2>
+<p>If a component defines <code>ngOnError(error, where)</code>, it receives the errors from its bindings and handlers and those of the content projected into it. That makes an <b>error boundary</b>: it shows a fallback instead of leaving a hole. Without <code>ngOnError</code> the error is logged to the console and the rest of the view keeps working.</p>
+<script type="text/plain" class="example" data-title="An error boundary">
+const { signal, component, mount } = AngeLite;
+
+class Boundary {
+  failure = signal(null);
+  ngOnError(error) { this.failure.set(error.message); }
+}
+component(Boundary, {
+  selector: 'error-boundary',
+  template: `
+    @if (failure()) {
+      <p class="card">Something went wrong: <b>{{ failure() }}</b></p>
+    } @else {
+      <ng-content></ng-content>
+    }`
+});
+
+class App {
+  broken() { throw new Error('invalid data'); }
+}
+component(App, {
+  imports: [Boundary],
+  template: `
+    <error-boundary><p>{{ broken() }}</p></error-boundary>
+    <p>The rest of the page keeps working.</p>`
+});
+
+mount(App, root);
+  </script>
+<div class="callout"><span class="t">What it catches and what it does not</span><p>It catches errors from expressions, bindings and event handlers. It does <b>not</b> catch those thrown in the component's own constructor or <code>ngOnInit</code>: those propagate to whoever mounted it.</p></div>
+
+<h2 id="di">Services and dependency injection</h2>
+<p><code>inject(Class)</code> returns a shared instance of the class (created on first use): it is for services, global state and API clients. With <code>provide(Class, value)</code> you replace it, for example in a test.</p>
+<script type="text/plain" class="example" data-title="A service shared between components">
+const { signal, component, mount, inject } = AngeLite;
+
+class CartService {
+  items = signal(0);
+  add() { this.items.update(n => n + 1); }
+}
+
+class AddButton {
+  cart = inject(CartService);
+}
+component(AddButton, {
+  selector: 'add-button',
+  template: `<button (click)="cart.add()">Add to cart</button>`
+});
+
+class Badge {
+  cart = inject(CartService);
+}
+component(Badge, {
+  selector: 'cart-badge',
+  template: `<b>🛒 {{ cart.items() }}</b>`
+});
+
+class Shop {}
+component(Shop, {
+  imports: [AddButton, Badge],
+  template: `<add-button></add-button> <cart-badge></cart-badge>`
+});
+
+mount(Shop, root);
+  </script>
+<h3 id="providers">Scoped services: <code>providers</code></h3>
+<p>If a component declares <code>providers</code>, the service is <b>its own and its descendants'</b>, and every instance of the component has its own. A provider is the class, or <code>&#123; provide: Api, useClass | useValue | useFactory &#125;</code>. <code>inject()</code> looks first at the nearest component that declares it and, if none does, uses the shared instance. It works inside the constructor and field initializers.</p>
+<script type="text/plain" class="example" data-title="providers: one service per component">
+const { signal, component, mount, inject } = AngeLite;
+
+class Counter {
+  n = signal(0);
+  add() { this.n.update(v => v + 1); }
+}
+
+class Button {
+  c = inject(Counter);               // the one from the nearest component that declares it
+}
+component(Button, { selector: 'my-button', template: `<button (click)="c.add()">add ({{ c.n() }})</button>` });
+
+class Group {}
+component(Group, {
+  selector: 'my-group',
+  providers: [Counter],              // every <my-group> has its own Counter
+  imports: [Button],
+  template: `<my-button></my-button> <my-button></my-button>`
+});
+
+class App {}
+component(App, { imports: [Group], template: `<p>Group A: <my-group></my-group></p><p>Group B: <my-group></my-group></p>` });
+
+mount(App, root);
+  </script>

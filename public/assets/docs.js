@@ -1,5 +1,6 @@
 /* AngeLite documentation: sidebar (an overlay on small screens), theme, search, copy buttons, live examples, table of contents. */
 (() => {
+  const I = window.DOCS_I18N || {};
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const root = document.documentElement;
@@ -12,7 +13,7 @@
     const dark = (t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark';
     if (themeBtn) {
       themeBtn.textContent = dark ? '☀' : '☾';
-      themeBtn.setAttribute('aria-label', dark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
+      themeBtn.setAttribute('aria-label', dark ? I.themeToLight : I.themeToDark);
       themeBtn.title = themeBtn.getAttribute('aria-label');
     }
     root.dispatchEvent(new CustomEvent('themechange', { detail: dark ? 'dark' : 'light' }));
@@ -27,6 +28,10 @@
     applyTheme(next);
   });
 
+  /* ---------- language: remember the choice so the next page opens in it ---------- */
+  const langBtn = $('.langbtn');
+  if (langBtn) langBtn.addEventListener('click', () => { try { localStorage.setItem('angelite-lang', langBtn.dataset.lang); } catch (e) { /* private mode */ } });
+
   /* ---------- sidebar: slides over the content on small screens ---------- */
   const sidebar = $('#sidebar'), scrim = $('.scrim'), menuBtn = $('#menu'), closeBtn = $('.closebtn');
   const page = [$('#main'), $('.foot')].filter(Boolean);
@@ -36,7 +41,7 @@
     sidebar.dataset.open = open;
     if (scrim) scrim.dataset.open = open;
     document.body.dataset.navOpen = open;
-    if (menuBtn) { menuBtn.setAttribute('aria-expanded', String(open)); menuBtn.setAttribute('aria-label', open ? 'Cerrar el menú' : 'Abrir el menú'); }
+    if (menuBtn) { menuBtn.setAttribute('aria-expanded', String(open)); menuBtn.setAttribute('aria-label', open ? I.closeMenu : I.openMenu); }
     page.forEach(el => { el.inert = open && mobile.matches; }); // keeps focus and screen readers inside the menu while it overlaps the page
     if (open) { opener = document.activeElement; (closeBtn || $('input', sidebar)).focus(); }
     else if (opener && mobile.matches) { opener.focus(); opener = null; }
@@ -94,7 +99,7 @@
       const at = norm(d.text).indexOf(words[0]);
       const snippet = at >= 0 ? d.text.slice(Math.max(0, at - 30), at + 70) : d.group;
       return `<li><a href="${d.url}${where ? '#' + where.id : ''}" role="option" aria-selected="false" data-i="${i}">${mark(where ? `${d.title} › ${where.text}` : d.title, words)}<small>${mark(snippet, words)}</small></a></li>`;
-    }).join('') || '<li><a href="#" role="option" aria-disabled="true">Sin resultados<small>Prueba con otra palabra</small></a></li>';
+    }).join('') || `<li><a href="#" role="option" aria-disabled="true">${I.noResults}<small>${I.tryAnother}</small></a></li>`;
     list.hidden = false;
     active = -1;
   }
@@ -128,11 +133,11 @@
     const btn = document.createElement('button');
     btn.className = 'copy';
     btn.type = 'button';
-    btn.textContent = 'Copiar';
+    btn.textContent = I.copy;
     btn.addEventListener('click', async () => {
       const code = $('code', b).textContent;
-      try { await navigator.clipboard.writeText(code); btn.textContent = 'Copiado'; } catch (e) { btn.textContent = 'No se pudo'; }
-      setTimeout(() => { btn.textContent = 'Copiar'; }, 1500);
+      try { await navigator.clipboard.writeText(code); btn.textContent = I.copied; } catch (e) { btn.textContent = I.copyFailed; }
+      setTimeout(() => { btn.textContent = I.copy; }, 1500);
     });
     b.append(btn);
   });
@@ -144,7 +149,7 @@
     for (const ex of runners) {
       const demo = $('.demo', ex);
       try { new Function('AngeLite', 'AngeLiteUI', 'root', $('script.src', ex).textContent)(Ng, window.AngeLiteUI, demo); }
-      catch (e) { demo.textContent = 'Error: ' + e.message; }
+      catch (e) { demo.textContent = I.error + e.message; }
     }
   }
 

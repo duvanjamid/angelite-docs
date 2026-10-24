@@ -1,0 +1,25 @@
+<!--{"title":"Security","description":"Trust model, what AngeLite protects by default and how to use trustHtml, trustUrl, CSP and Trusted Types.","examples":false}-->
+<h2 id="model">The trust model</h2>
+<p><b>Templates are your code; the data you show is not to be trusted.</b> The framework is built so that a piece of data does not turn into HTML, script or a dangerous URL by accident.</p>
+<table>
+  <tr><th>Situation</th><th>What AngeLite does</th></tr>
+  <tr><td><code>&#123;&#123; value &#125;&#125;</code></td><td>Always inserted as <b>text</b>.</td></tr>
+  <tr><td><code>href</code>, <code>src</code>, <code>action</code>…</td><td>Only <code>http(s)</code>, <code>mailto</code>, <code>tel</code>, <code>sms</code>, <code>ftp</code> and relative paths pass; anything else becomes <code>unsafe:…</code> and warns in the console.</td></tr>
+  <tr><td><code>[innerHTML]</code></td><td>Only paints HTML wrapped in <code>trustHtml()</code>; any other value is inserted as text.</td></tr>
+  <tr><td><code>[onclick]</code>, <code>[srcdoc]</code>, bindings on <code>&lt;script&gt;</code>, <code>&lt;base&gt;</code>, <code>&lt;link&gt;</code></td><td><b>Compile error.</b></td></tr>
+  <tr><td>Expressions</td><td>They never receive <code>window</code> or <code>document</code>, wherever they come from.</td></tr>
+  <tr><td><code>eval</code> / <code>new Function</code></td><td>Not used: it works with a CSP without <code>unsafe-eval</code> and supports Trusted Types.</td></tr>
+</table>
+
+<h2 id="trust">When you do want HTML or your own scheme</h2>
+<pre><code>import { signal, trustHtml, trustUrl } from '@duvanjamid/angelite';
+
+html = signal(trustHtml(DOMPurify.sanitize(comment)));      // sanitize first: you take responsibility
+link = signal(trustUrl('whatsapp://send?text=hello'));      // scheme allowed on purpose</code></pre>
+<div class="callout warn"><span class="t">trustHtml does not sanitize</span><p>It only marks the value as trusted. If the HTML comes from a user, run it through a sanitizer such as DOMPurify first.</p></div>
+
+<h2 id="csp">CSP and Trusted Types</h2>
+<pre><code>Content-Security-Policy: default-src 'self'; script-src 'self';
+  require-trusted-types-for 'script'; trusted-types angelite</code></pre>
+<p>With the <code>angelite</code> policy the browser only accepts HTML that has gone through <code>trustHtml()</code>.</p>
+<div class="callout"><span class="t">Defense in depth, not a boundary</span><p>The expression sandbox reduces the damage, but it is not a security boundary. Never compile templates that include user data; in production <a href="server.html#precompile">precompile</a>. More detail in the <a href="security-policy.html">security policy</a>.</p></div>
