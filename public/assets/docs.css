@@ -210,3 +210,17 @@ a.card:hover { border-color:var(--primary); box-shadow:var(--ring); }
 /* long words and URLs wrap instead of widening the page on phones */
 article :is(h1,h2,h3,h4,p,li,td,th,a,summary) { overflow-wrap:anywhere; }
 article :is(pre,code) { overflow-wrap:normal; }
+
+/* variants gallery: every option visible at once */
+.variants { border:1px solid var(--line); border-radius:var(--radius); background:var(--card); margin:0 0 14px; overflow:hidden; }
+.variants .vhead { padding:8px 14px; font-size:.78rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); border-bottom:1px solid var(--line); background:var(--soft); }
+.variants .vbody { padding:6px 14px 14px; }
+.vrow { display:grid; grid-template-columns:90px minmax(0,1fr); gap:6px 14px; align-items:start; padding:12px 0; border-top:1px dashed var(--line); }
+.vrow:first-child { border-top:0; }
+.vname { font:600 .78rem ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--muted); padding-top:8px; }
+.vcells { display:flex; flex-wrap:wrap; gap:14px 18px; align-items:flex-end; min-width:0; }
+.vcell { margin:0; display:flex; flex-direction:column; gap:6px; align-items:flex-start; max-width:100%; }
+.vcell figcaption { font-size:.72rem; color:var(--muted); }
+.vcell ui-text-field, .vcell ui-textarea, .vcell ui-select, .vcell ui-combobox, .vcell ui-slider, .vcell ui-card, .vcell ui-progress, .vcell ui-skeleton, .vcell ui-radio-group { width:220px; max-width:100%; }
+.vcell ui-alert { width:300px; max-width:100%; }
+@media (max-width:560px) { .vrow { grid-template-columns:1fr; } .vname { padding-top:0; } }

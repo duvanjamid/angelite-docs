@@ -25,12 +25,48 @@ function controlFor(input, def, ex) {
   return null;
 }
 
+
+/* ---------- variants: every option of an input shown at once, no need to pick one ---------- */
+
+const NO_GALLERY = new Set(['table', 'code-block', 'tabs', 'pagination', 'breadcrumb', 'stepper', 'accordion-item']);
+const FLAG_SKIP = new Set(['open', 'visible', 'checked', 'indeterminate', 'dismissible', 'removable']);
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/** Rows of cells: one row per input with a few string options, plus one row with the boolean states. */
+function galleryRows(m, ex) {
+  if (m.group === 'Superposiciones' || NO_GALLERY.has(m.id)) return [];
+  const data = ex.data || {};
+  const rows = [];
+  for (const inp of m.inputs) {
+    if (inp.name in data) continue;
+    const opts = union(inp.type);
+    if (opts && opts.length > 1 && opts.length <= 8) rows.push({ name: inp.name, cells: opts.filter(v => v !== '').map(v => ({ label: v, set: { [inp.name]: v } })) });
+  }
+  const flags = m.inputs.filter(i => i.type === 'boolean' && !(i.name in data) && !FLAG_SKIP.has(i.name)).slice(0, 6);
+  if (ex.extra) rows.push({ name: 'otros', cells: ex.extra });
+  if (flags.length) rows.push({ name: 'estados', cells: flags.map(f => ({ label: f.name, set: { [f.name]: true } })) });
+  return rows;
+}
+
+function galleryTemplate(m, ex, rows) {
+  const data = ex.data || {};
+  const attrs = set => {
+    const all = { ...(ex.props || {}), ...set };
+    return Object.entries(all).filter(([k, v]) => !(k in data) && !(v !== null && typeof v === 'object'))
+      .map(([k, v]) => (typeof v === 'string' ? `${k}="${esc(v)}"` : `[${k}]="${v}"`)).concat(Object.keys(data).map(k => `[${k}]="${k}"`)).join(' ');
+  };
+  return rows.map(r => `<div class="vrow"><span class="vname">${esc(r.name)}</span><div class="vcells">` +
+    r.cells.map(c => `<figure class="vcell"><${m.tag} ${attrs(c.set)}>${ex.content || ''}</${m.tag}><figcaption>${esc(c.label)}</figcaption></figure>`).join('') +
+    '</div></div>').join('');
+}
+
 /* ---------- playground: controls + live preview + generated template ---------- */
 
 class Playground {
   item = input(null);
   last = signal('—');
   controls = [];
+  rows = [];
   snippet = signal('');
 
   ngOnInit() {
@@ -51,6 +87,7 @@ class Playground {
       this.controls.push(c);
     }
     this.snippet = computed(() => this.build(m, ex));
+    this.rows = galleryRows(m, ex);
   }
 
   /** The template a user would write: only inputs that differ from their defaults. */
@@ -93,14 +130,21 @@ class Playground {
       template: `${ex.before || ''}<${m.tag} ${attrs} ${events}>${ex.content || ''}</${m.tag}>${ex.after || ''}`
     });
     this.handle = mount(Host, this.$el.querySelector('.preview'));
+    const box = this.$el.querySelector('.vbody');
+    if (box) {
+      class Gallery { constructor() { for (const [k, v] of Object.entries(data)) this[k] = v; } }
+      component(Gallery, { selector: `docs-variants-${m.id}`, imports: ui.all, template: galleryTemplate(m, ex, this.rows) });
+      this.vhandle = mount(Gallery, box);
+    }
   }
 
-  ngOnDestroy() { if (this.handle) this.handle.destroy(); }
+  ngOnDestroy() { if (this.handle) this.handle.destroy(); if (this.vhandle) this.vhandle.destroy(); }
 }
 component(Playground, {
   selector: 'docs-playground',
   imports: [ui.Checkbox, ui.Select, ui.TextField, ui.CodeBlock],
   template: `
+    @if (rows.length) {<div class="variants" role="group" aria-label="Variantes"><div class="vhead">Variantes</div><div class="vbody"></div></div>}
     <div class="pg">
       <div class="pg-stage">
         <div class="preview"></div>

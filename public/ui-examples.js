@@ -2,6 +2,7 @@
 // says how to show each component:
 //   props:   initial values of the inputs in the playground
 //   data:    values for inputs that are lists or objects (they have no control)
+//   extra:   more cells for the variants gallery: [{ label, set: { input: value } }]
 //   content: what goes between the tags (HTML; slot="..." children work)
 //   before / after: HTML around the component (the host exposes every input as a signal, `on(name, value)`, `toast`)
 window.UI_EXAMPLES = {
@@ -16,9 +17,9 @@ window.UI_EXAMPLES = {
   progress: { props: { value: 60, label: 'Subida' } },
   skeleton: { props: { height: 20 } },
   'empty-state': { props: { title: 'Aún no hay nada', description: 'Crea tu primer elemento para empezar.' }, content: '<ui-button variant="primary">Crear elemento</ui-button>' },
-  'text-field': { props: { label: 'Correo', placeholder: 'tu@correo.com', hint: 'No lo compartimos con nadie' } },
-  textarea: { props: { label: 'Descripción', rows: 3, placeholder: 'Cuéntanos…' } },
-  select: { props: { label: 'País', value: 'mx' }, data: { options: [{ value: 'es', label: 'España' }, { value: 'mx', label: 'México' }, { value: 'co', label: 'Colombia' }, { value: 'xx', label: 'Atlántida', disabled: true }] } },
+  'text-field': { extra: [{ label: 'con error', set: { error: 'Escribe un correo válido' } }, { label: 'con valor', set: { value: 'ada@correo.com' } }], props: { label: 'Correo', placeholder: 'tu@correo.com', hint: 'No lo compartimos con nadie' } },
+  textarea: { extra: [{ label: 'con error', set: { error: 'Cuéntanos un poco más' } }], props: { label: 'Descripción', rows: 3, placeholder: 'Cuéntanos…' } },
+  select: { extra: [{ label: 'con error', set: { error: 'Elige un país' } }], props: { label: 'País', value: 'mx' }, data: { options: [{ value: 'es', label: 'España' }, { value: 'mx', label: 'México' }, { value: 'co', label: 'Colombia' }, { value: 'xx', label: 'Atlántida', disabled: true }] } },
   checkbox: { props: { label: 'Acepto los términos' } },
   'radio-group': { props: { label: 'Tamaño', value: 'm' }, data: { options: [{ value: 's', label: 'Pequeño' }, { value: 'm', label: 'Mediano' }, { value: 'l', label: 'Grande' }] } },
   toggle: { props: { label: 'Notificaciones' } },
@@ -31,8 +32,8 @@ window.UI_EXAMPLES = {
   stepper: { props: { current: 1 }, data: { steps: ['Cuenta', 'Perfil', 'Confirmar'] } },
   'accordion-item': { props: { title: '¿Qué es AngeLite?' }, content: 'Un framework de señales con plantillas al estilo de Angular.' },
   dropdown: { props: { label: 'Acciones' }, data: { items: ['Editar', 'Duplicar', { value: 'borrar', label: 'Borrar', disabled: true }] } },
-  modal: { props: { title: 'Título del diálogo' }, before: '<ui-button (click)="open.set(true)">Abrir el modal</ui-button>', content: '<p>Contenido del diálogo. Tab se queda dentro; Escape lo cierra.</p><ui-button variant="primary" (click)="open.set(false)">Aceptar</ui-button>' },
-  drawer: { props: { title: 'Menú', side: 'left' }, before: '<ui-button (click)="open.set(true)">Abrir el panel</ui-button>', content: '<p>Un panel lateral, útil para menús en móvil.</p>' },
+  modal: { props: { title: 'Título del diálogo' }, before: '<ui-button (click)="open.set(true)">Abrir el modal</ui-button> <ui-button (click)="size.set(\'sm\'); open.set(true)">Pequeño</ui-button> <ui-button (click)="size.set(\'md\'); open.set(true)">Mediano</ui-button> <ui-button (click)="size.set(\'lg\'); open.set(true)">Grande</ui-button>', content: '<p>Contenido del diálogo. Tab se queda dentro; Escape lo cierra.</p><ui-button variant="primary" (click)="open.set(false)">Aceptar</ui-button>' },
+  drawer: { props: { title: 'Menú', side: 'left' }, before: '<ui-button (click)="side.set(\'left\'); open.set(true)">Izquierda</ui-button> <ui-button (click)="side.set(\'right\'); open.set(true)">Derecha</ui-button> <ui-button (click)="side.set(\'bottom\'); open.set(true)">Abajo</ui-button>', content: '<p>Un panel lateral, útil para menús en móvil.</p>' },
   popover: { props: { label: 'Más información' }, content: '<p style="margin:0">Contenido del panel flotante.</p>' },
   tooltip: { props: { text: 'Guarda los cambios' }, content: 'Pasa el ratón o enfoca con Tab' },
   toasts: { before: `<ui-button (click)="toast.show('Guardado correctamente', 'success')">Aviso de éxito</ui-button> <ui-button (click)="toast.show('No se pudo guardar', 'error', 0)">Aviso fijo</ui-button> <ui-button variant="ghost" (click)="toast.clear()">Limpiar</ui-button>` },
